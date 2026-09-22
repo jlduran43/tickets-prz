@@ -23,12 +23,12 @@ class UserSeeder extends Seeder
                 'password' => Hash::make(
                     env(
                         'ADMIN_INITIAL_PASSWORD',
-                        'Cambiar123456!'
+                        '#Przmarket2026!'
                     )
                 ),
 
                 'rol' => 'ADMIN',
-            ]
+            ],
         );
     }
 }

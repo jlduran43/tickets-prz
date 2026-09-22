@@ -549,29 +549,7 @@
                         </button>
 
                     </div>
-
-
-
-                    {{-- IMAGEN --}}
-                    <div class="col-md-6">
-
-                        <label for="archivoQr" class="btn btn-outline-success w-100 py-3 mb-0">
-
-                            <i class="bi bi-image me-2"></i>
-
-                            Seleccionar imagen con QR
-
-                        </label>
-
-
-                        <input type="file" id="archivoQr" accept="image/*" class="d-none">
-
-                    </div>
-
-
                 </div>
-
-
 
                 <div class="alert alert-info mt-3 mb-0">
 

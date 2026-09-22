@@ -14,8 +14,8 @@ class TicketCompradoMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public string $qrBase64;
     public string $url;
+    public string $qrImage;
 
     public function __construct(public Venta $venta)
     {
@@ -38,9 +38,7 @@ class TicketCompradoMail extends Mailable
         $writer = new PngWriter();
         $result = $writer->write($qrCode);
 
-        $this->qrBase64 = base64_encode(
-            $result->getString()
-        );
+        $this->qrImage = $result->getString();
     }
 
     public function build()
