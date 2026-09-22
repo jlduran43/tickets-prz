@@ -6,10 +6,10 @@
 
     <style>
         /*
-        |--------------------------------------------------------------------------
-        | ESCÁNER
-        |--------------------------------------------------------------------------
-        */
+                        |--------------------------------------------------------------------------
+                        | ESCÁNER
+                        |--------------------------------------------------------------------------
+                        */
 
         .scanner-container {
             max-width: 720px;
@@ -23,10 +23,10 @@
 
 
         /*
-        |--------------------------------------------------------------------------
-        | RESULTADO TICKET
-        |--------------------------------------------------------------------------
-        */
+                        |--------------------------------------------------------------------------
+                        | RESULTADO TICKET
+                        |--------------------------------------------------------------------------
+                        */
 
         .verification-card {
             width: 100%;
@@ -44,10 +44,10 @@
 
 
         /*
-        |--------------------------------------------------------------------------
-        | CABECERA
-        |--------------------------------------------------------------------------
-        */
+                        |--------------------------------------------------------------------------
+                        | CABECERA
+                        |--------------------------------------------------------------------------
+                        */
 
         .park-header {
             display: flex;
@@ -98,10 +98,10 @@
 
 
         /*
-        |--------------------------------------------------------------------------
-        | PANEL
-        |--------------------------------------------------------------------------
-        */
+                        |--------------------------------------------------------------------------
+                        | PANEL
+                        |--------------------------------------------------------------------------
+                        */
 
         .ticket-panel {
             border: 1px solid #e2e5e3;
@@ -115,10 +115,10 @@
 
 
         /*
-        |--------------------------------------------------------------------------
-        | CÍRCULO ESTADO
-        |--------------------------------------------------------------------------
-        */
+                        |--------------------------------------------------------------------------
+                        | CÍRCULO ESTADO
+                        |--------------------------------------------------------------------------
+                        */
 
         .state-circle {
             width: 104px;
@@ -164,10 +164,10 @@
 
 
         /*
-        |--------------------------------------------------------------------------
-        | TÍTULOS
-        |--------------------------------------------------------------------------
-        */
+                        |--------------------------------------------------------------------------
+                        | TÍTULOS
+                        |--------------------------------------------------------------------------
+                        */
 
         .ticket-state-title {
             margin-top: 24px;
@@ -212,10 +212,10 @@
 
 
         /*
-        |--------------------------------------------------------------------------
-        | ALERTA PRINCIPAL
-        |--------------------------------------------------------------------------
-        */
+                        |--------------------------------------------------------------------------
+                        | ALERTA PRINCIPAL
+                        |--------------------------------------------------------------------------
+                        */
 
         .status-box {
             display: flex;
@@ -286,10 +286,10 @@
 
 
         /*
-        |--------------------------------------------------------------------------
-        | INFORMACIÓN
-        |--------------------------------------------------------------------------
-        */
+                        |--------------------------------------------------------------------------
+                        | INFORMACIÓN
+                        |--------------------------------------------------------------------------
+                        */
 
         .ticket-info {
             border-top: 1px solid #d9dddb;
@@ -350,10 +350,10 @@
 
 
         /*
-        |--------------------------------------------------------------------------
-        | FOOTER
-        |--------------------------------------------------------------------------
-        */
+                        |--------------------------------------------------------------------------
+                        | FOOTER
+                        |--------------------------------------------------------------------------
+                        */
 
         .ticket-footer {
             margin-top: 50px;
@@ -413,10 +413,10 @@
 
 
         /*
-        |--------------------------------------------------------------------------
-        | MOBILE
-        |--------------------------------------------------------------------------
-        */
+                        |--------------------------------------------------------------------------
+                        | MOBILE
+                        |--------------------------------------------------------------------------
+                        */
 
         @media (max-width: 576px) {
 
@@ -500,6 +500,18 @@
                 font-size: 15px;
             }
 
+            #html5-qrcode-select-camera {
+                display: none !important;
+            }
+
+            #reader select {
+                display: none !important;
+            }
+
+            #reader__camera_selection {
+                display: none !important;
+            }
+
         }
     </style>
 
@@ -550,19 +562,6 @@
 
                     </div>
                 </div>
-
-                <div class="alert alert-info mt-3 mb-0">
-
-                    <i class="bi bi-info-circle me-2"></i>
-
-                    En conexión HTTP desde el teléfono la cámara
-                    puede estar bloqueada.
-
-                    Para pruebas utiliza
-                    <strong>Seleccionar imagen con QR</strong>.
-
-                </div>
-
 
             </div>
 
@@ -626,9 +625,6 @@
             const btnCamara =
                 document.getElementById('btnCamara');
 
-            const archivoQr =
-                document.getElementById('archivoQr');
-
             const contenedorScanner =
                 document.getElementById('contenedorScanner');
 
@@ -648,8 +644,6 @@
             let procesando = false;
 
             let scannerCamara = null;
-
-            let scannerArchivo = null;
 
 
             /*
@@ -1422,23 +1416,13 @@
 
                             estadoScanner.innerHTML = `
 
-                        <div class="alert alert-warning">
+                                <div class="alert alert-warning">
 
-                            <i class="bi bi-shield-lock me-2"></i>
+                                    <i class="bi bi-shield-lock me-2"></i>
 
-                            La cámara requiere HTTPS.
+                                    La cámara requiere una conexión HTTPS.
 
-                            <br><br>
-
-                            Para pruebas locales utiliza
-
-                            <strong>
-                                Seleccionar imagen con QR
-                            </strong>.
-
-                        </div>
-
-                    `;
+                                </div>`;
 
                             return;
                         }
@@ -1492,6 +1476,7 @@
 
                                     }
 
+                                    scannerCamara = null;
 
                                     await procesarCodigo(
                                         decodedText
@@ -1517,95 +1502,7 @@
             |--------------------------------------------------------------------------
             */
 
-            archivoQr.addEventListener(
-                'change',
-                async function(event) {
 
-                    const archivo =
-                        event.target.files[0];
-
-
-                    if (!archivo) {
-                        return;
-                    }
-
-
-                    resultado.style.display =
-                        'none';
-
-                    acciones.style.display =
-                        'none';
-
-                    contenedorScanner.style.display =
-                        'block';
-
-                    procesando = false;
-
-
-                    estadoScanner.innerText =
-                        'Leyendo imagen...';
-
-
-                    try {
-
-                        /*
-                         * Limpiar lector anterior.
-                         */
-
-                        document
-                            .getElementById('reader')
-                            .innerHTML = '';
-
-
-                        scannerArchivo =
-                            new Html5Qrcode(
-                                'reader'
-                            );
-
-
-                        const texto =
-                            await scannerArchivo
-                            .scanFile(
-                                archivo,
-                                true
-                            );
-
-
-                        estadoScanner.innerText =
-                            'Código QR detectado.';
-
-
-                        await procesarCodigo(
-                            texto
-                        );
-
-
-                    } catch (error) {
-
-                        console.error(error);
-
-
-                        estadoScanner.innerText =
-                            'No se pudo detectar un código QR en la imagen.';
-
-
-                        mostrarResultado({
-
-                            ok: false,
-
-                            estado: 'INVALIDO',
-
-                            mensaje: 'No se encontró un código QR válido en la imagen seleccionada.'
-
-                        });
-
-                    }
-
-
-                    archivoQr.value = '';
-
-                }
-            );
 
 
             /*
@@ -1618,7 +1515,17 @@
                 'click',
                 function() {
 
-                    window.location.reload();
+                    resultado.style.display = 'none';
+                    acciones.style.display = 'none';
+                    contenedorScanner.style.display = 'none';
+
+                    resultado.innerHTML = '';
+
+                    estadoScanner.innerText =
+                        'Selecciona una opción para comenzar.';
+
+                    procesando = false;
+                    scannerCamara = null;
 
                 }
             );
