@@ -22,24 +22,23 @@ class TicketCompradoMail extends Mailable
     {
         $signer = app(TicketOfflineSigner::class);
 
-        // Generamos el contenido firmado que irá dentro del QR
-        $this->codigoQr = $signer->generarQrFirmado($venta);
+        $this->codigoQr =
+            $signer->generarQrFirmado($venta);
 
         $qrCode = new QrCode(
             data: $this->codigoQr,
             size: 300,
-            margin: 10,
-            foregroundColor: new Color(20, 110, 70),
-            backgroundColor: new Color(255, 255, 255),
+            margin: 10
         );
 
         $writer = new PngWriter();
 
         $result = $writer->write($qrCode);
 
-        $this->qrBase64 = base64_encode(
-            $result->getString()
-        );
+        $this->qrBase64 =
+            base64_encode(
+                $result->getString()
+            );
     }
 
     public function build()

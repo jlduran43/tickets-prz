@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Venta;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
-use Endroid\QrCode\Color\Color;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\TicketOfflineSigner;
 
 class TicketController extends Controller
 {
@@ -18,19 +18,15 @@ class TicketController extends Controller
             abort(404);
         }
 
-        $url = rtrim(config('app.url'), '/')
-            . route(
-                'ticket.verificar',
-                ['token' => $venta->token_ticket],
-                false
-            );
+        $signer = app(TicketOfflineSigner::class);
+
+        $codigoQr =
+            $signer->generarQrFirmado($venta);
 
         $qrCode = new QrCode(
-            data: $url,
-            size: 350,
-            margin: 15,
-            foregroundColor: new Color(20, 110, 70),
-            backgroundColor: new Color(255, 255, 255)
+            data: $codigoQr,
+            size: 300,
+            margin: 10
         );
 
         $writer = new PngWriter();

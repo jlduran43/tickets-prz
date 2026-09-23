@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use Endroid\QrCode\Color\Color;
+use App\Services\TicketOfflineSigner;
 
 class VentaController extends Controller
 {
@@ -264,27 +265,23 @@ class VentaController extends Controller
             $venta->token_ticket
         ) {
 
-            $urlVerificacion =
-                rtrim(config('app.url'), '/')
-                . route(
-                    'ticket.verificar',
-                    ['token' => $venta->token_ticket],
-                    false
-                );
+            $signer = app(TicketOfflineSigner::class);
 
+            $codigoQr =
+                $signer->generarQrFirmado($venta);
 
             $qrCode = new QrCode(
-                data: $urlVerificacion,
+                data: $codigoQr,
                 size: 300,
                 margin: 10,
                 foregroundColor: new Color(20, 110, 70),
                 backgroundColor: new Color(255, 255, 255),
             );
 
-
             $writer = new PngWriter();
 
-            $resultado = $writer->write($qrCode);
+            $resultado =
+                $writer->write($qrCode);
 
 
             $qrBase64 = base64_encode(
