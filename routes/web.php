@@ -147,7 +147,6 @@ Route::middleware('guest')->group(function () {
                 $email
             )->exists(),
         ]);
-
     })->name('validar.email');
 
 
@@ -176,7 +175,6 @@ Route::middleware('guest')->group(function () {
         '/restablecer-password',
         [PasswordResetController::class, 'update']
     )->name('password.update');
-
 });
 
 
@@ -195,7 +193,6 @@ Route::get(
     function () {
 
         return view('auth.verify-email');
-
     }
 )
     ->middleware('auth')
@@ -221,12 +218,7 @@ Route::get(
         */
 
         return redirect()
-            ->route('ventas.create')
-            ->with(
-                'success',
-                'Tu correo electrónico fue verificado correctamente.'
-            );
-
+            ->route('verification.success');
     }
 )
     ->middleware([
@@ -234,6 +226,13 @@ Route::get(
         'signed',
     ])
     ->name('verification.verify');
+
+Route::get('/email/verificado', function () {
+
+    return view('auth.email-verified');
+})
+    ->middleware('auth')
+    ->name('verification.success');
 
 
 Route::post(
@@ -266,7 +265,6 @@ Route::post(
             'status',
             'verification-link-sent'
         );
-
     }
 )
     ->middleware([
@@ -426,7 +424,6 @@ Route::middleware([
         '/mis-tickets/{venta}',
         [VentaController::class, 'verTicket']
     )->name('tickets.show');
-
 });
 
 
@@ -455,7 +452,6 @@ Route::middleware([
         '/admin/usuarios',
         [UsuarioController::class, 'store']
     )->name('admin.usuarios.store');
-
 });
 
 
@@ -489,5 +485,4 @@ Route::middleware([
         '/control/historial',
         [ControlController::class, 'historial']
     )->name('control.historial');
-
 });
