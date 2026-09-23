@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Rules\RutChileno;
+use Illuminate\Auth\Events\Registered;
 
 class RegistroClienteController extends Controller
 {
@@ -23,7 +24,7 @@ class RegistroClienteController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nombre' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'rut' => [
                 'required',
                 'string',
@@ -64,10 +65,10 @@ class RegistroClienteController extends Controller
             return $user;
         });
 
+        event(new Registered($user));
+
         Auth::login($user);
 
-        $request->session()->regenerate();
-
-        return redirect()->route('ventas.create');
+        return redirect()->route('verificacion.notice');
     }
 }

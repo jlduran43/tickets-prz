@@ -12,6 +12,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ControlController;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 
 /*
@@ -60,6 +61,37 @@ Route::middleware('guest')->group(function () {
     Route::post('/registro', [RegistroClienteController::class, 'store'])
         ->name('registro.store');
 
+    Route::get('/email/verify', function () {
+        return view('auth.verify-email');
+    })
+        ->middleware('auth')
+        ->name('verification.notice');
+
+    Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+
+        $request->fulfill();
+
+        return redirect()->route('auth.login')
+            ->with('success', 'Tu correo fue verificado correctamente.');
+    })
+        ->middleware(['auth', 'signed'])
+        ->name('verification.verify');
+
+    Route::post('/email/verification-notification', function (Request $request) {
+
+        if ($request->user()->hasVerifiedEmail()) {
+            return redirect()->route('ticket.index');
+        }
+
+        $request->user()->sendEmailVerificationNotification();
+
+        return back()->with(
+            'status',
+            'verification-link-sent'
+        );
+    })
+        ->middleware(['auth', 'throttle:6,1'])
+        ->name('verification.send');
 
     /*
     |--------------------------------------------------------------------------
@@ -189,7 +221,7 @@ Route::get(
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
