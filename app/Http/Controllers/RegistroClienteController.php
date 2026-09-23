@@ -39,6 +39,9 @@ class RegistroClienteController extends Controller
             'password' => 'required|string|min:8|confirmed',
 
             [
+                'rut.unique' => 'Este RUT ya se encuentra registrado.',
+                'rut.required' => 'El RUT es obligatorio.',
+
                 'email.required' => 'El correo electrónico es obligatorio.',
                 'email.email' => 'Ingresa un correo electrónico válido.',
                 'email.unique' => 'Este correo electrónico ya se encuentra registrado.',
