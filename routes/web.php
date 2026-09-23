@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Controllers\PerfilController;
+use App\Http\Controllers\OfflineTicketController;
 
 
 /*
@@ -435,6 +436,16 @@ Route::middleware([
         '/mi-perfil',
         [PerfilController::class, 'update']
     )->name('perfil.update');
+
+    Route::post(
+        '/tickets/offline/sincronizar',
+        [
+            OfflineTicketController::class,
+            'sincronizar'
+        ]
+    )->name(
+        'tickets.offline.sincronizar'
+    );
 });
 
 

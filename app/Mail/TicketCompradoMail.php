@@ -9,26 +9,24 @@ use Illuminate\Queue\SerializesModels;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use Endroid\QrCode\Color\Color;
+use App\Services\TicketOfflineSigner;
 
 class TicketCompradoMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public string $url;
-    public string $qrImage;
+    public string $codigoQr;
+    public string $qrBase64;
 
     public function __construct(public Venta $venta)
     {
-        $this->url =
-            rtrim(config('app.url'), '/')
-            . route(
-                'ticket.verificar',
-                ['token' => $venta->token_ticket],
-                false
-            );
+        $signer = app(TicketOfflineSigner::class);
+
+        // Generamos el contenido firmado que irá dentro del QR
+        $this->codigoQr = $signer->generarQrFirmado($venta);
 
         $qrCode = new QrCode(
-            data: $this->url,
+            data: $this->codigoQr,
             size: 300,
             margin: 10,
             foregroundColor: new Color(20, 110, 70),
@@ -36,9 +34,12 @@ class TicketCompradoMail extends Mailable
         );
 
         $writer = new PngWriter();
+
         $result = $writer->write($qrCode);
 
-        $this->qrImage = $result->getString();
+        $this->qrBase64 = base64_encode(
+            $result->getString()
+        );
     }
 
     public function build()
