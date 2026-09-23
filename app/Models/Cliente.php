@@ -14,6 +14,9 @@ class Cliente extends Model
         'telefono',
         'region_id',
         'comuna_id',
+        'direccion',
+        'patente',
+        'recibir_noticias',
     ];
 
     public function user()
@@ -35,4 +38,8 @@ class Cliente extends Model
     {
         return $this->hasMany(Venta::class);
     }
+
+    protected $casts = [
+        'recibir_noticias' => 'boolean',
+    ];
 }

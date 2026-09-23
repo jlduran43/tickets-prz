@@ -15,6 +15,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Http\Controllers\PerfilController;
 
 
 /*
@@ -424,6 +425,16 @@ Route::middleware([
         '/mis-tickets/{venta}',
         [VentaController::class, 'verTicket']
     )->name('tickets.show');
+
+    Route::get(
+        '/mi-perfil',
+        [PerfilController::class, 'edit']
+    )->name('perfil.edit');
+
+    Route::put(
+        '/mi-perfil',
+        [PerfilController::class, 'update']
+    )->name('perfil.update');
 });
 
 

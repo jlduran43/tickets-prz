@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Notifications\ResetPasswordNotification;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Cliente;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -44,6 +45,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function cliente()
     {
-        return $this->hasOne(\App\Models\Cliente::class);
+        return $this->hasOne(Cliente::class);
     }
 }
