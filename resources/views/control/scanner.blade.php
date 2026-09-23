@@ -6,10 +6,10 @@
 
     <style>
         /*
-                                |--------------------------------------------------------------------------
-                                | ESCÁNER
-                                |--------------------------------------------------------------------------
-                                */
+                                    |--------------------------------------------------------------------------
+                                    | ESCÁNER
+                                    |--------------------------------------------------------------------------
+                                    */
 
         .scanner-container {
             max-width: 720px;
@@ -23,10 +23,10 @@
 
 
         /*
-                                |--------------------------------------------------------------------------
-                                | RESULTADO TICKET
-                                |--------------------------------------------------------------------------
-                                */
+                                    |--------------------------------------------------------------------------
+                                    | RESULTADO TICKET
+                                    |--------------------------------------------------------------------------
+                                    */
 
         .verification-card {
             width: 100%;
@@ -44,10 +44,10 @@
 
 
         /*
-                                |--------------------------------------------------------------------------
-                                | CABECERA
-                                |--------------------------------------------------------------------------
-                                */
+                                    |--------------------------------------------------------------------------
+                                    | CABECERA
+                                    |--------------------------------------------------------------------------
+                                    */
 
         .park-header {
             display: flex;
@@ -98,10 +98,10 @@
 
 
         /*
-                                |--------------------------------------------------------------------------
-                                | PANEL
-                                |--------------------------------------------------------------------------
-                                */
+                                    |--------------------------------------------------------------------------
+                                    | PANEL
+                                    |--------------------------------------------------------------------------
+                                    */
 
         .ticket-panel {
             border: 1px solid #e2e5e3;
@@ -115,10 +115,10 @@
 
 
         /*
-                                |--------------------------------------------------------------------------
-                                | CÍRCULO ESTADO
-                                |--------------------------------------------------------------------------
-                                */
+                                    |--------------------------------------------------------------------------
+                                    | CÍRCULO ESTADO
+                                    |--------------------------------------------------------------------------
+                                    */
 
         .state-circle {
             width: 104px;
@@ -164,10 +164,10 @@
 
 
         /*
-                                |--------------------------------------------------------------------------
-                                | TÍTULOS
-                                |--------------------------------------------------------------------------
-                                */
+                                    |--------------------------------------------------------------------------
+                                    | TÍTULOS
+                                    |--------------------------------------------------------------------------
+                                    */
 
         .ticket-state-title {
             margin-top: 24px;
@@ -212,10 +212,10 @@
 
 
         /*
-                                |--------------------------------------------------------------------------
-                                | ALERTA PRINCIPAL
-                                |--------------------------------------------------------------------------
-                                */
+                                    |--------------------------------------------------------------------------
+                                    | ALERTA PRINCIPAL
+                                    |--------------------------------------------------------------------------
+                                    */
 
         .status-box {
             display: flex;
@@ -286,10 +286,10 @@
 
 
         /*
-                                |--------------------------------------------------------------------------
-                                | INFORMACIÓN
-                                |--------------------------------------------------------------------------
-                                */
+                                    |--------------------------------------------------------------------------
+                                    | INFORMACIÓN
+                                    |--------------------------------------------------------------------------
+                                    */
 
         .ticket-info {
             border-top: 1px solid #d9dddb;
@@ -350,10 +350,10 @@
 
 
         /*
-                                |--------------------------------------------------------------------------
-                                | FOOTER
-                                |--------------------------------------------------------------------------
-                                */
+                                    |--------------------------------------------------------------------------
+                                    | FOOTER
+                                    |--------------------------------------------------------------------------
+                                    */
 
         .ticket-footer {
             margin-top: 50px;
@@ -413,10 +413,10 @@
 
 
         /*
-                                |--------------------------------------------------------------------------
-                                | MOBILE
-                                |--------------------------------------------------------------------------
-                                */
+                                    |--------------------------------------------------------------------------
+                                    | MOBILE
+                                    |--------------------------------------------------------------------------
+                                    */
 
         @media (max-width: 576px) {
 
@@ -622,48 +622,48 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
 
-            const btnCamara =
-                document.getElementById('btnCamara');
+                    const btnCamara =
+                        document.getElementById('btnCamara');
 
-            const contenedorScanner =
-                document.getElementById('contenedorScanner');
+                    const contenedorScanner =
+                        document.getElementById('contenedorScanner');
 
-            const resultado =
-                document.getElementById('resultadoTicket');
+                    const resultado =
+                        document.getElementById('resultadoTicket');
 
-            const estadoScanner =
-                document.getElementById('estadoScanner');
+                    const estadoScanner =
+                        document.getElementById('estadoScanner');
 
-            const acciones =
-                document.getElementById('accionesScanner');
+                    const acciones =
+                        document.getElementById('accionesScanner');
 
-            const btnNuevoEscaneo =
-                document.getElementById('btnNuevoEscaneo');
-
-
-            let procesando = false;
-
-            let scannerCamara = null;
+                    const btnNuevoEscaneo =
+                        document.getElementById('btnNuevoEscaneo');
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | LOGO
-            |--------------------------------------------------------------------------
-            */
+                    let procesando = false;
 
-            const logoParque =
-                "{{ asset('images/logo-ticket.png') }}";
+                    let scannerCamara = null;
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | CABECERA COMÚN DEL RESULTADO
-            |--------------------------------------------------------------------------
-            */
+                    /*
+                    |--------------------------------------------------------------------------
+                    | LOGO
+                    |--------------------------------------------------------------------------
+                    */
 
-            function cabeceraTicket() {
-                return `
+                    const logoParque =
+                        "{{ asset('images/logo-ticket.png') }}";
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | CABECERA COMÚN DEL RESULTADO
+                    |--------------------------------------------------------------------------
+                    */
+
+                    function cabeceraTicket() {
+                        return `
 
             <div class="park-header">
 
@@ -688,17 +688,17 @@
             </div>
 
         `;
-            }
+                    }
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | FOOTER COMÚN
-            |--------------------------------------------------------------------------
-            */
+                    /*
+                    |--------------------------------------------------------------------------
+                    | FOOTER COMÚN
+                    |--------------------------------------------------------------------------
+                    */
 
-            function footerTicket() {
-                return `
+                    function footerTicket() {
+                        return `
 
             <div class="ticket-footer">
 
@@ -723,157 +723,157 @@
             </div>
 
         `;
-            }
+                    }
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | EXTRAER TOKEN
-            |--------------------------------------------------------------------------
-            */
+                    /*
+                    |--------------------------------------------------------------------------
+                    | EXTRAER TOKEN
+                    |--------------------------------------------------------------------------
+                    */
 
-            function obtenerToken(texto) {
+                    function obtenerToken(texto) {
 
-                if (!texto) {
-                    return null;
-                }
-
-                texto = texto.trim();
-
-                /*
-                |--------------------------------------------------------------------------
-                | QR NUEVO FIRMADO PRZ1
-                |--------------------------------------------------------------------------
-                */
-
-                if (texto.startsWith('PRZ1.')) {
-
-                    try {
-
-                        const partes = texto.split('.');
-
-                        if (partes.length !== 3) {
-                            console.error('Formato PRZ1 incorrecto');
+                        if (!texto) {
                             return null;
                         }
 
-                        const payloadBase64 = partes[1];
+                        texto = texto.trim();
 
                         /*
-                         * Base64URL → Base64 normal
-                         */
-                        let base64 = payloadBase64
-                            .replace(/-/g, '+')
-                            .replace(/_/g, '/');
+                        |--------------------------------------------------------------------------
+                        | QR NUEVO FIRMADO PRZ1
+                        |--------------------------------------------------------------------------
+                        */
 
-                        /*
-                         * Completar padding
-                         */
-                        while (base64.length % 4) {
-                            base64 += '=';
+                        if (texto.startsWith('PRZ1.')) {
+
+                            try {
+
+                                const partes = texto.split('.');
+
+                                if (partes.length !== 3) {
+                                    console.error('Formato PRZ1 incorrecto');
+                                    return null;
+                                }
+
+                                const payloadBase64 = partes[1];
+
+                                /*
+                                 * Base64URL → Base64 normal
+                                 */
+                                let base64 = payloadBase64
+                                    .replace(/-/g, '+')
+                                    .replace(/_/g, '/');
+
+                                /*
+                                 * Completar padding
+                                 */
+                                while (base64.length % 4) {
+                                    base64 += '=';
+                                }
+
+                                /*
+                                 * Decodificar correctamente UTF-8
+                                 */
+                                const binario = atob(base64);
+
+                                const bytes = Uint8Array.from(
+                                    binario,
+                                    char => char.charCodeAt(0)
+                                );
+
+                                const json = new TextDecoder()
+                                    .decode(bytes);
+
+                                const payload = JSON.parse(json);
+
+                                console.log('Payload PRZ1:', payload);
+
+                                if (!payload.token) {
+                                    console.error(
+                                        'El payload PRZ1 no contiene token'
+                                    );
+
+                                    return null;
+                                }
+
+                                return payload.token;
+
+                            } catch (error) {
+
+                                console.error(
+                                    'Error leyendo QR PRZ1:',
+                                    error
+                                );
+
+                                return null;
+                            }
                         }
 
+
                         /*
-                         * Decodificar correctamente UTF-8
-                         */
-                        const binario = atob(base64);
+                        |--------------------------------------------------------------------------
+                        | QR ANTIGUO CON URL
+                        |--------------------------------------------------------------------------
+                        */
 
-                        const bytes = Uint8Array.from(
-                            binario,
-                            char => char.charCodeAt(0)
-                        );
+                        try {
 
-                        const json = new TextDecoder()
-                            .decode(bytes);
+                            const url = new URL(texto);
 
-                        const payload = JSON.parse(json);
+                            const partes =
+                                url.pathname
+                                .split('/')
+                                .filter(Boolean);
 
-                        console.log('Payload PRZ1:', payload);
+                            const posicion =
+                                partes.indexOf('verificar');
 
-                        if (!payload.token) {
-                            console.error(
-                                'El payload PRZ1 no contiene token'
-                            );
+                            if (
+                                posicion !== -1 &&
+                                partes[posicion + 1]
+                            ) {
 
-                            return null;
+                                return partes[posicion + 1];
+                            }
+
+                        } catch (error) {
+
+                            /*
+                             * Token antiguo directamente
+                             */
+
+                            if (texto.length >= 20) {
+                                return texto;
+                            }
                         }
-
-                        return payload.token;
-
-                    } catch (error) {
-
-                        console.error(
-                            'Error leyendo QR PRZ1:',
-                            error
-                        );
 
                         return null;
                     }
-                }
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | QR ANTIGUO CON URL
-                |--------------------------------------------------------------------------
-                */
-
-                try {
-
-                    const url = new URL(texto);
-
-                    const partes =
-                        url.pathname
-                        .split('/')
-                        .filter(Boolean);
-
-                    const posicion =
-                        partes.indexOf('verificar');
-
-                    if (
-                        posicion !== -1 &&
-                        partes[posicion + 1]
-                    ) {
-
-                        return partes[posicion + 1];
-                    }
-
-                } catch (error) {
 
                     /*
-                     * Token antiguo directamente
-                     */
+                    |--------------------------------------------------------------------------
+                    | RESULTADO
+                    |--------------------------------------------------------------------------
+                    */
 
-                    if (texto.length >= 20) {
-                        return texto;
-                    }
-                }
+                    function mostrarResultado(data) {
+                        resultado.style.display = 'block';
 
-                return null;
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | RESULTADO
-            |--------------------------------------------------------------------------
-            */
-
-            function mostrarResultado(data) {
-                resultado.style.display = 'block';
-
-                acciones.style.display = 'block';
+                        acciones.style.display = 'block';
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | VÁLIDO
-                |--------------------------------------------------------------------------
-                */
+                        /*
+                        |--------------------------------------------------------------------------
+                        | VÁLIDO
+                        |--------------------------------------------------------------------------
+                        */
 
-                if (data.ok) {
+                        if (data.ok) {
 
-                    resultado.innerHTML = `
+                            resultado.innerHTML = `
 
                 <div class="verification-card">
 
@@ -1018,19 +1018,19 @@
 
             `;
 
-                    return;
-                }
+                            return;
+                        }
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | UTILIZADO
-                |--------------------------------------------------------------------------
-                */
+                        /*
+                        |--------------------------------------------------------------------------
+                        | UTILIZADO
+                        |--------------------------------------------------------------------------
+                        */
 
-                if (data.estado === 'UTILIZADO') {
+                        if (data.estado === 'UTILIZADO') {
 
-                    resultado.innerHTML = `
+                            resultado.innerHTML = `
 
                 <div class="verification-card">
 
@@ -1149,19 +1149,19 @@
 
             `;
 
-                    return;
-                }
+                            return;
+                        }
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | VENCIDO
-                |--------------------------------------------------------------------------
-                */
+                        /*
+                        |--------------------------------------------------------------------------
+                        | VENCIDO
+                        |--------------------------------------------------------------------------
+                        */
 
-                if (data.estado === 'VENCIDO') {
+                        if (data.estado === 'VENCIDO') {
 
-                    resultado.innerHTML = `
+                            resultado.innerHTML = `
 
                 <div class="verification-card">
 
@@ -1280,17 +1280,17 @@
 
             `;
 
-                    return;
-                }
+                            return;
+                        }
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | INVÁLIDO
-                |--------------------------------------------------------------------------
-                */
+                        /*
+                        |--------------------------------------------------------------------------
+                        | INVÁLIDO
+                        |--------------------------------------------------------------------------
+                        */
 
-                resultado.innerHTML = `
+                        resultado.innerHTML = `
 
             <div class="verification-card">
 
@@ -1355,147 +1355,147 @@
             </div>
 
         `;
-            }
+                    }
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | VALIDAR EN LARAVEL
-            |--------------------------------------------------------------------------
-            */
+                    /*
+                    |--------------------------------------------------------------------------
+                    | VALIDAR EN LARAVEL
+                    |--------------------------------------------------------------------------
+                    */
 
-            async function validarTicket(token) {
-                try {
+                    async function validarTicket(token) {
+                        try {
 
-                    const response =
-                        await fetch(
-                            "{{ route('control.validar') }}", {
-                                method: 'POST',
+                            const response =
+                                await fetch(
+                                    "{{ route('control.validar') }}", {
+                                        method: 'POST',
 
-                                headers: {
+                                        headers: {
 
-                                    'Content-Type': 'application/json',
+                                            'Content-Type': 'application/json',
 
-                                    'Accept': 'application/json',
+                                            'Accept': 'application/json',
 
-                                    'X-CSRF-TOKEN': "{{ csrf_token() }}",
+                                            'X-CSRF-TOKEN': "{{ csrf_token() }}",
 
-                                },
+                                        },
 
-                                body: JSON.stringify({
-                                    token: token
-                                }),
-                            }
-                        );
-
-
-                    const data =
-                        await response.json();
+                                        body: JSON.stringify({
+                                            token: token
+                                        }),
+                                    }
+                                );
 
 
-                    mostrarResultado(data);
-
-                } catch (error) {
-
-                    mostrarResultado({
-
-                        ok: false,
-
-                        estado: 'ERROR',
-
-                        mensaje: 'No fue posible conectar con el servidor.'
-
-                    });
-
-                }
-            }
+                            const data =
+                                await response.json();
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | PROCESAR QR
-            |--------------------------------------------------------------------------
-            */
+                            mostrarResultado(data);
 
-            async function procesarCodigo(texto) {
-                if (procesando) {
-                    return;
-                }
+                        } catch (error) {
 
+                            mostrarResultado({
 
-                procesando = true;
+                                ok: false,
 
+                                estado: 'ERROR',
 
-                const token =
-                    obtenerToken(texto);
+                                mensaje: 'No fue posible conectar con el servidor.'
 
+                            });
 
-                if (!token) {
-
-                    mostrarResultado({
-
-                        ok: false,
-
-                        estado: 'INVALIDO',
-
-                        mensaje: 'El código QR no pertenece al sistema de tickets.'
-
-                    });
+                        }
+                    }
 
 
-                    procesando = false;
+                    /*
+                    |--------------------------------------------------------------------------
+                    | PROCESAR QR
+                    |--------------------------------------------------------------------------
+                    */
 
-                    return;
-                }
-
-
-                estadoScanner.innerText =
-                    'Validando ticket...';
-
-
-                await validarTicket(token);
-
-
-                estadoScanner.innerText =
-                    'Validación finalizada.';
-            }
+                    async function procesarCodigo(texto) {
+                        if (procesando) {
+                            return;
+                        }
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | CÁMARA
-            |--------------------------------------------------------------------------
-            */
-
-            if (btnCamara) {
-
-                btnCamara.addEventListener(
-                    'click',
-                    async function() {
-
-                        contenedorScanner.style.display =
-                            'block';
-
-                        resultado.style.display =
-                            'none';
-
-                        acciones.style.display =
-                            'none';
-
-                        procesando = false;
+                        procesando = true;
 
 
-                        /*
-                         * HTTP por IP local.
-                         */
+                        const token =
+                            obtenerToken(texto);
 
-                        if (
-                            location.protocol !== 'https:' &&
-                            location.hostname !== 'localhost' &&
-                            location.hostname !== '127.0.0.1'
-                        ) {
 
-                            estadoScanner.innerHTML = `
+                        if (!token) {
+
+                            mostrarResultado({
+
+                                ok: false,
+
+                                estado: 'INVALIDO',
+
+                                mensaje: 'El código QR no pertenece al sistema de tickets.'
+
+                            });
+
+
+                            procesando = false;
+
+                            return;
+                        }
+
+
+                        estadoScanner.innerText =
+                            'Validando ticket...';
+
+
+                        await validarTicket(token);
+
+
+                        estadoScanner.innerText =
+                            'Validación finalizada.';
+                    }
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | CÁMARA
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (btnCamara) {
+
+                        btnCamara.addEventListener(
+                            'click',
+                            async function() {
+
+                                contenedorScanner.style.display =
+                                    'block';
+
+                                resultado.style.display =
+                                    'none';
+
+                                acciones.style.display =
+                                    'none';
+
+                                procesando = false;
+
+
+                                /*
+                                 * HTTP por IP local.
+                                 */
+
+                                if (
+                                    location.protocol !== 'https:' &&
+                                    location.hostname !== 'localhost' &&
+                                    location.hostname !== '127.0.0.1'
+                                ) {
+
+                                    estadoScanner.innerHTML = `
 
                                 <div class="alert alert-warning">
 
@@ -1505,142 +1505,143 @@
 
                                 </div>`;
 
-                            return;
-                        }
-
-
-                        if (scannerCamara) {
-                            return;
-                        }
-
-
-                        scannerCamara =
-                            new Html5QrcodeScanner(
-                                'reader', {
-                                    fps: 10,
-
-                                    qrbox: {
-                                        width: 250,
-                                        height: 250
-                                    },
-
-                                    rememberLastUsedCamera: true,
-
-                                    supportedScanTypes: [
-                                        Html5QrcodeScanType
-                                        .SCAN_TYPE_CAMERA
-                                    ],
-                                },
-                                false
-                            );
-
-
-                        scannerCamara.render(
-
-                            async function(
-                                    decodedText
-                                ) {
-
-                                    if (procesando) {
-                                        return;
-                                    }
-
-
-                                    try {
-
-                                        await scannerCamara
-                                            .clear();
-
-                                    } catch (error) {
-
-                                        // Ignorar
-
-                                    }
-
-                                    scannerCamara = null;
-
-                                    await procesarCodigo(
-                                        decodedText
-                                    );
-
-                                },
-
-                                function() {
-                                    // Errores normales de lectura.
+                                    return;
                                 }
 
+
+                                if (scannerCamara) {
+                                    return;
+                                }
+
+
+                                scannerCamara =
+                                    new Html5QrcodeScanner(
+                                        'reader', {
+                                            fps: 10,
+
+                                            qrbox: {
+                                                width: 250,
+                                                height: 250
+                                            },
+
+                                            rememberLastUsedCamera: true,
+
+                                            supportedScanTypes: [
+                                                Html5QrcodeScanType
+                                                .SCAN_TYPE_CAMERA
+                                            ],
+                                        },
+                                        false
+                                    );
+
+
+                                scannerCamara.render(
+
+                                    async function(decodedText) {
+
+                                            if (procesando) {
+                                                return;
+                                            }
+
+                                            console.log(
+                                                'QR LEÍDO:',
+                                                decodedText
+                                            );
+
+                                            await procesarCodigo(
+                                                decodedText
+                                            );
+
+                                            try {
+
+                                                if (scannerCamara) {
+                                                    await scannerCamara.clear();
+                                                }
+
+                                            } catch (error) {
+
+                                                console.log(
+                                                    'Scanner detenido'
+                                                );
+
+                                            }
+
+                                            scannerCamara = null;
+                                        },
+
+                                        function() {
+                                            // Errores normales de lectura.
+                                        }
+                                }
+                            );
+
+                        }
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | IMAGEN
+                        |--------------------------------------------------------------------------
+                        */
+
+
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | ESCANEAR OTRO
+                        |--------------------------------------------------------------------------
+                        */
+
+                        btnNuevoEscaneo.addEventListener(
+                            'click',
+                            function() {
+
+                                resultado.style.display = 'none';
+                                acciones.style.display = 'none';
+                                contenedorScanner.style.display = 'none';
+
+                                resultado.innerHTML = '';
+
+                                estadoScanner.innerText =
+                                    'Selecciona una opción para comenzar.';
+
+                                procesando = false;
+                                scannerCamara = null;
+
+                            }
                         );
 
-                    }
-                );
+                    });
+                if ('serviceWorker' in navigator) {
 
-            }
+                    window.addEventListener(
+                        'load',
+                        function() {
 
+                            navigator
+                                .serviceWorker
+                                .register('/sw.js')
+                                .then(function() {
 
-            /*
-            |--------------------------------------------------------------------------
-            | IMAGEN
-            |--------------------------------------------------------------------------
-            */
+                                    console.log(
+                                        'Modo offline preparado.'
+                                    );
 
+                                })
+                                .catch(function(error) {
 
+                                    console.error(
+                                        'Error Service Worker:',
+                                        error
+                                    );
 
+                                });
 
-            /*
-            |--------------------------------------------------------------------------
-            | ESCANEAR OTRO
-            |--------------------------------------------------------------------------
-            */
-
-            btnNuevoEscaneo.addEventListener(
-                'click',
-                function() {
-
-                    resultado.style.display = 'none';
-                    acciones.style.display = 'none';
-                    contenedorScanner.style.display = 'none';
-
-                    resultado.innerHTML = '';
-
-                    estadoScanner.innerText =
-                        'Selecciona una opción para comenzar.';
-
-                    procesando = false;
-                    scannerCamara = null;
+                        }
+                    );
 
                 }
-            );
-
-        });
-        if ('serviceWorker' in navigator) {
-
-            window.addEventListener(
-                'load',
-                function() {
-
-                    navigator
-                        .serviceWorker
-                        .register('/sw.js')
-                        .then(function() {
-
-                            console.log(
-                                'Modo offline preparado.'
-                            );
-
-                        })
-                        .catch(function(error) {
-
-                            console.error(
-                                'Error Service Worker:',
-                                error
-                            );
-
-                        });
-
-                }
-            );
-
-        }
     </script>
 
 @endsection
