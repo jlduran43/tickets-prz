@@ -13,7 +13,7 @@ class TicketOfflineSigner
     public function __construct()
     {
         $this->privateKeyPath =
-            storage_path('app/private/tickets_private.pem');
+            storage_path('app/keys/tickets_private.pem');
 
         $this->publicKeyPath =
             public_path('offline/tickets_public.pem');
