@@ -550,7 +550,7 @@
 
                 <i class="bi bi-qr-code-scan text-success me-2"></i>
 
-                Escanear ticket
+                Escanear ticket - VERSION NUEVA 23/09
 
             </h2>
 
