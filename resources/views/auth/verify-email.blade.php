@@ -1,60 +1,246 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container py-5">
+    <style>
+        body {
+            background: #f4f7f2;
+        }
 
-        <div class="card shadow-sm border-0 mx-auto" style="max-width: 520px; border-radius: 20px;">
+        .verification-page {
+            min-height: calc(100vh - 70px);
 
-            <div class="card-body p-4 p-md-5 text-center">
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
-                <div class="d-flex align-items-center justify-content-center mx-auto mb-3"
-                    style="
-                    width: 70px;
-                    height: 70px;
-                    border-radius: 50%;
-                    background: #e8f5ee;
-                    color: #198754;
-                    font-size: 32px;
-                ">
-                    <i class="bi bi-envelope-check"></i>
-                </div>
+            padding: 30px 15px;
+        }
 
-                <h2 class="fw-bold mb-3" style="color:#14532d;">
-                    Revisa tu correo
-                </h2>
+        .verification-card {
+            width: 100%;
+            max-width: 520px;
 
-                <p class="text-muted mb-3">
-                    Te enviamos un enlace de verificación a:
-                </p>
+            background: #ffffff;
 
-                <p class="fw-bold text-success mb-4">
-                    {{ auth()->user()->email }}
-                </p>
+            border-radius: 22px;
 
-                <p class="text-muted">
-                    Debes verificar tu correo electrónico
-                    antes de continuar con la compra de tickets.
-                </p>
+            padding: 40px 35px;
 
-                @if (session('status') === 'verification-link-sent')
-                    <div class="alert alert-success mt-3">
+            text-align: center;
 
-                        Te enviamos un nuevo enlace de verificación.
+            box-shadow:
+                0 12px 40px rgba(0, 0, 0, 0.08);
+        }
 
-                    </div>
-                @endif
+        .verification-icon {
+            width: 82px;
+            height: 82px;
 
-                <form method="POST" action="{{ route('verification.send') }}" class="mt-4">
-                    @csrf
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
-                    <button type="submit" class="btn btn-success rounded-pill px-4 py-2">
-                        <i class="bi bi-envelope me-2"></i>
-                        Reenviar correo de verificación
-                    </button>
+            margin: 0 auto 22px;
 
-                </form>
+            border-radius: 50%;
+
+            background: #e6f5ed;
+
+            color: #198754;
+
+            font-size: 38px;
+        }
+
+        .verification-title {
+            color: #14532d;
+
+            font-size: 2rem;
+            font-weight: 700;
+
+            margin-bottom: 12px;
+        }
+
+        .verification-description {
+            color: #6c757d;
+
+            font-size: 1rem;
+            line-height: 1.6;
+
+            margin-bottom: 22px;
+        }
+
+        .email-box {
+            background: #f2f8f4;
+
+            border: 1px solid #c5dfd0;
+
+            border-radius: 14px;
+
+            padding: 16px;
+
+            margin-bottom: 24px;
+        }
+
+        .email-box-label {
+            color: #6c757d;
+
+            font-size: 0.85rem;
+
+            margin-bottom: 4px;
+        }
+
+        .email-box-address {
+            color: #176341;
+
+            font-size: 1.05rem;
+            font-weight: 700;
+
+            word-break: break-word;
+        }
+
+        .btn-verification {
+            width: 100%;
+
+            min-height: 48px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            gap: 8px;
+
+            border: none;
+            border-radius: 999px;
+
+            background: linear-gradient(135deg,
+                    #188a55,
+                    #219b62);
+
+            color: white;
+
+            font-weight: 700;
+
+            transition: 0.2s ease;
+        }
+
+        .btn-verification:hover {
+            background: linear-gradient(135deg,
+                    #147547,
+                    #198754);
+
+            color: white;
+        }
+
+        .verification-help {
+            color: #7a8580;
+
+            font-size: 0.86rem;
+
+            margin-top: 20px;
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 576px) {
+
+            .verification-card {
+                padding: 30px 20px;
+            }
+
+            .verification-title {
+                font-size: 1.7rem;
+            }
+
+        }
+    </style>
+
+
+    <div class="verification-page">
+
+        <div class="verification-card">
+
+            <div class="verification-icon">
+
+                <i class="bi bi-envelope-check"></i>
 
             </div>
+
+
+            <h1 class="verification-title">
+
+                Revisa tu correo
+
+            </h1>
+
+
+            <p class="verification-description">
+
+                Tu cuenta fue creada correctamente.
+
+                <br>
+
+                Te enviamos un enlace para verificar
+                tu dirección de correo electrónico.
+
+            </p>
+
+
+            <div class="email-box">
+
+                <div class="email-box-label">
+
+                    Enlace enviado a
+
+                </div>
+
+                <div class="email-box-address">
+
+                    {{ auth()->user()->email }}
+
+                </div>
+
+            </div>
+
+
+            @if (session('status') === 'verification-link-sent')
+                <div class="alert alert-success mb-4">
+
+                    <i class="bi bi-check-circle me-2"></i>
+
+                    Te enviamos un nuevo enlace de verificación.
+
+                </div>
+            @endif
+
+
+            <p class="text-muted mb-4">
+
+                Abre el correo y presiona el botón de verificación
+                para activar tu cuenta.
+
+            </p>
+
+
+            <form method="POST" action="{{ route('verification.send') }}">
+
+                @csrf
+
+                <button type="submit" class="btn-verification">
+
+                    <i class="bi bi-arrow-clockwise"></i>
+
+                    Reenviar correo de verificación
+
+                </button>
+
+            </form>
+
+
+            <p class="verification-help">
+
+                ¿No encuentras el mensaje?
+                Revisa también tu carpeta de spam o correo no deseado.
+
+            </p>
 
         </div>
 

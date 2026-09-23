@@ -85,6 +85,6 @@ class RegistroClienteController extends Controller
 
         Auth::login($user);
 
-        return redirect()->route('verificacion.notice');
+        return redirect()->route('verification.notice');
     }
 }

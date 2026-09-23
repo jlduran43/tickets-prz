@@ -61,26 +61,26 @@ Route::middleware('guest')->group(function () {
     Route::post('/registro', [RegistroClienteController::class, 'store'])
         ->name('registro.store');
 
-    Route::get('/email/verify', function () {
+    Route::get('/email/verificar', function () {
         return view('auth.verify-email');
     })
         ->middleware('auth')
         ->name('verification.notice');
 
-    Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    Route::get('/email/verificar/{id}/{hash}', function (EmailVerificationRequest $request) {
 
         $request->fulfill();
 
-        return redirect()->route('auth.login')
-            ->with('success', 'Tu correo fue verificado correctamente.');
+        return redirect()->route('login')
+            ->with('success', 'Tu correo fue verificado correctamente. Ya puedes iniciar sesión.');
     })
         ->middleware(['auth', 'signed'])
         ->name('verification.verify');
 
-    Route::post('/email/verification-notification', function (Request $request) {
+    Route::post('/email/reenviar-verificacion', function (Request $request) {
 
         if ($request->user()->hasVerifiedEmail()) {
-            return redirect()->route('ticket.index');
+            return redirect()->route('login');
         }
 
         $request->user()->sendEmailVerificationNotification();
