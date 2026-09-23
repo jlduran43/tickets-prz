@@ -30,7 +30,6 @@ class LoginController extends Controller
                 ->onlyInput('email');
         }
 
-
         /*
         |--------------------------------------------------------------------------
         | Regenerar sesión
@@ -39,10 +38,7 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
-        if (!Auth::user()->hasVerifiedEmail()) {
-            return redirect()->route('verification.notice');
-        }
-
+        $usuario = Auth::user();
 
         /*
         |--------------------------------------------------------------------------
@@ -50,7 +46,13 @@ class LoginController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $usuario = Auth::user();
+        if (
+            $usuario->rol === 'CLIENTE' &&
+            !$usuario->hasVerifiedEmail()
+        ) {
+            return redirect()
+                ->route('verification.notice');
+        }
 
 
         if ($usuario->rol === 'ADMIN') {
