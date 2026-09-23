@@ -17,6 +17,8 @@
 
     @auth
 
+        @if (auth()->user()->hasVerifiedEmail())
+
         <nav class="navbar bg-white shadow-sm py-3">
 
             <div class="container position-relative">
@@ -263,6 +265,8 @@
             </div>
 
         </nav>
+
+        @endif
 
     @endauth
 
