@@ -28,7 +28,9 @@ class TicketCompradoMail extends Mailable
         $qrCode = new QrCode(
             data: $this->codigoQr,
             size: 300,
-            margin: 10
+            margin: 10,
+            foregroundColor: new Color(20, 110, 70),
+            backgroundColor: new Color(255, 255, 255),
         );
 
         $writer = new PngWriter();

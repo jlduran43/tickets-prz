@@ -7,6 +7,7 @@ use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Services\TicketOfflineSigner;
+use Endroid\QrCode\Color\Color;
 
 class TicketController extends Controller
 {
@@ -26,7 +27,9 @@ class TicketController extends Controller
         $qrCode = new QrCode(
             data: $codigoQr,
             size: 300,
-            margin: 10
+            margin: 10,
+            foregroundColor: new Color(20, 110, 70),
+            backgroundColor: new Color(255, 255, 255),
         );
 
         $writer = new PngWriter();
