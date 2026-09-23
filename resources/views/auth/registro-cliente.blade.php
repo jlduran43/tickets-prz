@@ -354,7 +354,7 @@
 
                         <div class="col-md-6 mb-3">
 
-                            <label for="nombre" class="form-label">
+                            <label for="name" class="form-label">
                                 Nombre
                             </label>
 
@@ -362,12 +362,12 @@
 
                                 <i class="bi bi-person"></i>
 
-                                <input type="text" id="nombre" name="nombre" class="form-control"
-                                    value="{{ old('nombre') }}" placeholder="Nombre completo" required>
+                                <input type="text" id="name" name="name" class="form-control"
+                                    value="{{ old('name') }}" placeholder="Nombre completo" required>
 
                             </div>
 
-                            @error('nombre')
+                            @error('name')
                                 <div class="validation-error">
                                     {{ $message }}
                                 </div>

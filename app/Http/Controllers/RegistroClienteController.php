@@ -23,21 +23,30 @@ class RegistroClienteController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'rut' => [
-                'required',
-                'string',
-                'max:20',
-                'unique:clientes,rut',
-                new RutChileno(),
-            ],
-            'email' => 'required|email|max:255|unique:users,email',
-            'telefono' => 'required|string|max:20',
-            'region_id' => 'required|exists:regiones,id',
-            'comuna_id' => 'required|exists:comunas,id',
-            'password' => 'required|string|min:8|confirmed',
+        $request->validate(
+            [
+                'name' => 'required|string|max:255',
 
+                'rut' => [
+                    'required',
+                    'string',
+                    'max:20',
+                    'unique:clientes,rut',
+                    new RutChileno(),
+                ],
+
+                'email' => [
+                    'required',
+                    'email',
+                    'max:255',
+                    'unique:users,email',
+                ],
+
+                'telefono' => 'required|string|max:20',
+                'region_id' => 'required|exists:regiones,id',
+                'comuna_id' => 'required|exists:comunas,id',
+                'password' => 'required|string|min:8|confirmed',
+            ],
             [
                 'rut.unique' => 'Este RUT ya se encuentra registrado.',
                 'rut.required' => 'El RUT es obligatorio.',
@@ -45,13 +54,17 @@ class RegistroClienteController extends Controller
                 'email.required' => 'El correo electrónico es obligatorio.',
                 'email.email' => 'Ingresa un correo electrónico válido.',
                 'email.unique' => 'Este correo electrónico ya se encuentra registrado.',
+
+                'password.required' => 'La contraseña es obligatoria.',
+                'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+                'password.confirmed' => 'Las contraseñas no coinciden.',
             ]
-        ]);
+        );
 
         $user = DB::transaction(function () use ($request) {
 
             $user = User::create([
-                'name' => $request->nombre,
+                'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'rol' => 'CLIENTE',
