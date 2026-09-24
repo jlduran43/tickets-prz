@@ -17,7 +17,9 @@
 
     @auth
 
-        @if (auth()->user()->hasVerifiedEmail() && !request()->routeIs('verification.success'))
+        @if (
+            (auth()->user()->rol !== 'CLIENTE' || auth()->user()->hasVerifiedEmail()) &&
+                !request()->routeIs('verification.success'))
             <nav class="navbar bg-white shadow-sm py-3">
 
                 <div class="container position-relative">
