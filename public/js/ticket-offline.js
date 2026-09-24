@@ -399,85 +399,24 @@ function generarUUID() {
     return crypto.randomUUID();
 }
 
+function obtenerDeviceId() {
 
-async function agregarPendiente(
-    codigo,
-    payload
-) {
+    let deviceId =
+        localStorage.getItem('prz_device_id');
 
-    const db =
-        await abrirDB();
+    if (!deviceId) {
 
-    const scanUuid =
-        generarUUID();
+        deviceId =
+            crypto.randomUUID();
 
+        localStorage.setItem(
+            'prz_device_id',
+            deviceId
+        );
+    }
 
-    const registro = {
-
-        scan_uuid:
-            scanUuid,
-
-        signed_qr:
-            codigo,
-
-        token:
-            payload.token,
-
-        venta_id:
-            payload.id,
-
-        folio:
-            payload.folio,
-
-        scanned_at:
-            new Date()
-                .toISOString(),
-
-        device_id:
-            obtenerDeviceId()
-    };
-
-
-    return new Promise(
-        (resolve, reject) => {
-
-            const transaction =
-                db.transaction(
-                    STORE_PENDIENTES,
-                    'readwrite'
-                );
-
-
-            transaction
-                .objectStore(
-                    STORE_PENDIENTES
-                )
-                .put(
-                    registro
-                );
-
-
-            transaction.oncomplete =
-                () =>
-                    resolve(
-                        registro
-                    );
-
-
-            transaction.onerror =
-                () =>
-                    reject(
-                        transaction.error
-                    );
-        }
-    );
+    return deviceId;
 }
-
-function generarUUID() {
-
-    return crypto.randomUUID();
-}
-
 
 async function agregarPendiente(
     codigo,
@@ -800,61 +739,3 @@ async function eliminarPendiente(
         }
     );
 }
-
-async function eliminarPendiente(
-    scanUuid
-) {
-
-    const db =
-        await abrirDB();
-
-
-    return new Promise(
-        (resolve, reject) => {
-
-            const transaction =
-                db.transaction(
-                    STORE_PENDIENTES,
-                    'readwrite'
-                );
-
-
-            transaction
-                .objectStore(
-                    STORE_PENDIENTES
-                )
-                .delete(
-                    scanUuid
-                );
-
-
-            transaction.oncomplete =
-                () =>
-                    resolve();
-
-
-            transaction.onerror =
-                () =>
-                    reject(
-                        transaction.error
-                    );
-        }
-    );
-}
-
-window.addEventListener(
-    'online',
-    () => {
-        sincronizarPendientes();
-    }
-);
-
-
-document.addEventListener(
-    'DOMContentLoaded',
-    () => {
-
-        sincronizarPendientes();
-
-    }
-);
