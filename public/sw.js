@@ -1,7 +1,7 @@
 const CACHE_NAME = 'prz-scanner-v4';
 
 const OFFLINE_FILES = [
-    '/offline/tickets_public.pem',
+    '/offline/ticket_public.pem',
     '/js/ticket-offline.js',
     '/js/html5-qrcode.min.js'
 ];

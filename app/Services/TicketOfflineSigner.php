@@ -16,7 +16,7 @@ class TicketOfflineSigner
             storage_path('app/keys/ticket_private.pem');
 
         $this->publicKeyPath =
-            public_path('app/keys/ticket_public.pem');
+            public_path('offline/ticket_public.pem');
     }
 
     public function generarQrFirmado(Venta $venta): string

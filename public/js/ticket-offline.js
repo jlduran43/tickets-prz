@@ -7,7 +7,7 @@ async function cargarClavePublica() {
     }
 
     const response = await fetch(
-        '/offline/tickets_public.pem'
+        '/offline/ticket_public.pem'
     );
 
     if (!response.ok) {
