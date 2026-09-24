@@ -639,7 +639,7 @@
 
 @section('js')
 
-    <script src="{{ asset('vendor/html5-qrcode/html5-qrcode.min.js') }}"></script>
+    <script src="{{ asset('js/html5-qrcode.min.js') }}"></script>
 
 
     <script>
