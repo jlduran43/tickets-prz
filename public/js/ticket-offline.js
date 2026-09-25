@@ -742,39 +742,30 @@ async function eliminarPendiente(
     );
 }
 
-    async function sincronizarPendientes() {
-        alert(
-        '2 - Entré a sincronizarPendientes'
-        );
+let sincronizandoPendientes = false;
 
-    if (!navigator.onLine) {
+    async function sincronizarPendientes() 
+    {
+        
+        if (sincronizandoPendientes) {
+            return;
+        }
 
-        console.log(
-            'Sin conexión. No se puede sincronizar.'
-        );
+        sincronizandoPendientes = true;
+    
+        if (!navigator.onLine) {
 
-        return;
-    }
+            sincronizandoPendientes = false;
 
-    console.log(
-        'Buscando tickets pendientes de sincronización...'
-    );
+            return;
+        }
 
     try {
 
         const pendientes =
             await obtenerPendientes();
 
-        console.log(
-            'Pendientes encontrados:',
-            pendientes
-        );
-
         if (!pendientes.length) {
-
-            console.log(
-                'No existen tickets pendientes.'
-            );
 
             return;
         }
@@ -891,7 +882,10 @@ async function eliminarPendiente(
                     pendiente.folio,
                     error
                 );
-            }
+            } finally {
+
+        sincronizandoPendientes = false;
+    }
         }
 
     } catch (error) {
@@ -948,10 +942,6 @@ window.addEventListener(
     'online',
     function () {
 
-        console.log(
-            'Evento online detectado.'
-        );
-
         intentarSincronizar();
     }
 );
@@ -966,10 +956,6 @@ window.addEventListener(
 window.addEventListener(
     'load',
     function () {
-
-        console.log(
-            'Página cargada.'
-        );
 
         intentarSincronizar();
     }
@@ -990,49 +976,7 @@ document.addEventListener(
             document.visibilityState === 'visible'
         ) {
 
-            console.log(
-                'Página nuevamente visible.'
-            );
-
             intentarSincronizar();
         }
     }
-);
-
-
-/*
-|--------------------------------------------------------------------------
-| CUANDO CHROME RECUPERA EL FOCO
-|--------------------------------------------------------------------------
-*/
-
-window.addEventListener(
-    'focus',
-    function () {
-
-        console.log(
-            'Ventana activa.'
-        );
-
-        intentarSincronizar();
-    }
-);
-
-/*
-|--------------------------------------------------------------------------
-| PRUEBA DIRECTA AL CARGAR EL ARCHIVO
-|--------------------------------------------------------------------------
-*/
-
-setTimeout(
-    function () {
-
-        alert(
-            '0 - Ejecutando prueba directa'
-        );
-
-        intentarSincronizar();
-
-    },
-    1000
 );
