@@ -1,5 +1,3 @@
-alert('ticket-offline.js NUEVO cargado');
-
 let clavePublicaPRZ = null;
 
 async function cargarClavePublica() {
@@ -791,11 +789,6 @@ let sincronizandoPendientes = false;
                     pendiente
                 );
 
-                alert(
-    '3 - Voy a enviar: ' +
-    pendiente.folio
-);
-
                 const response =
                     await fetch(
                         '/control/sincronizar-offline',
@@ -920,9 +913,6 @@ async function intentarSincronizar() {
 
         return;
     }
-
-    alert('1 - Intentando sincronizar');
-
 
     console.log(
         'Hay conexión. Revisando pendientes...'
