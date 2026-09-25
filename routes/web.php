@@ -446,6 +446,14 @@ Route::middleware([
     )->name(
         'tickets.offline.sincronizar'
     );
+
+    Route::post(
+        '/control/sincronizar-offline',
+        [
+            ControlController::class, 
+            'sincronizarOffline'
+        ]
+    )->name('control.sincronizarOffline');
 });
 
 

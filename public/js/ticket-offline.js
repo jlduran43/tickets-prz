@@ -738,4 +738,188 @@ async function eliminarPendiente(
                     );
         }
     );
+
+    async function sincronizarPendientes() {
+
+    if (!navigator.onLine) {
+
+        console.log(
+            'Sin conexión. No se puede sincronizar.'
+        );
+
+        return;
+    }
+
+    console.log(
+        'Buscando tickets pendientes de sincronización...'
+    );
+
+    try {
+
+        const pendientes =
+            await obtenerPendientes();
+
+        console.log(
+            'Pendientes encontrados:',
+            pendientes
+        );
+
+        if (!pendientes.length) {
+
+            console.log(
+                'No existen tickets pendientes.'
+            );
+
+            return;
+        }
+
+        const csrfToken =
+            document.querySelector(
+                'meta[name="csrf-token"]'
+            )?.getAttribute('content');
+
+
+        for (const pendiente of pendientes) {
+
+            try {
+
+                console.log(
+                    'Sincronizando:',
+                    pendiente.folio
+                );
+
+
+                const response =
+                    await fetch(
+                        '/control/sincronizar-offline',
+                        {
+                            method: 'POST',
+
+                            headers: {
+                                'Content-Type':
+                                    'application/json',
+
+                                'Accept':
+                                    'application/json',
+
+                                'X-CSRF-TOKEN':
+                                    csrfToken
+                            },
+
+                            body: JSON.stringify({
+                                scan_uuid:
+                                    pendiente.scan_uuid,
+
+                                token:
+                                    pendiente.token,
+
+                                venta_id:
+                                    pendiente.venta_id,
+
+                                folio:
+                                    pendiente.folio,
+
+                                scanned_at:
+                                    pendiente.scanned_at,
+
+                                device_id:
+                                    pendiente.device_id
+                            })
+                        }
+                    );
+
+
+                if (!response.ok) {
+
+                    console.error(
+                        'Servidor rechazó sincronización:',
+                        pendiente.folio,
+                        response.status
+                    );
+
+                    continue;
+                }
+
+
+                const data =
+                    await response.json();
+
+
+                console.log(
+                    'Respuesta Laravel:',
+                    data
+                );
+
+
+                if (data.ok) {
+
+                    await eliminarPendiente(
+                        pendiente.scan_uuid
+                    );
+
+                    console.log(
+                        'Sincronizado correctamente:',
+                        pendiente.folio
+                    );
+                }
+
+            } catch (error) {
+
+                console.error(
+                    'Error sincronizando ' +
+                    pendiente.folio,
+                    error
+                );
+            }
+        }
+
+    } catch (error) {
+
+        console.error(
+            'Error general de sincronización:',
+            error
+        );
+    }
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| CUANDO VUELVE INTERNET
+|--------------------------------------------------------------------------
+*/
+
+window.addEventListener(
+    'online',
+    function () {
+
+        console.log(
+            'Internet recuperado. Iniciando sincronización...'
+        );
+
+        sincronizarPendientes();
+    }
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| AL CARGAR LA PÁGINA
+|--------------------------------------------------------------------------
+|
+| Esto cubre el caso donde el usuario recuperó internet
+| pero cerró y volvió a abrir /control.
+|
+*/
+
+window.addEventListener(
+    'load',
+    function () {
+
+        if (navigator.onLine) {
+
+            sincronizarPendientes();
+        }
+    }
+);
 }

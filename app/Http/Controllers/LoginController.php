@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Venta;
 
 class LoginController extends Controller
 {
@@ -90,4 +91,75 @@ class LoginController extends Controller
         return redirect()
             ->route('login');
     }
+
+    public function sincronizarOffline(Request $request)
+{
+    $request->validate([
+        'token' => 'required|string',
+        'venta_id' => 'required|integer',
+        'folio' => 'required|string',
+        'scanned_at' => 'required|date',
+        'scan_uuid' => 'required|string',
+        'device_id' => 'nullable|string',
+    ]);
+
+
+    $venta = Venta::where(
+        'id',
+        $request->venta_id
+    )
+        ->where(
+            'token_ticket',
+            $request->token
+        )
+        ->first();
+
+
+    if (!$venta) {
+
+        return response()->json([
+            'ok' => false,
+            'mensaje' => 'Ticket no encontrado.'
+        ], 404);
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SI YA ESTÁ UTILIZADO
+    |--------------------------------------------------------------------------
+    */
+
+    if ($venta->validada_at) {
+
+        return response()->json([
+            'ok' => true,
+            'estado' => 'YA_SINCRONIZADO',
+            'folio' => $venta->folio,
+            'validada_at' => $venta->validada_at,
+        ]);
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | REGISTRAR FECHA REAL DEL ESCANEO OFFLINE
+    |--------------------------------------------------------------------------
+    */
+
+    $venta->validada_at =
+        \Carbon\Carbon::parse(
+            $request->scanned_at
+        );
+
+    $venta->save();
+
+
+    return response()->json([
+        'ok' => true,
+        'estado' => 'SINCRONIZADO',
+        'folio' => $venta->folio,
+        'validada_at' => $venta->validada_at,
+    ]);
+}
 }
