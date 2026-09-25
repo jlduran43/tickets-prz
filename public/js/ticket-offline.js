@@ -837,12 +837,15 @@ let sincronizandoPendientes = false;
                         }
                     );
 
-                    alert(
-                            'Respuesta HTTP ' +
-                            response.status +
-                            ' para ' +
-                            pendiente.folio
-                    );
+                    const textoRespuesta =
+    await response.text();
+
+alert(
+    'HTTP ' +
+    response.status +
+    '\n' +
+    textoRespuesta.substring(0, 300)
+);
 
                     console.log(
                         'STATUS:',
@@ -862,8 +865,8 @@ let sincronizandoPendientes = false;
                 }
 
 
-                const data =
-                    await response.json();
+                //const data =
+                    //await response.json();
 
 
                 console.log(

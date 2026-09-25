@@ -436,24 +436,6 @@ Route::middleware([
         '/mi-perfil',
         [PerfilController::class, 'update']
     )->name('perfil.update');
-
-    Route::post(
-        '/tickets/offline/sincronizar',
-        [
-            OfflineTicketController::class,
-            'sincronizar'
-        ]
-    )->name(
-        'tickets.offline.sincronizar'
-    );
-
-    Route::post(
-        '/control/sincronizar-offline',
-        [
-            ControlController::class, 
-            'sincronizarOffline'
-        ]
-    )->name('control.sincronizarOffline');
 });
 
 
@@ -515,4 +497,22 @@ Route::middleware([
         '/control/historial',
         [ControlController::class, 'historial']
     )->name('control.historial');
+
+    Route::post(
+        '/tickets/offline/sincronizar',
+        [
+            OfflineTicketController::class,
+            'sincronizar'
+        ]
+    )->name(
+        'tickets.offline.sincronizar'
+    );
+
+    Route::post(
+        '/control/sincronizar-offline',
+        [
+            ControlController::class, 
+            'sincronizarOffline'
+        ]
+    )->name('control.sincronizarOffline');
 });
