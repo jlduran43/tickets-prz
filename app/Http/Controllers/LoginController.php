@@ -93,15 +93,19 @@ class LoginController extends Controller
     }
 
     public function sincronizarOffline(Request $request)
-{
-    $request->validate([
-        'token' => 'required|string',
-        'venta_id' => 'required|integer',
-        'folio' => 'required|string',
-        'scanned_at' => 'required|date',
-        'scan_uuid' => 'required|string',
-        'device_id' => 'nullable|string',
-    ]);
+    {
+        \Log::info('ENTRO A sincronizarOffline', [
+            'data' => $request->all()
+        ]);
+
+        $request->validate([
+            'token' => 'required|string',
+            'venta_id' => 'required|integer',
+            'folio' => 'required|string',
+            'scanned_at' => 'required|date',
+            'scan_uuid' => 'required|string',
+            'device_id' => 'nullable|string',
+        ]);
 
 
     $venta = Venta::where(

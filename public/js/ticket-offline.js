@@ -740,6 +740,7 @@ async function eliminarPendiente(
     );
 
     async function sincronizarPendientes() {
+        console.log('ENTRE A sincronizarPendientes');
 
     if (!navigator.onLine) {
 
@@ -789,6 +790,11 @@ async function eliminarPendiente(
                 );
 
 
+                console.log(
+                    'ENVIANDO A LARAVEL:',
+                    pendiente
+                );
+
                 const response =
                     await fetch(
                         '/control/sincronizar-offline',
@@ -826,6 +832,11 @@ async function eliminarPendiente(
                                     pendiente.device_id
                             })
                         }
+                    );
+
+                    console.log(
+                        'STATUS:',
+                        response.status
                     );
 
 
@@ -917,6 +928,10 @@ window.addEventListener(
     function () {
 
         if (navigator.onLine) {
+
+            console.log(
+                'Página cargada con Internet. Revisando pendientes.'
+            );
 
             sincronizarPendientes();
         }
