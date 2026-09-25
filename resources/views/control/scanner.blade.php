@@ -6,10 +6,10 @@
 
     <style>
         /*
-                                                                                            |--------------------------------------------------------------------------
-                                                                                            | ESCÁNER
-                                                                                            |--------------------------------------------------------------------------
-                                                                                            */
+                                                                                                    |--------------------------------------------------------------------------
+                                                                                                    | ESCÁNER
+                                                                                                    |--------------------------------------------------------------------------
+                                                                                                    */
 
         .scanner-container {
             max-width: 720px;
@@ -23,10 +23,10 @@
 
 
         /*
-                                                                                            |--------------------------------------------------------------------------
-                                                                                            | RESULTADO TICKET
-                                                                                            |--------------------------------------------------------------------------
-                                                                                            */
+                                                                                                    |--------------------------------------------------------------------------
+                                                                                                    | RESULTADO TICKET
+                                                                                                    |--------------------------------------------------------------------------
+                                                                                                    */
 
         .verification-card {
             width: 100%;
@@ -44,10 +44,10 @@
 
 
         /*
-                                                                                            |--------------------------------------------------------------------------
-                                                                                            | CABECERA
-                                                                                            |--------------------------------------------------------------------------
-                                                                                            */
+                                                                                                    |--------------------------------------------------------------------------
+                                                                                                    | CABECERA
+                                                                                                    |--------------------------------------------------------------------------
+                                                                                                    */
 
         .park-header {
             display: flex;
@@ -98,10 +98,10 @@
 
 
         /*
-                                                                                            |--------------------------------------------------------------------------
-                                                                                            | PANEL
-                                                                                            |--------------------------------------------------------------------------
-                                                                                            */
+                                                                                                    |--------------------------------------------------------------------------
+                                                                                                    | PANEL
+                                                                                                    |--------------------------------------------------------------------------
+                                                                                                    */
 
         .ticket-panel {
             border: 1px solid #e2e5e3;
@@ -115,10 +115,10 @@
 
 
         /*
-                                                                                            |--------------------------------------------------------------------------
-                                                                                            | CÍRCULO ESTADO
-                                                                                            |--------------------------------------------------------------------------
-                                                                                            */
+                                                                                                    |--------------------------------------------------------------------------
+                                                                                                    | CÍRCULO ESTADO
+                                                                                                    |--------------------------------------------------------------------------
+                                                                                                    */
 
         .state-circle {
             width: 104px;
@@ -164,10 +164,10 @@
 
 
         /*
-                                                                                            |--------------------------------------------------------------------------
-                                                                                            | TÍTULOS
-                                                                                            |--------------------------------------------------------------------------
-                                                                                            */
+                                                                                                    |--------------------------------------------------------------------------
+                                                                                                    | TÍTULOS
+                                                                                                    |--------------------------------------------------------------------------
+                                                                                                    */
 
         .ticket-state-title {
             margin-top: 24px;
@@ -212,10 +212,10 @@
 
 
         /*
-                                                                                            |--------------------------------------------------------------------------
-                                                                                            | ALERTA PRINCIPAL
-                                                                                            |--------------------------------------------------------------------------
-                                                                                            */
+                                                                                                    |--------------------------------------------------------------------------
+                                                                                                    | ALERTA PRINCIPAL
+                                                                                                    |--------------------------------------------------------------------------
+                                                                                                    */
 
         .status-box {
             display: flex;
@@ -286,10 +286,10 @@
 
 
         /*
-                                                                                            |--------------------------------------------------------------------------
-                                                                                            | INFORMACIÓN
-                                                                                            |--------------------------------------------------------------------------
-                                                                                            */
+                                                                                                    |--------------------------------------------------------------------------
+                                                                                                    | INFORMACIÓN
+                                                                                                    |--------------------------------------------------------------------------
+                                                                                                    */
 
         .ticket-info {
             border-top: 1px solid #d9dddb;
@@ -350,10 +350,10 @@
 
 
         /*
-                                                                                            |--------------------------------------------------------------------------
-                                                                                            | FOOTER
-                                                                                            |--------------------------------------------------------------------------
-                                                                                            */
+                                                                                                    |--------------------------------------------------------------------------
+                                                                                                    | FOOTER
+                                                                                                    |--------------------------------------------------------------------------
+                                                                                                    */
 
         .ticket-footer {
             margin-top: 50px;
@@ -413,10 +413,10 @@
 
 
         /*
-                                                                                            |--------------------------------------------------------------------------
-                                                                                            | MOBILE
-                                                                                            |--------------------------------------------------------------------------
-                                                                                            */
+                                                                                                    |--------------------------------------------------------------------------
+                                                                                                    | MOBILE
+                                                                                                    |--------------------------------------------------------------------------
+                                                                                                    */
 
         @media (max-width: 576px) {
 
@@ -541,6 +541,22 @@
 
 
     <div class="scanner-container">
+
+        <div class="card mt-4">
+            <div class="card-body">
+
+                <h5 class="card-title">
+                    Diagnóstico IndexedDB
+                </h5>
+
+                <button type="button" class="btn btn-secondary mb-3" id="btnVerSincronizaciones">
+                    Ver sincronizaciones pendientes
+                </button>
+
+                <div id="resultadoSincronizaciones"></div>
+
+            </div>
+        </div>
 
 
         {{-- CABECERA --}}
@@ -1860,6 +1876,213 @@
             );
 
         }
+
+        document
+            .getElementById('btnVerSincronizaciones')
+            .addEventListener('click', async function() {
+
+                const contenedor =
+                    document.getElementById('resultadoSincronizaciones');
+
+                contenedor.innerHTML =
+                    '<div class="text-muted">Leyendo IndexedDB...</div>';
+
+                try {
+
+                    /*
+                     * IMPORTANTE:
+                     * Cambia "prz_offline" por el nombre REAL
+                     * de tu base IndexedDB si usaste otro.
+                     */
+                    const request = indexedDB.open('prz_offline');
+
+                    request.onerror = function() {
+
+                        contenedor.innerHTML = `
+                    <div class="alert alert-danger">
+                        No se pudo abrir IndexedDB.
+                    </div>
+                `;
+                    };
+
+                    request.onsuccess = function(event) {
+
+                        const db = event.target.result;
+
+                        /*
+                         * Comprobar que exista el object store
+                         * "sincronizaciones"
+                         */
+                        if (
+                            !db.objectStoreNames.contains(
+                                'sincronizaciones'
+                            )
+                        ) {
+
+                            contenedor.innerHTML = `
+                        <div class="alert alert-warning">
+                            No existe el almacén
+                            <strong>sincronizaciones</strong>.
+                        </div>
+                    `;
+
+                            db.close();
+
+                            return;
+                        }
+
+                        const transaction =
+                            db.transaction(
+                                'sincronizaciones',
+                                'readonly'
+                            );
+
+                        const store =
+                            transaction.objectStore(
+                                'sincronizaciones'
+                            );
+
+                        const consulta =
+                            store.getAll();
+
+                        consulta.onsuccess = function() {
+
+                            const registros =
+                                consulta.result;
+
+                            if (!registros.length) {
+
+                                contenedor.innerHTML = `
+                            <div class="alert alert-success">
+                                No existen sincronizaciones
+                                pendientes.
+                            </div>
+                        `;
+
+                                return;
+                            }
+
+                            let html = `
+                        <div class="table-responsive">
+
+                            <table
+                                class="table
+                                       table-bordered
+                                       table-sm"
+                            >
+
+                                <thead>
+
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Folio</th>
+                                        <th>Token</th>
+                                        <th>Fecha</th>
+                                        <th>Estado</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+                    `;
+
+                            registros.forEach(function(registro) {
+
+                                html += `
+                            <tr>
+
+                                <td>
+                                    ${registro.id ?? '-'}
+                                </td>
+
+                                <td>
+                                    ${registro.folio ?? '-'}
+                                </td>
+
+                                <td
+                                    style="
+                                        max-width: 150px;
+                                        overflow-wrap: anywhere;
+                                    "
+                                >
+                                    ${registro.token ?? '-'}
+                                </td>
+
+                                <td>
+                                    ${
+                                        registro.validada_at
+                                        ?? registro.fecha
+                                        ?? '-'
+                                    }
+                                </td>
+
+                                <td>
+
+                                    ${
+                                        registro.sincronizado
+                                            ? `
+                                                    <span
+                                                        class="
+                                                            badge
+                                                            bg-success
+                                                        "
+                                                    >
+                                                        Sincronizado
+                                                    </span>
+                                                `
+                                            : `
+                                                    <span
+                                                        class="
+                                                            badge
+                                                            bg-warning
+                                                            text-dark
+                                                        "
+                                                    >
+                                                        Pendiente
+                                                    </span>
+                                                `
+                                    }
+
+                                </td>
+
+                            </tr>
+                        `;
+                            });
+
+                            html += `
+                                </tbody>
+
+                            </table>
+
+                        </div>
+                    `;
+
+                            contenedor.innerHTML = html;
+                        };
+
+                        consulta.onerror = function() {
+
+                            contenedor.innerHTML = `
+                        <div class="alert alert-danger">
+                            No fue posible leer
+                            las sincronizaciones.
+                        </div>
+                    `;
+                        };
+                    };
+
+                } catch (error) {
+
+                    console.error(error);
+
+                    contenedor.innerHTML = `
+                <div class="alert alert-danger">
+                    Error al consultar IndexedDB:
+                    ${error.message}
+                </div>
+            `;
+                }
+            });
     </script>
 
 @endsection
