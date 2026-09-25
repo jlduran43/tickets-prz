@@ -744,14 +744,18 @@ let sincronizandoPendientes = false;
 
     async function sincronizarPendientes() 
     {
+        alert('A - Entré a sincronizarPendientes');
         
         if (sincronizandoPendientes) {
+            alert('B - Ya había una sincronización ejecutándose');
+
             return;
         }
 
         sincronizandoPendientes = true;
     
         if (!navigator.onLine) {
+            alert('C - El navegador dice que NO hay Internet');
 
             sincronizandoPendientes = false;
 
@@ -762,6 +766,11 @@ let sincronizandoPendientes = false;
 
         const pendientes =
             await obtenerPendientes();
+
+            alert(
+            'D - Pendientes encontrados: ' +
+            pendientes.length
+        );
 
         if (!pendientes.length) {
 
