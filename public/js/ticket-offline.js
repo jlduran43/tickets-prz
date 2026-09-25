@@ -925,6 +925,7 @@ async function intentarSincronizar() {
 
     alert('1 - Intentando sincronizar');
 
+
     console.log(
         'Hay conexión. Revisando pendientes...'
     );
@@ -1011,4 +1012,36 @@ window.addEventListener(
 
         intentarSincronizar();
     }
+);
+
+window.addEventListener(
+    'focus',
+    function () {
+
+        console.log(
+            'Ventana activa.'
+        );
+
+        intentarSincronizar();
+    }
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| PRUEBA DIRECTA AL CARGAR EL ARCHIVO
+|--------------------------------------------------------------------------
+*/
+
+setTimeout(
+    function () {
+
+        alert(
+            '0 - Ejecutando prueba directa'
+        );
+
+        intentarSincronizar();
+
+    },
+    1000
 );
