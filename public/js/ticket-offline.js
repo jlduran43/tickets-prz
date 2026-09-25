@@ -743,6 +743,10 @@ async function eliminarPendiente(
 }
 
     async function sincronizarPendientes() {
+        alert(
+        '2 - Entré a sincronizarPendientes'
+        );
+
     if (!navigator.onLine) {
 
         console.log(
@@ -1013,19 +1017,6 @@ window.addEventListener(
         intentarSincronizar();
     }
 );
-
-window.addEventListener(
-    'focus',
-    function () {
-
-        console.log(
-            'Ventana activa.'
-        );
-
-        intentarSincronizar();
-    }
-);
-
 
 /*
 |--------------------------------------------------------------------------
