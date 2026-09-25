@@ -6,10 +6,10 @@
 
     <style>
         /*
-                                                                                                        |--------------------------------------------------------------------------
-                                                                                                        | ESCÁNER
-                                                                                                        |--------------------------------------------------------------------------
-                                                                                                        */
+                                                                                                                |--------------------------------------------------------------------------
+                                                                                                                | ESCÁNER
+                                                                                                                |--------------------------------------------------------------------------
+                                                                                                                */
 
         .scanner-container {
             max-width: 720px;
@@ -23,10 +23,10 @@
 
 
         /*
-                                                                                                        |--------------------------------------------------------------------------
-                                                                                                        | RESULTADO TICKET
-                                                                                                        |--------------------------------------------------------------------------
-                                                                                                        */
+                                                                                                                |--------------------------------------------------------------------------
+                                                                                                                | RESULTADO TICKET
+                                                                                                                |--------------------------------------------------------------------------
+                                                                                                                */
 
         .verification-card {
             width: 100%;
@@ -44,10 +44,10 @@
 
 
         /*
-                                                                                                        |--------------------------------------------------------------------------
-                                                                                                        | CABECERA
-                                                                                                        |--------------------------------------------------------------------------
-                                                                                                        */
+                                                                                                                |--------------------------------------------------------------------------
+                                                                                                                | CABECERA
+                                                                                                                |--------------------------------------------------------------------------
+                                                                                                                */
 
         .park-header {
             display: flex;
@@ -98,10 +98,10 @@
 
 
         /*
-                                                                                                        |--------------------------------------------------------------------------
-                                                                                                        | PANEL
-                                                                                                        |--------------------------------------------------------------------------
-                                                                                                        */
+                                                                                                                |--------------------------------------------------------------------------
+                                                                                                                | PANEL
+                                                                                                                |--------------------------------------------------------------------------
+                                                                                                                */
 
         .ticket-panel {
             border: 1px solid #e2e5e3;
@@ -115,10 +115,10 @@
 
 
         /*
-                                                                                                        |--------------------------------------------------------------------------
-                                                                                                        | CÍRCULO ESTADO
-                                                                                                        |--------------------------------------------------------------------------
-                                                                                                        */
+                                                                                                                |--------------------------------------------------------------------------
+                                                                                                                | CÍRCULO ESTADO
+                                                                                                                |--------------------------------------------------------------------------
+                                                                                                                */
 
         .state-circle {
             width: 104px;
@@ -164,10 +164,10 @@
 
 
         /*
-                                                                                                        |--------------------------------------------------------------------------
-                                                                                                        | TÍTULOS
-                                                                                                        |--------------------------------------------------------------------------
-                                                                                                        */
+                                                                                                                |--------------------------------------------------------------------------
+                                                                                                                | TÍTULOS
+                                                                                                                |--------------------------------------------------------------------------
+                                                                                                                */
 
         .ticket-state-title {
             margin-top: 24px;
@@ -212,10 +212,10 @@
 
 
         /*
-                                                                                                        |--------------------------------------------------------------------------
-                                                                                                        | ALERTA PRINCIPAL
-                                                                                                        |--------------------------------------------------------------------------
-                                                                                                        */
+                                                                                                                |--------------------------------------------------------------------------
+                                                                                                                | ALERTA PRINCIPAL
+                                                                                                                |--------------------------------------------------------------------------
+                                                                                                                */
 
         .status-box {
             display: flex;
@@ -286,10 +286,10 @@
 
 
         /*
-                                                                                                        |--------------------------------------------------------------------------
-                                                                                                        | INFORMACIÓN
-                                                                                                        |--------------------------------------------------------------------------
-                                                                                                        */
+                                                                                                                |--------------------------------------------------------------------------
+                                                                                                                | INFORMACIÓN
+                                                                                                                |--------------------------------------------------------------------------
+                                                                                                                */
 
         .ticket-info {
             border-top: 1px solid #d9dddb;
@@ -350,10 +350,10 @@
 
 
         /*
-                                                                                                        |--------------------------------------------------------------------------
-                                                                                                        | FOOTER
-                                                                                                        |--------------------------------------------------------------------------
-                                                                                                        */
+                                                                                                                |--------------------------------------------------------------------------
+                                                                                                                | FOOTER
+                                                                                                                |--------------------------------------------------------------------------
+                                                                                                                */
 
         .ticket-footer {
             margin-top: 50px;
@@ -413,10 +413,10 @@
 
 
         /*
-                                                                                                        |--------------------------------------------------------------------------
-                                                                                                        | MOBILE
-                                                                                                        |--------------------------------------------------------------------------
-                                                                                                        */
+                                                                                                                |--------------------------------------------------------------------------
+                                                                                                                | MOBILE
+                                                                                                                |--------------------------------------------------------------------------
+                                                                                                                */
 
         @media (max-width: 576px) {
 
@@ -579,6 +579,10 @@
 
                             <button type="button" class="btn btn-secondary mb-3" id="btnVerSincronizaciones">
                                 Ver sincronizaciones pendientes
+                            </button>
+
+                            <button type="button" class="btn btn-primary mb-3 ms-2" id="btnSincronizarPendientes">
+                                Sincronizar pendientes
                             </button>
 
                             <div id="resultadoSincronizaciones"></div>
@@ -1876,56 +1880,56 @@
         }
 
         document
-    .getElementById('btnVerSincronizaciones')
-    .addEventListener('click', async function () {
+            .getElementById('btnVerSincronizaciones')
+            .addEventListener('click', async function() {
 
-        alert('Botón funcionando');
+                alert('Botón funcionando');
 
-        const contenedor =
-            document.getElementById('resultadoSincronizaciones');
+                const contenedor =
+                    document.getElementById('resultadoSincronizaciones');
 
-        contenedor.innerHTML =
-            '<div class="text-muted">Buscando bases IndexedDB...</div>';
+                contenedor.innerHTML =
+                    '<div class="text-muted">Buscando bases IndexedDB...</div>';
 
-        try {
+                try {
 
-            if (!indexedDB.databases) {
+                    if (!indexedDB.databases) {
 
-                contenedor.innerHTML = `
+                        contenedor.innerHTML = `
                     <div class="alert alert-warning">
                         Este navegador no permite listar las bases IndexedDB.
                     </div>
                 `;
 
-                return;
-            }
+                        return;
+                    }
 
-            const bases = await indexedDB.databases();
+                    const bases = await indexedDB.databases();
 
-            if (!bases.length) {
+                    if (!bases.length) {
 
-                contenedor.innerHTML = `
+                        contenedor.innerHTML = `
                     <div class="alert alert-warning">
                         No se encontraron bases IndexedDB en este dispositivo.
                     </div>
                 `;
 
-                return;
-            }
+                        return;
+                    }
 
-            let html = `
+                    let html = `
                 <div class="alert alert-info">
                     <strong>Bases IndexedDB encontradas:</strong>
                 </div>
             `;
 
-            for (const baseInfo of bases) {
+                    for (const baseInfo of bases) {
 
-                if (!baseInfo.name) {
-                    continue;
-                }
+                        if (!baseInfo.name) {
+                            continue;
+                        }
 
-                html += `
+                        html += `
                     <div class="card mb-3">
                         <div class="card-body">
 
@@ -1942,156 +1946,156 @@
                         </div>
                     </div>
                 `;
-            }
+                    }
 
-            contenedor.innerHTML = html;
+                    contenedor.innerHTML = html;
 
-            for (const baseInfo of bases) {
+                    for (const baseInfo of bases) {
 
-                if (!baseInfo.name) {
-                    continue;
-                }
+                        if (!baseInfo.name) {
+                            continue;
+                        }
 
-                await mostrarBaseIndexedDB(
-                    baseInfo.name
-                );
-            }
+                        await mostrarBaseIndexedDB(
+                            baseInfo.name
+                        );
+                    }
 
-        } catch (error) {
+                } catch (error) {
 
-            console.error(error);
+                    console.error(error);
 
-            contenedor.innerHTML = `
+                    contenedor.innerHTML = `
                 <div class="alert alert-danger">
                     Error IndexedDB:
                     ${error.message}
                 </div>
             `;
-        }
-    });
+                }
+            });
 
 
-async function mostrarBaseIndexedDB(nombreBase) {
+        async function mostrarBaseIndexedDB(nombreBase) {
 
-    return new Promise(function (resolve) {
+            return new Promise(function(resolve) {
 
-        const idContenedor =
-            'db-' +
-            nombreBase.replace(
-                /[^a-zA-Z0-9]/g,
-                '-'
-            );
+                const idContenedor =
+                    'db-' +
+                    nombreBase.replace(
+                        /[^a-zA-Z0-9]/g,
+                        '-'
+                    );
 
-        const contenedor =
-            document.getElementById(
-                idContenedor
-            );
+                const contenedor =
+                    document.getElementById(
+                        idContenedor
+                    );
 
-        const request =
-            indexedDB.open(nombreBase);
+                const request =
+                    indexedDB.open(nombreBase);
 
-        request.onerror = function () {
+                request.onerror = function() {
 
-            contenedor.innerHTML = `
+                    contenedor.innerHTML = `
                 <div class="text-danger">
                     No se pudo abrir esta base.
                 </div>
             `;
 
-            resolve();
-        };
+                    resolve();
+                };
 
-        request.onsuccess = function (event) {
+                request.onsuccess = function(event) {
 
-            const db =
-                event.target.result;
+                    const db =
+                        event.target.result;
 
-            const almacenes =
-                Array.from(
-                    db.objectStoreNames
-                );
+                    const almacenes =
+                        Array.from(
+                            db.objectStoreNames
+                        );
 
-            if (!almacenes.length) {
+                    if (!almacenes.length) {
 
-                contenedor.innerHTML = `
+                        contenedor.innerHTML = `
                     <div class="text-muted">
                         Sin almacenes.
                     </div>
                 `;
 
-                db.close();
+                        db.close();
 
-                resolve();
+                        resolve();
 
-                return;
-            }
+                        return;
+                    }
 
-            let html = `
+                    let html = `
                 <strong>Almacenes:</strong>
                 <ul>
             `;
 
-            almacenes.forEach(function (almacen) {
+                    almacenes.forEach(function(almacen) {
 
-                html += `
+                        html += `
                     <li>
                         ${almacen}
                     </li>
                 `;
-            });
+                    });
 
-            html += '</ul>';
+                    html += '</ul>';
 
-            contenedor.innerHTML = html;
+                    contenedor.innerHTML = html;
 
-            /*
-             * Si existe "sincronizaciones",
-             * mostramos sus registros.
-             */
-            if (
-                almacenes.includes(
-                    'sincronizaciones'
-                )
-            ) {
+                    /*
+                     * Si existe "sincronizaciones",
+                     * mostramos sus registros.
+                     */
+                    if (
+                        almacenes.includes(
+                            'sincronizaciones'
+                        )
+                    ) {
 
-                const transaction =
-                    db.transaction(
-                        'sincronizaciones',
-                        'readonly'
-                    );
+                        const transaction =
+                            db.transaction(
+                                'sincronizaciones',
+                                'readonly'
+                            );
 
-                const store =
-                    transaction.objectStore(
-                        'sincronizaciones'
-                    );
+                        const store =
+                            transaction.objectStore(
+                                'sincronizaciones'
+                            );
 
-                const consulta =
-                    store.getAll();
+                        const consulta =
+                            store.getAll();
 
-                consulta.onsuccess =
-                    function () {
+                        consulta.onsuccess =
+                            function() {
 
-                        const registros =
-                            consulta.result;
+                                const registros =
+                                    consulta.result;
 
-                        let resultado = `
+                                let resultado = `
                             <div class="mt-3">
                                 <strong>
                                     Registros de sincronizaciones:
                                 </strong>
                         `;
 
-                        if (!registros.length) {
+                                if (!registros.length) {
 
-                            resultado += `
+                                    resultado += `
                                 <div class="alert alert-success mt-2">
                                     No hay sincronizaciones pendientes.
                                 </div>
                             `;
 
-                        } else {
+                                } else {
 
-                            resultado += `
+                                    resultado += `
                                 <pre class="bg-light p-2 mt-2"
                                      style="white-space:pre-wrap;">
 ${JSON.stringify(
@@ -2101,41 +2105,94 @@ ${JSON.stringify(
 )}
                                 </pre>
                             `;
-                        }
+                                }
 
-                        resultado += '</div>';
+                                resultado += '</div>';
 
-                        contenedor.innerHTML +=
-                            resultado;
+                                contenedor.innerHTML +=
+                                    resultado;
 
-                        db.close();
+                                db.close();
 
-                        resolve();
-                    };
+                                resolve();
+                            };
 
-                consulta.onerror =
-                    function () {
+                        consulta.onerror =
+                            function() {
 
-                        contenedor.innerHTML += `
+                                contenedor.innerHTML += `
                             <div class="alert alert-danger">
                                 Error leyendo sincronizaciones.
                             </div>
                         `;
 
+                                db.close();
+
+                                resolve();
+                            };
+
+                    } else {
+
                         db.close();
 
                         resolve();
-                    };
+                    }
+                };
+            });
+        }
 
-            } else {
+        const btnSincronizarPendientes =
+            document.getElementById(
+                'btnSincronizarPendientes'
+            );
 
-                db.close();
+        if (btnSincronizarPendientes) {
 
-                resolve();
-            }
-        };
-    });
-}
+            btnSincronizarPendientes
+                .addEventListener(
+                    'click',
+                    async function() {
+
+                        if (!navigator.onLine) {
+
+                            alert(
+                                'No hay conexión a Internet.'
+                            );
+
+                            return;
+                        }
+
+                        btnSincronizarPendientes.disabled = true;
+
+                        btnSincronizarPendientes.innerText =
+                            'Sincronizando...';
+
+                        try {
+
+                            await sincronizarPendientes();
+
+                            alert(
+                                'Proceso de sincronización terminado.'
+                            );
+
+                        } catch (error) {
+
+                            console.error(error);
+
+                            alert(
+                                'Ocurrió un error al sincronizar.'
+                            );
+
+                        } finally {
+
+                            btnSincronizarPendientes.disabled = false;
+
+                            btnSincronizarPendientes.innerText =
+                                'Sincronizar pendientes';
+                        }
+                    }
+                );
+        }
     </script>
 
 @endsection

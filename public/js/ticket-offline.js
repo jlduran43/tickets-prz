@@ -828,6 +828,13 @@ let sincronizandoPendientes = false;
                         }
                     );
 
+                    alert(
+                            'Respuesta HTTP ' +
+                            response.status +
+                            ' para ' +
+                            pendiente.folio
+                    );
+
                     console.log(
                         'STATUS:',
                         response.status
