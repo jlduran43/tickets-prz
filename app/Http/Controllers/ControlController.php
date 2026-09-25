@@ -269,4 +269,79 @@ class ControlController extends Controller
             ], 500);
         }
     }
+
+    public function sincronizarOffline(Request $request)
+    {
+        \Log::info('ENTRO A sincronizarOffline', [
+            'data' => $request->all()
+        ]);
+
+        $request->validate([
+            'token' => 'required|string',
+            'venta_id' => 'required|integer',
+            'folio' => 'required|string',
+            'scanned_at' => 'required|date',
+            'scan_uuid' => 'required|string',
+            'device_id' => 'nullable|string',
+        ]);
+
+
+    $venta = Venta::where(
+        'id',
+        $request->venta_id
+    )
+        ->where(
+            'token_ticket',
+            $request->token
+        )
+        ->first();
+
+
+    if (!$venta) {
+
+        return response()->json([
+            'ok' => false,
+            'mensaje' => 'Ticket no encontrado.'
+        ], 404);
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SI YA ESTÁ UTILIZADO
+    |--------------------------------------------------------------------------
+    */
+
+    if ($venta->validada_at) {
+
+        return response()->json([
+            'ok' => true,
+            'estado' => 'YA_SINCRONIZADO',
+            'folio' => $venta->folio,
+            'validada_at' => $venta->validada_at,
+        ]);
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | REGISTRAR FECHA REAL DEL ESCANEO OFFLINE
+    |--------------------------------------------------------------------------
+    */
+
+    $venta->validada_at =
+        \Carbon\Carbon::parse(
+            $request->scanned_at
+        );
+
+    $venta->save();
+
+
+    return response()->json([
+        'ok' => true,
+        'estado' => 'SINCRONIZADO',
+        'folio' => $venta->folio,
+        'validada_at' => $venta->validada_at,
+    ]);
+}
 }
