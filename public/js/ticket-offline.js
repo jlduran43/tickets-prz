@@ -1,3 +1,5 @@
+alert('ticket-offline.js NUEVO cargado');
+
 let clavePublicaPRZ = null;
 
 async function cargarClavePublica() {
@@ -740,7 +742,7 @@ async function eliminarPendiente(
     );
 
     async function sincronizarPendientes() {
-        console.log('ENTRE A sincronizarPendientes');
+        alert('2 - Entré a sincronizarPendientes');
 
     if (!navigator.onLine) {
 
@@ -794,6 +796,11 @@ async function eliminarPendiente(
                     'ENVIANDO A LARAVEL:',
                     pendiente
                 );
+
+                alert(
+    '3 - Voy a enviar: ' +
+    pendiente.folio
+);
 
                 const response =
                     await fetch(
@@ -904,9 +911,7 @@ window.addEventListener(
     'online',
     function () {
 
-        console.log(
-            'Internet recuperado. Iniciando sincronización...'
-        );
+        alert('1 - Internet recuperado');
 
         sincronizarPendientes();
     }
