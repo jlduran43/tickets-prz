@@ -740,10 +740,9 @@ async function eliminarPendiente(
                     );
         }
     );
+}
 
     async function sincronizarPendientes() {
-        alert('2 - Entré a sincronizarPendientes');
-
     if (!navigator.onLine) {
 
         console.log(
@@ -907,39 +906,109 @@ async function eliminarPendiente(
 |--------------------------------------------------------------------------
 */
 
+/*
+|--------------------------------------------------------------------------
+| INTENTAR SINCRONIZACIÓN
+|--------------------------------------------------------------------------
+*/
+
+async function intentarSincronizar() {
+
+    if (!navigator.onLine) {
+
+        console.log(
+            'Todavía sin conexión.'
+        );
+
+        return;
+    }
+
+    alert('1 - Intentando sincronizar');
+
+    console.log(
+        'Hay conexión. Revisando pendientes...'
+    );
+
+    await sincronizarPendientes();
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| RECUPERACIÓN DE INTERNET
+|--------------------------------------------------------------------------
+*/
+
 window.addEventListener(
     'online',
     function () {
 
-        alert('1 - Internet recuperado');
+        console.log(
+            'Evento online detectado.'
+        );
 
-        sincronizarPendientes();
+        intentarSincronizar();
     }
 );
 
 
 /*
 |--------------------------------------------------------------------------
-| AL CARGAR LA PÁGINA
+| AL CARGAR /CONTROL
 |--------------------------------------------------------------------------
-|
-| Esto cubre el caso donde el usuario recuperó internet
-| pero cerró y volvió a abrir /control.
-|
 */
 
 window.addEventListener(
     'load',
     function () {
 
-        if (navigator.onLine) {
+        console.log(
+            'Página cargada.'
+        );
+
+        intentarSincronizar();
+    }
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| CUANDO EL USUARIO VUELVE A LA PÁGINA
+|--------------------------------------------------------------------------
+*/
+
+document.addEventListener(
+    'visibilitychange',
+    function () {
+
+        if (
+            document.visibilityState === 'visible'
+        ) {
 
             console.log(
-                'Página cargada con Internet. Revisando pendientes.'
+                'Página nuevamente visible.'
             );
 
-            sincronizarPendientes();
+            intentarSincronizar();
         }
     }
 );
-}
+
+
+/*
+|--------------------------------------------------------------------------
+| CUANDO CHROME RECUPERA EL FOCO
+|--------------------------------------------------------------------------
+*/
+
+window.addEventListener(
+    'focus',
+    function () {
+
+        console.log(
+            'Ventana activa.'
+        );
+
+        intentarSincronizar();
+    }
+);
