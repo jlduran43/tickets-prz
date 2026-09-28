@@ -659,7 +659,7 @@
 @section('js')
 
     <script src="{{ asset('js/html5-qrcode.min.js') }}"></script>
-    <script src="{{ asset('js/ticket-offline.js') }}?20260928-1"></script>
+    <script src="{{ asset('js/ticket-offline.js') }}?20260928-2"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
