@@ -742,32 +742,269 @@ async function eliminarPendiente(
 
 let sincronizandoPendientes = false;
 
-    async function sincronizarPendientes() 
-    {
-        alert('A - Entré a sincronizarPendientes');
-        
-        if (sincronizandoPendientes) {
-            alert('B - Ya había una sincronización ejecutándose');
+let sincronizandoPendientes = false;
 
-            return;
-        }
+async function sincronizarPendientes() {
 
-        sincronizandoPendientes = true;
-    
-        if (!navigator.onLine) {
-            alert('C - El navegador dice que NO hay Internet');
+    if (sincronizandoPendientes) {
+        console.log(
+            'Ya hay una sincronización en ejecución.'
+        );
 
-            sincronizandoPendientes = false;
+        return;
+    }
 
-            return;
-        }
+    if (!navigator.onLine) {
+        console.log(
+            'No hay conexión a Internet.'
+        );
+
+        return;
+    }
+
+    sincronizandoPendientes = true;
 
     try {
 
         const pendientes =
             await obtenerPendientes();
 
-            alert(
+        console.log(
+            'Pendientes encontrados:',
+            pendientes.length
+        );
+
+        if (!pendientes.length) {
+
+            console.log(
+                'No hay sincronizaciones pendientes.'
+            );
+
+            return;
+        }
+
+        const csrfToken =
+            document.querySelector(
+                'meta[name="csrf-token"]'
+            )?.getAttribute('content');
+
+
+        for (const pendiente of pendientes) {
+
+            try {
+
+                console.log(
+                    'Sincronizando:',
+                    pendiente.folio
+                );
+
+
+                const response =
+                    await fetch(
+                        '/control/sincronizar-offline',
+                        {
+                            method: 'POST',
+
+                            headers: {
+                                'Content-Type':
+                                    'application/json',
+
+                                'Accept':
+                                    'application/json',
+
+                                'X-CSRF-TOKEN':
+                                    csrfToken
+                            },
+
+                            body: JSON.stringify({
+
+                                scan_uuid:
+                                    pendiente.scan_uuid,
+
+                                token:
+                                    pendiente.token,
+
+                                venta_id:
+                                    pendiente.venta_id,
+
+                                folio:
+                                    pendiente.folio,
+
+                                scanned_at:
+                                    pendiente.scanned_at,
+
+                                device_id:
+                                    pendiente.device_id
+                            })
+                        }
+                    );
+
+
+                /*
+                 * Intentar leer JSON de Laravel
+                 */
+                let data = null;
+
+                try {
+
+                    data =
+                        await response.json();
+
+                } catch (error) {
+
+                    console.error(
+                        'Laravel no devolvió JSON válido.',
+                        error
+                    );
+
+                    continue;
+                }
+
+
+                console.log(
+                    'Respuesta Laravel:',
+                    data
+                );
+
+
+                /*
+                 * Si hubo error HTTP,
+                 * mantenerlo pendiente.
+                 */
+                if (!response.ok) {
+
+                    console.error(
+                        'Servidor rechazó sincronización:',
+                        pendiente.folio,
+                        response.status,
+                        data
+                    );
+
+                    continue;
+                }
+
+
+                /*
+                 * CASO 1
+                 *
+                 * Sincronización normal.
+                 */
+                if (
+                    data.ok === true &&
+                    data.estado !== 'YA_SINCRONIZADO'
+                ) {
+
+                    await eliminarPendiente(
+                        pendiente.scan_uuid
+                    );
+
+                    console.log(
+                        'Sincronizado correctamente:',
+                        pendiente.folio
+                    );
+
+                    continue;
+                }
+
+
+                /*
+                 * CASO 2
+                 *
+                 * Laravel informa que este registro
+                 * ya había sido sincronizado.
+                 *
+                 * También debe eliminarse de la cola.
+                 */
+                if (
+                    data.estado === 'YA_SINCRONIZADO' ||
+                    data.estado === 'YA_UTILIZADO' ||
+                    data.mensaje === 'Ya sincronizado'
+                ) {
+
+                    await eliminarPendiente(
+                        pendiente.scan_uuid
+                    );
+
+                    console.log(
+                        'Pendiente resuelto porque ya estaba sincronizado:',
+                        pendiente.folio
+                    );
+
+                    continue;
+                }
+
+
+                /*
+                 * Si Laravel devuelve otra respuesta,
+                 * dejamos el registro pendiente.
+                 */
+                console.warn(
+                    'Sincronización no resuelta:',
+                    pendiente.folio,
+                    data
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    'Error sincronizando ' +
+                    pendiente.folio,
+                    error
+                );
+            }
+        }
+
+
+        /*
+         * Verificar cuántos quedaron pendientes.
+         */
+        const restantes =
+            await obtenerPendientes();
+
+        console.log(
+            'Pendientes restantes:',
+            restantes.length
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            'Error general de sincronización:',
+            error
+        );
+
+    } finally {
+
+        sincronizandoPendientes = false;
+    }
+}
+{
+    alert('A - Entré a sincronizarPendientes');
+
+    if (sincronizandoPendientes) {
+        alert('B - Ya había una sincronización ejecutándose');
+
+        return;
+    }
+
+    sincronizandoPendientes = true;
+
+    if (!navigator.onLine) {
+        alert('C - El navegador dice que NO hay Internet');
+
+        sincronizandoPendientes = false;
+
+        return;
+    }
+
+    try {
+
+        const pendientes =
+            await obtenerPendientes();
+
+        alert(
             'D - Pendientes encontrados: ' +
             pendientes.length
         );
@@ -837,20 +1074,20 @@ let sincronizandoPendientes = false;
                         }
                     );
 
-                    const textoRespuesta =
-    await response.text();
+                const textoRespuesta =
+                    await response.text();
 
-alert(
-    'HTTP ' +
-    response.status +
-    '\n' +
-    textoRespuesta.substring(0, 300)
-);
+                alert(
+                    'HTTP ' +
+                    response.status +
+                    '\n' +
+                    textoRespuesta.substring(0, 300)
+                );
 
-                    console.log(
-                        'STATUS:',
-                        response.status
-                    );
+                console.log(
+                    'STATUS:',
+                    response.status
+                );
 
 
                 if (!response.ok) {
@@ -866,7 +1103,7 @@ alert(
 
 
                 //const data =
-                    //await response.json();
+                //await response.json();
 
 
                 console.log(
@@ -896,8 +1133,8 @@ alert(
                 );
             } finally {
 
-        sincronizandoPendientes = false;
-    }
+                sincronizandoPendientes = false;
+            }
         }
 
     } catch (error) {
