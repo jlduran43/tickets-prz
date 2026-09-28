@@ -742,8 +742,6 @@ async function eliminarPendiente(
 
 let sincronizandoPendientes = false;
 
-let sincronizandoPendientes = false;
-
 async function sincronizarPendientes() {
 
     if (sincronizandoPendientes) {
