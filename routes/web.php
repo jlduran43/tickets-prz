@@ -472,6 +472,16 @@ Route::middleware([
         [UsuarioController::class, 'store']
     )->name('admin.usuarios.store');
 
+    Route::get('admin/usuarios/{usuario}/editar', [UsuarioController::class, 'edit'])
+        ->name('admin.usuarios.edit');
+
+    Route::put('admin/usuarios/{usuario}', [UsuarioController::class, 'update'])
+        ->name('admin.usuarios.update');
+
+    Route::patch(
+        '/usuarios/{usuario}/estado',
+        [UsuarioController::class, 'cambiarEstado']
+    )->name('admin.usuarios.estado');
 
     /*
     |--------------------------------------------------------------------------
