@@ -11,6 +11,7 @@ use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use Endroid\QrCode\Color\Color;
 use App\Services\TicketOfflineSigner;
+use App\Models\TiposEntrada;
 
 class VentaController extends Controller
 {
@@ -31,6 +32,11 @@ class VentaController extends Controller
 
         $cliente = null;
 
+
+        $tipoEntrada = TiposEntrada::where('activo', true)
+            ->orderBy('id')
+            ->firstOrFail();
+
         if (
             auth()->check() &&
             auth()->user()->rol === 'CLIENTE'
@@ -40,7 +46,8 @@ class VentaController extends Controller
 
         return view('ventas.create', compact(
             'regiones',
-            'cliente'
+            'cliente',
+            'tipoEntrada'
         ));
     }
 
@@ -70,6 +77,11 @@ class VentaController extends Controller
                 'exists:comunas,id',
             ],
 
+            'tipo_entrada_id' => [
+                'required',
+                'exists:tipos_entradas,id',
+            ],
+
             'cantidad_personas' => [
                 'required',
                 'integer',
@@ -92,9 +104,12 @@ class VentaController extends Controller
                 ->withInput();
         }
 
+        $tipoEntrada = TiposEntrada::where('id', $request['tipo_entrada_id'])
+            ->where('activo', true)
+            ->firstOrFail();
 
         // Precio fijo por vehículo
-        $precioTicket = 3000;
+        $precioTicket = $tipoEntrada->precio;
 
         $venta = Venta::create([
 

@@ -203,7 +203,11 @@
                             <label class="form-label">Entrada</label>
 
                             <div class="form-control bg-light">
-                                Entrada vehículo - $3.000
+                                {{ $tipoEntrada->nombre }}
+                                -
+                                ${{ number_format($tipoEntrada->precio, 0, ',', '.') }}
+
+                                <input type="hidden" name="tipo_entrada_id" value="{{ $tipoEntrada->id }}">
                             </div>
                         </div>
 
