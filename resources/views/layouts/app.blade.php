@@ -4,7 +4,6 @@
 <head>
 
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -21,54 +20,68 @@
         @if (
             (auth()->user()->rol !== 'CLIENTE' || auth()->user()->hasVerifiedEmail()) &&
                 !request()->routeIs('verification.success'))
-            <nav class="navbar bg-white shadow-sm py-3">
+            <nav class="navbar navbar-expand-lg bg-white shadow-sm py-2">
 
-                <div class="container position-relative">
+                <div class="container">
 
-                    <div class="d-flex align-items-center justify-content-between w-100">
+                    {{-- =====================================
+                        MARCA
+                    ====================================== --}}
 
-                        {{-- MARCA --}}
-                        <a class="navbar-brand fw-semibold text-success mb-0"
-                            href="
-                            @if (auth()->user()->rol === 'ADMIN') {{ route('admin.usuarios.index') }}
-                            @elseif(auth()->user()->rol === 'CONTROL')
-                                {{ route('control.index') }}
-                            @else
-                                {{ route('ventas.create') }} @endif
-                        ">
-                            Tickets PRZ
-                        </a>
+                    @php
 
+                        $inicio = match (auth()->user()->rol) {
+                            'ADMIN' => route('admin.usuarios.index'),
+                            'CONTROL' => route('control.index'),
+                            default => route('ventas.create'),
+                        };
 
-                        {{-- BOTÓN MÓVIL --}}
-                        <button type="button" class="btn btn-outline-secondary d-lg-none" id="btnMenuMovil"
-                            aria-label="Abrir menú">
+                    @endphp
 
-                            <i class="bi bi-list fs-3"></i>
-
-                        </button>
-
-                    </div>
+                    <a class="navbar-brand fw-bold text-success me-lg-4" href="{{ $inicio }}">
+                        Tickets PRZ
+                    </a>
 
 
-                    {{-- CONTENIDO DEL MENÚ --}}
-                    <div id="menuPrz" class="menu-prz-custom w-100 mt-3 mt-lg-0">
+                    {{-- =====================================
+                        BOTÓN HAMBURGUESA
+                    ====================================== --}}
 
-                        <div class="d-lg-flex align-items-lg-center w-100">
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarPrz"
+                        aria-controls="navbarPrz" aria-expanded="false" aria-label="Abrir menú">
+
+                        <span class="navbar-toggler-icon"></span>
+
+                    </button>
 
 
-                            {{-- MENÚ PRINCIPAL --}}
-                            <div class="d-lg-flex align-items-lg-center">
+                    {{-- =====================================
+                        CONTENIDO NAVBAR
+                    ====================================== --}}
+
+                    <div class="collapse navbar-collapse" id="navbarPrz">
 
 
-                                {{-- ================================================= --}}
-                                {{-- CLIENTE --}}
-                                {{-- ================================================= --}}
+                        {{-- =================================
+                            MENÚ PRINCIPAL
+                        ================================== --}}
 
-                                @if (auth()->user()->rol === 'CLIENTE')
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+
+                            {{-- =============================
+                                CLIENTE
+                            ============================== --}}
+
+                            @if (auth()->user()->rol === 'CLIENTE')
+                                <li class="nav-item">
+
                                     <a href="{{ route('ventas.create') }}"
-                                        class="nav-link px-lg-3 py-2
-                                    {{ request()->routeIs('ventas.create') ? 'fw-semibold text-success' : 'text-dark' }}">
+                                        class="
+                                            nav-link
+                                            px-lg-3
+                                            {{ request()->routeIs('ventas.create') ? 'active fw-semibold text-success' : '' }}
+                                        ">
 
                                         <i class="bi bi-cart-plus me-1"></i>
 
@@ -76,28 +89,42 @@
 
                                     </a>
 
+                                </li>
+
+
+                                <li class="nav-item">
 
                                     <a href="{{ route('tickets.index') }}"
-                                        class="nav-link px-lg-3 py-2
-                                    {{ request()->routeIs('tickets.*') ? 'fw-semibold text-success' : 'text-dark' }}">
+                                        class="
+                                            nav-link
+                                            px-lg-3
+                                            {{ request()->routeIs('tickets.*') ? 'active fw-semibold text-success' : '' }}
+                                        ">
 
                                         <i class="bi bi-ticket-perforated me-1"></i>
 
                                         Mis tickets
 
                                     </a>
-                                @endif
+
+                                </li>
+                            @endif
 
 
 
-                                {{-- ================================================= --}}
-                                {{-- CONTROL --}}
-                                {{-- ================================================= --}}
+                            {{-- =============================
+                                CONTROL
+                            ============================== --}}
 
-                                @if (auth()->user()->rol === 'CONTROL')
+                            @if (auth()->user()->rol === 'CONTROL')
+                                <li class="nav-item">
+
                                     <a href="{{ route('control.index') }}"
-                                        class="nav-link px-lg-3 py-2
-                                    {{ request()->routeIs('control.index') ? 'fw-semibold text-success' : 'text-dark' }}">
+                                        class="
+                                            nav-link
+                                            px-lg-3
+                                            {{ request()->routeIs('control.index') ? 'active fw-semibold text-success' : '' }}
+                                        ">
 
                                         <i class="bi bi-house-door me-1"></i>
 
@@ -105,10 +132,17 @@
 
                                     </a>
 
+                                </li>
+
+
+                                <li class="nav-item">
 
                                     <a href="{{ route('control.scanner') }}"
-                                        class="nav-link px-lg-3 py-2
-                                    {{ request()->routeIs('control.scanner') ? 'fw-semibold text-success' : 'text-dark' }}">
+                                        class="
+                                            nav-link
+                                            px-lg-3
+                                            {{ request()->routeIs('control.scanner') ? 'active fw-semibold text-success' : '' }}
+                                        ">
 
                                         <i class="bi bi-qr-code-scan me-1"></i>
 
@@ -116,155 +150,105 @@
 
                                     </a>
 
+                                </li>
+
+
+                                <li class="nav-item">
 
                                     <a href="{{ route('control.historial') }}"
-                                        class="nav-link px-lg-3 py-2
-                                    {{ request()->routeIs('control.historial') ? 'fw-semibold text-success' : 'text-dark' }}">
+                                        class="
+                                            nav-link
+                                            px-lg-3
+                                            {{ request()->routeIs('control.historial') ? 'active fw-semibold text-success' : '' }}
+                                        ">
 
                                         <i class="bi bi-clock-history me-1"></i>
 
                                         Historial
 
                                     </a>
-                                @endif
+
+                                </li>
+                            @endif
 
 
 
-                                {{-- ================================================= --}}
-                                {{-- ADMIN --}}
-                                {{-- ================================================= --}}
+                            {{-- =============================
+                                ADMIN
+                            ============================== --}}
 
-                                @if (auth()->user()->rol === 'ADMIN')
+                            @if (auth()->user()->rol === 'ADMIN')
+                                <li class="nav-item">
+
                                     <a href="{{ route('admin.usuarios.index') }}"
-                                        class="nav-link px-lg-3 py-2
-                                    {{ request()->routeIs('admin.usuarios.*') ? 'fw-semibold text-success' : 'text-dark' }}">
+                                        class="
+                                            nav-link
+                                            px-lg-3
+                                            {{ request()->routeIs('admin.usuarios.*') ? 'active fw-semibold text-success' : '' }}
+                                        ">
 
                                         <i class="bi bi-people me-1"></i>
 
                                         Usuarios
 
                                     </a>
-                                @endif
 
+                                </li>
+
+
+                                <li class="nav-item">
+
+                                    <a href="{{ route('admin.tipos-entradas.index') }}"
+                                        class="
+                                            nav-link
+                                            px-lg-3
+                                            {{ request()->routeIs('admin.tipos-entradas.*') ? 'active fw-semibold text-success' : '' }}
+                                        ">
+
+                                        <i class="bi bi-ticket-perforated me-1"></i>
+
+                                        Tipos de entradas
+
+                                    </a>
+
+                                </li>
+                            @endif
+
+                        </ul>
+
+
+                        {{-- =================================
+                            USUARIO / CERRAR SESIÓN
+                        ================================== --}}
+
+                        <div class="navbar-user">
+
+                            <div class="navbar-user-name">
+
+                                <i class="bi bi-person-circle"></i>
+
+                                <span>
+                                    {{ auth()->user()->name ?? auth()->user()->email }}
+                                </span>
 
                             </div>
 
 
+                            <form method="POST" action="{{ route('logout') }}" class="navbar-logout-form">
 
-                            {{-- USUARIO --}}
-                            <div class="dropdown ms-lg-auto mt-2 mt-lg-0">
+                                @csrf
 
-                                <button class="btn btn-light dropdown-toggle w-100 text-start" type="button"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                <button type="submit" class="navbar-logout">
 
-                                    <i class="bi bi-person-circle me-1"></i>
+                                    <i class="bi bi-box-arrow-right"></i>
 
-                                    {{ auth()->user()->name ?? auth()->user()->email }}
+                                    <span>
+                                        Cerrar sesión
+                                    </span>
 
                                 </button>
 
-
-                                <ul class="dropdown-menu dropdown-menu-end">
-
-
-                                    {{-- OPCIONES CLIENTE --}}
-                                    @if (auth()->user()->rol === 'CLIENTE')
-                                        <li>
-
-                                            <a class="dropdown-item" href="{{ route('tickets.index') }}">
-
-                                                <i class="bi bi-ticket-perforated me-2"></i>
-
-                                                Mis tickets
-
-                                            </a>
-
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ route('perfil.edit') }}">
-                                                <i class="bi bi-person-gear me-2"></i>
-                                                Mi perfil
-                                            </a>
-                                        </li>
-                                    @endif
-
-
-
-                                    {{-- OPCIONES CONTROL --}}
-                                    @if (auth()->user()->rol === 'CONTROL')
-                                        <li>
-
-                                            <a class="dropdown-item" href="{{ route('control.scanner') }}">
-
-                                                <i class="bi bi-qr-code-scan me-2"></i>
-
-                                                Escanear ticket
-
-                                            </a>
-
-                                        </li>
-
-
-                                        <li>
-
-                                            <a class="dropdown-item" href="{{ route('control.historial') }}">
-
-                                                <i class="bi bi-clock-history me-2"></i>
-
-                                                Historial
-
-                                            </a>
-
-                                        </li>
-                                    @endif
-
-
-
-                                    {{-- OPCIONES ADMIN --}}
-                                    @if (auth()->user()->rol === 'ADMIN')
-                                        <li>
-
-                                            <a class="dropdown-item" href="{{ route('admin.usuarios.index') }}">
-
-                                                <i class="bi bi-people me-2"></i>
-
-                                                Usuarios
-
-                                            </a>
-
-                                        </li>
-                                    @endif
-
-
-
-                                    <li>
-                                        <hr class="dropdown-divider">
-                                    </li>
-
-
-                                    {{-- CERRAR SESIÓN --}}
-                                    <li>
-
-                                        <form method="POST" action="{{ route('logout') }}">
-
-                                            @csrf
-
-                                            <button type="submit" class="dropdown-item">
-
-                                                <i class="bi bi-box-arrow-right me-2"></i>
-
-                                                Cerrar sesión
-
-                                            </button>
-
-                                        </form>
-
-                                    </li>
-
-                                </ul>
-
-                            </div>
-
+                            </form>
 
                         </div>
 
@@ -278,8 +262,10 @@
     @endauth
 
 
+    {{-- =====================================
+        CONTENIDO
+    ====================================== --}}
 
-    {{-- CONTENIDO --}}
     <main class="container py-4">
 
         @yield('content')
@@ -287,43 +273,11 @@
     </main>
 
 
+    {{-- =====================================
+        JS EXTRA
+    ====================================== --}}
 
-    {{-- JS EXTRA DE CADA VISTA --}}
     @yield('js')
-
-
-
-    {{-- MENÚ MÓVIL --}}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-
-            const boton =
-                document.getElementById('btnMenuMovil');
-
-            const menu =
-                document.getElementById('menuPrz');
-
-
-            if (!boton || !menu) {
-                return;
-            }
-
-
-            boton.addEventListener(
-                'click',
-                function(event) {
-
-                    event.preventDefault();
-                    event.stopPropagation();
-
-                    menu.classList.toggle('menu-open');
-
-                }
-            );
-
-        });
-    </script>
-
 
 </body>
 

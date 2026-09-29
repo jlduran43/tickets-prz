@@ -15,7 +15,7 @@ class UserSeeder extends Seeder
     {
         User::updateOrCreate(
             [
-                'email' => 'marketing@prz.cl',
+                'email' => 'control.acceso@prz.cl',
             ],
             [
                 'name' => 'Administrador PRZ',
@@ -23,7 +23,7 @@ class UserSeeder extends Seeder
                 'password' => Hash::make(
                     env(
                         'ADMIN_INITIAL_PASSWORD',
-                        '#Przmarket2026!'
+                        'z_c+Z,fwLq2xbdiY'
                     )
                 ),
 

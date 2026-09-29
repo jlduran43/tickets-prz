@@ -12,7 +12,12 @@ class TiposEntradaController extends Controller
      */
     public function index()
     {
-        //
+        $tiposEntradas = TiposEntrada::orderBy('nombre')->get();
+
+        return view(
+            'admin.tipos-entradas.index',
+            compact('tiposEntradas')
+        );
     }
 
     /**
@@ -20,7 +25,7 @@ class TiposEntradaController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.tipos-entradas.create');
     }
 
     /**
@@ -28,7 +33,37 @@ class TiposEntradaController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $datos = $request->validate([
+            'nombre' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'precio' => [
+                'required',
+                'numeric',
+                'min:0',
+            ],
+
+            'activo' => [
+                'nullable',
+                'boolean',
+            ],
+        ]);
+
+        TiposEntrada::create([
+            'nombre' => $datos['nombre'],
+            'precio' => $datos['precio'],
+            'activo' => $request->boolean('activo'),
+        ]);
+
+        return redirect()
+            ->route('admin.tipos-entradas.index')
+            ->with(
+                'success',
+                'Tipo de entrada creado correctamente.'
+            );
     }
 
     /**
@@ -42,24 +77,72 @@ class TiposEntradaController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(TiposEntrada $tiposEntrada)
+    public function edit(TiposEntrada $tipoEntrada)
     {
-        //
+        return view(
+            'admin.tipos-entradas.edit',
+            compact('tipoEntrada')
+        );
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, TiposEntrada $tiposEntrada)
+    public function update(Request $request, TiposEntrada $tipoEntrada)
     {
-        //
+        $datos = $request->validate([
+            'nombre' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'precio' => [
+                'required',
+                'numeric',
+                'min:0',
+            ],
+
+            'activo' => [
+                'nullable',
+                'boolean',
+            ],
+        ]);
+
+        $tipoEntrada->update([
+            'nombre' => $datos['nombre'],
+            'precio' => $datos['precio'],
+            'activo' => $request->boolean('activo'),
+        ]);
+
+        return redirect()
+            ->route('admin.tipos-entradas.index')
+            ->with(
+                'success',
+                'Tipo de entrada actualizado correctamente.'
+            );
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(TiposEntrada $tiposEntrada)
+    public function destroy(TiposEntrada $tipoEntrada)
     {
         //
+    }
+
+    public function cambiarEstado(TiposEntrada $tipoEntrada)
+    {
+        $tipoEntrada->update([
+            'activo' => ! $tipoEntrada->activo,
+        ]);
+
+        $mensaje = $tipoEntrada->activo
+            ? 'Tipo de entrada activado correctamente.'
+            : 'Tipo de entrada desactivado correctamente.';
+
+        return redirect()
+            ->route('admin.tipos-entradas.index')
+            ->with('success', $mensaje);
     }
 }

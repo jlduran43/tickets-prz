@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\OfflineTicketController;
+use App\Http\Controllers\OfflineAuthController;
+use App\Http\Controllers\TiposEntradaController;
 
 
 /*
@@ -436,6 +438,11 @@ Route::middleware([
         '/mi-perfil',
         [PerfilController::class, 'update']
     )->name('perfil.update');
+
+    Route::post(
+        '/control/offline/preparar',
+        [OfflineAuthController::class, 'preparar']
+    )->name('control.offline.preparar');
 });
 
 
@@ -464,8 +471,47 @@ Route::middleware([
         '/admin/usuarios',
         [UsuarioController::class, 'store']
     )->name('admin.usuarios.store');
-});
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Tipos de entradas
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/admin/tipos-entradas',
+        [TiposEntradaController::class, 'index']
+    )->name('admin.tipos-entradas.index');
+
+    Route::get(
+        '/admin/tipos-entradas/crear',
+        [TiposEntradaController::class, 'create']
+    )->name('admin.tipos-entradas.create');
+
+    Route::post(
+        '/admin/tipos-entradas',
+        [TiposEntradaController::class, 'store']
+    )->name('admin.tipos-entradas.store');
+
+    Route::get(
+        '/admin/tipos-entradas/{tipoEntrada}/editar',
+        [TiposEntradaController::class, 'edit']
+    )->name('admin.tipos-entradas.edit');
+
+    Route::put(
+        '/admin/tipos-entradas/{tipoEntrada}',
+        [TiposEntradaController::class, 'update']
+    )->name('admin.tipos-entradas.update');
+
+    Route::patch(
+        '/admin/tipos-entradas/{tipoEntrada}/estado',
+        [
+            TiposEntradaController::class,
+            'cambiarEstado'
+        ]
+    )->name('admin.tipos-entradas.estado');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -511,8 +557,13 @@ Route::middleware([
     Route::post(
         '/control/sincronizar-offline',
         [
-            ControlController::class, 
+            ControlController::class,
             'sincronizarOffline'
         ]
     )->name('control.sincronizarOffline');
+
+    Route::view(
+        '/offline-login',
+        'auth.offline-login'
+    )->name('offline.login');
 });

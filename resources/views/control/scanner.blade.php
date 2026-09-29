@@ -6,10 +6,10 @@
 
     <style>
         /*
-        |--------------------------------------------------------------------------
-        | ESCÁNER
-        |--------------------------------------------------------------------------
-        */
+                                |--------------------------------------------------------------------------
+                                | ESCÁNER
+                                |--------------------------------------------------------------------------
+                            */
 
         .scanner-container {
             max-width: 720px;
@@ -21,153 +21,115 @@
             border-radius: 18px;
         }
 
-
         /*
-                                                                                                                    |--------------------------------------------------------------------------
-                                                                                                                    | RESULTADO TICKET
-                                                                                                                    |--------------------------------------------------------------------------
-                                                                                                                    */
+                                |--------------------------------------------------------------------------
+                                | RESULTADO TICKET
+                                |--------------------------------------------------------------------------
+                            */
 
         .verification-card {
             width: 100%;
             max-width: 650px;
             margin: 0 auto;
-
             background: #fff;
-
             border-radius: 24px;
-
             box-shadow: 0 12px 35px rgba(0, 0, 0, .10);
-
             padding: 22px;
         }
 
-
         /*
-                                                                                                                    |--------------------------------------------------------------------------
-                                                                                                                    | CABECERA
-                                                                                                                    |--------------------------------------------------------------------------
-                                                                                                                    */
+                                |--------------------------------------------------------------------------
+                                | CABECERA
+                                |--------------------------------------------------------------------------
+                            */
 
         .park-header {
             display: flex;
             align-items: center;
-
             gap: 22px;
-
             padding: 8px 16px 26px;
         }
-
 
         .park-logo {
             width: 105px;
             max-width: 105px;
-
             height: auto;
-
             object-fit: contain;
-
             flex-shrink: 0;
         }
 
-
         .park-title {
             color: #124d38;
-
             font-family: Georgia, "Times New Roman", serif;
-
             font-size: 28px;
-
             line-height: 1.15;
-
             margin: 0;
         }
 
-
         .park-subtitle {
             margin-top: 7px;
-
             color: #6d9486;
-
             font-size: 17px;
-
             letter-spacing: .28em;
-
             text-transform: uppercase;
         }
 
-
         /*
-                                                                                                                    |--------------------------------------------------------------------------
-                                                                                                                    | PANEL
-                                                                                                                    |--------------------------------------------------------------------------
-                                                                                                                    */
+                                |--------------------------------------------------------------------------
+                                | PANEL
+                                |--------------------------------------------------------------------------
+                            */
 
         .ticket-panel {
             border: 1px solid #e2e5e3;
-
             border-radius: 18px;
-
             padding: 36px 28px 26px;
-
             box-shadow: 0 4px 18px rgba(0, 0, 0, .04);
         }
 
-
         /*
-                                                                                                                    |--------------------------------------------------------------------------
-                                                                                                                    | CÍRCULO ESTADO
-                                                                                                                    |--------------------------------------------------------------------------
-                                                                                                                    */
+                                |--------------------------------------------------------------------------
+                                | CÍRCULO ESTADO
+                                |--------------------------------------------------------------------------
+                            */
 
         .state-circle {
             width: 104px;
             height: 104px;
-
             border-radius: 50%;
-
             margin: 0 auto;
-
             display: flex;
-
             align-items: center;
             justify-content: center;
-
             color: #fff;
-
             font-size: 52px;
         }
-
 
         .state-circle.valid {
             background: #198754;
             border: 16px solid #dff3e8;
         }
 
-
         .state-circle.used {
             background: #6c757d;
             border: 16px solid #e9ecef;
         }
-
 
         .state-circle.expired {
             background: #d97706;
             border: 16px solid #fff0d5;
         }
 
-
         .state-circle.invalid {
             background: #dc3545;
             border: 16px solid #fde5e7;
         }
 
-
         /*
-                                                                                                                    |--------------------------------------------------------------------------
-                                                                                                                    | TÍTULOS
-                                                                                                                    |--------------------------------------------------------------------------
-                                                                                                                    */
+                                                                                                                                                                    |--------------------------------------------------------------------------
+                                                                                                                                                                    | TÍTULOS
+                                                                                                                                                                    |--------------------------------------------------------------------------
+                                                                                                                                                                    */
 
         .ticket-state-title {
             margin-top: 24px;
@@ -212,10 +174,10 @@
 
 
         /*
-                                                                                                                    |--------------------------------------------------------------------------
-                                                                                                                    | ALERTA PRINCIPAL
-                                                                                                                    |--------------------------------------------------------------------------
-                                                                                                                    */
+                                                                                                                                                                    |--------------------------------------------------------------------------
+                                                                                                                                                                    | ALERTA PRINCIPAL
+                                                                                                                                                                    |--------------------------------------------------------------------------
+                                                                                                                                                                    */
 
         .status-box {
             display: flex;
@@ -286,10 +248,10 @@
 
 
         /*
-                                                                                                                    |--------------------------------------------------------------------------
-                                                                                                                    | INFORMACIÓN
-                                                                                                                    |--------------------------------------------------------------------------
-                                                                                                                    */
+                                                                                                                                                                    |--------------------------------------------------------------------------
+                                                                                                                                                                    | INFORMACIÓN
+                                                                                                                                                                    |--------------------------------------------------------------------------
+                                                                                                                                                                    */
 
         .ticket-info {
             border-top: 1px solid #d9dddb;
@@ -350,10 +312,10 @@
 
 
         /*
-                                                                                                                    |--------------------------------------------------------------------------
-                                                                                                                    | FOOTER
-                                                                                                                    |--------------------------------------------------------------------------
-                                                                                                                    */
+                                                                                                                                                                    |--------------------------------------------------------------------------
+                                                                                                                                                                    | FOOTER
+                                                                                                                                                                    |--------------------------------------------------------------------------
+                                                                                                                                                                    */
 
         .ticket-footer {
             margin-top: 50px;
@@ -413,10 +375,10 @@
 
 
         /*
-                                                                                                                    |--------------------------------------------------------------------------
-                                                                                                                    | MOBILE
-                                                                                                                    |--------------------------------------------------------------------------
-                                                                                                                    */
+                                                                                                                                                                    |--------------------------------------------------------------------------
+                                                                                                                                                                    | MOBILE
+                                                                                                                                                                    |--------------------------------------------------------------------------
+                                                                                                                                                                    */
 
         @media (max-width: 576px) {
 
@@ -542,6 +504,12 @@
 
     <div class="scanner-container">
 
+        <div id="usuarioOfflineActual" class="alert alert-warning" style="display:none;">
+        </div>
+        <button type="button" id="btnCerrarSesionOffline" class="btn btn-outline-danger" style="display:none;">
+            Cerrar sesión offline
+        </button>
+
         {{-- CABECERA --}}
         <div class="mb-4">
 
@@ -549,7 +517,7 @@
 
                 <i class="bi bi-qr-code-scan text-success me-2"></i>
 
-                Escanear ticket - VERSION NUEVA 23/09
+                Escanear ticket
 
             </h2>
 
@@ -603,6 +571,49 @@
                         </button>
 
                     </div>
+
+                    <div class="card mb-3" id="configOffline">
+                        <div class="card-body">
+
+                            <h5>
+                                Acceso offline
+                            </h5>
+
+                            <p class="text-muted">
+                                Permite utilizar este dispositivo
+                                cuando no exista conexión a Internet.
+                            </p>
+
+                            <div class="mb-3">
+
+                                <label for="offlinePin" class="form-label">
+                                    PIN offline
+                                </label>
+
+                                <input type="password" id="offlinePin" class="form-control" inputmode="numeric"
+                                    maxlength="8" autocomplete="new-password">
+
+                            </div>
+
+                            <div class="mb-3">
+
+                                <label for="offlinePinConfirmacion" class="form-label">
+                                    Repetir PIN
+                                </label>
+
+                                <input type="password" id="offlinePinConfirmacion" class="form-control" inputmode="numeric"
+                                    maxlength="8" autocomplete="new-password">
+
+                            </div>
+
+                            <button type="button" id="btnPrepararOffline" class="btn btn-primary">
+                                Habilitar este dispositivo
+                            </button>
+
+                            <div id="resultadoPrepararOffline" class="mt-3"></div>
+
+                        </div>
+                    </div>
                 </div>
 
             </div>
@@ -654,12 +665,11 @@
 
 @endsection
 
-
-
 @section('js')
 
     <script src="{{ asset('js/html5-qrcode.min.js') }}"></script>
     <script src="{{ asset('js/ticket-offline.js') }}?20260928-2"></script>
+    <script src="/js/offline-auth.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -2192,6 +2202,451 @@ ${JSON.stringify(
                         }
                     }
                 );
+        }
+
+        document
+            .getElementById(
+                'btnPrepararOffline'
+            )
+            ?.addEventListener(
+                'click',
+                async function() {
+
+                    const pin =
+                        document
+                        .getElementById(
+                            'offlinePin'
+                        )
+                        .value;
+
+                    const confirmacion =
+                        document
+                        .getElementById(
+                            'offlinePinConfirmacion'
+                        )
+                        .value;
+
+                    const resultado =
+                        document.getElementById(
+                            'resultadoPrepararOffline'
+                        );
+
+
+                    if (
+                        pin.length < 4
+                    ) {
+
+                        resultado.innerHTML =
+                            '<div class="alert alert-danger">El PIN debe tener al menos 4 caracteres.</div>';
+
+                        return;
+                    }
+
+
+                    if (
+                        pin !== confirmacion
+                    ) {
+
+                        resultado.innerHTML =
+                            '<div class="alert alert-danger">Los PIN no coinciden.</div>';
+
+                        return;
+                    }
+
+
+                    try {
+
+                        const deviceId =
+                            await PRZOfflineAuth
+                            .obtenerDeviceId();
+
+
+                        const response =
+                            await fetch(
+                                '/control/offline/preparar', {
+                                    method: 'POST',
+
+                                    headers: {
+
+                                        'Content-Type': 'application/json',
+
+                                        'Accept': 'application/json',
+
+                                        'X-CSRF-TOKEN': document
+                                            .querySelector(
+                                                'meta[name="csrf-token"]'
+                                            )
+                                            .content
+                                    },
+
+                                    body: JSON.stringify({
+                                        device_id: deviceId
+                                    })
+                                }
+                            );
+
+
+                        const datos =
+                            await response.json();
+
+
+                        if (
+                            !response.ok ||
+                            !datos.ok
+                        ) {
+
+                            throw new Error(
+                                datos.message ??
+                                'No fue posible habilitar el modo offline.'
+                            );
+                        }
+
+
+                        await PRZOfflineAuth
+                            .guardarUsuarioOffline(
+                                datos,
+                                pin
+                            );
+
+
+                        resultado.innerHTML =
+                            `
+                    <div class="alert alert-success">
+                        <strong>Dispositivo preparado.</strong>
+                        <br>
+                        El acceso offline estará disponible hasta:
+                        ${new Date(
+                            datos.expires_at
+                        ).toLocaleString()}
+                    </div>
+                    `;
+
+
+                        document
+                            .getElementById(
+                                'offlinePin'
+                            )
+                            .value = '';
+
+                        document
+                            .getElementById(
+                                'offlinePinConfirmacion'
+                            )
+                            .value = '';
+
+
+                    } catch (error) {
+
+                        console.error(error);
+
+                        resultado.innerHTML =
+                            `
+                    <div class="alert alert-danger">
+                        ${error.message}
+                    </div>
+                    `;
+                    }
+                }
+            );
+
+        async function verificarAccesoControlOffline() {
+
+            /*
+             * Si tenemos Internet,
+             * Laravel ya realizó autenticación.
+             */
+
+            if (navigator.onLine) {
+                return true;
+            }
+
+
+            /*
+             * Sin Internet necesitamos
+             * sesión offline local.
+             */
+
+            const sesion =
+                await PRZOfflineAuth
+                .obtenerSesionOffline();
+
+
+            if (!sesion) {
+
+                window.location.href =
+                    '/offline-login';
+
+                return false;
+            }
+
+
+            try {
+
+                const payload =
+                    await PRZOfflineAuth
+                    .verificarPermiso(
+                        sesion.permit
+                    );
+
+
+                const ahora =
+                    Math.floor(
+                        Date.now() / 1000
+                    );
+
+
+                if (
+                    payload.exp < ahora
+                ) {
+
+                    await PRZOfflineAuth
+                        .cerrarSesionOffline();
+
+                    window.location.href =
+                        '/offline-login';
+
+                    return false;
+                }
+
+
+                if (
+                    payload.role !== 'CONTROL'
+                ) {
+
+                    await PRZOfflineAuth
+                        .cerrarSesionOffline();
+
+                    window.location.href =
+                        '/offline-login';
+
+                    return false;
+                }
+
+
+                const deviceId =
+                    await PRZOfflineAuth
+                    .obtenerDeviceId();
+
+
+                if (
+                    payload.device_id !==
+                    deviceId
+                ) {
+
+                    await PRZOfflineAuth
+                        .cerrarSesionOffline();
+
+                    window.location.href =
+                        '/offline-login';
+
+                    return false;
+                }
+
+
+                return true;
+
+
+            } catch (error) {
+
+                console.error(
+                    'Error autenticación offline:',
+                    error
+                );
+
+                window.location.href =
+                    '/offline-login';
+
+                return false;
+            }
+        }
+
+
+        document.addEventListener(
+            'DOMContentLoaded',
+            async function() {
+
+                await verificarAccesoControlOffline();
+
+            }
+        );
+
+        async function mostrarUsuarioOffline() {
+
+            if (navigator.onLine) {
+                return;
+            }
+
+            const sesion =
+                await PRZOfflineAuth
+                .obtenerSesionOffline();
+
+            if (!sesion) {
+                return;
+            }
+
+            const elemento =
+                document.getElementById(
+                    'usuarioOfflineActual'
+                );
+
+            elemento.style.display =
+                'block';
+
+            elemento.innerHTML =
+                `
+        <strong>Modo offline</strong>
+        <br>
+        Usuario: ${sesion.name}
+        <br>
+        ${sesion.email}
+        `;
+        }
+
+
+        document.addEventListener(
+            'DOMContentLoaded',
+            mostrarUsuarioOffline
+        );
+
+        async function prepararCerrarSesionOffline() {
+
+            if (navigator.onLine) {
+                return;
+            }
+
+            const boton =
+                document.getElementById(
+                    'btnCerrarSesionOffline'
+                );
+
+            boton.style.display =
+                'inline-block';
+
+            boton.addEventListener(
+                'click',
+                async function() {
+
+                    await PRZOfflineAuth
+                        .cerrarSesionOffline();
+
+                    window.location.href =
+                        '/offline-login';
+                }
+            );
+        }
+
+        window.addEventListener(
+            'online',
+            renovarPermisoOffline
+        );
+
+        document.addEventListener(
+            'DOMContentLoaded',
+            prepararCerrarSesionOffline
+        );
+
+        document.addEventListener(
+            'DOMContentLoaded',
+            renovarPermisoOffline
+        );
+
+        window.addEventListener(
+            'offline',
+            function() {
+
+                console.log(
+                    'Internet perdido. Sistema funcionando en modo offline.'
+                );
+
+            }
+        );
+
+        async function renovarPermisoOffline() {
+
+            if (!navigator.onLine) {
+                return;
+            }
+
+            try {
+
+                const sesionOffline =
+                    await PRZOfflineAuth
+                    .obtenerSesionOffline();
+
+                const deviceId =
+                    await PRZOfflineAuth
+                    .obtenerDeviceId();
+
+
+                const response =
+                    await fetch(
+                        '/control/offline/preparar', {
+                            method: 'POST',
+
+                            headers: {
+
+                                'Content-Type': 'application/json',
+
+                                'Accept': 'application/json',
+
+                                'X-CSRF-TOKEN': document
+                                    .querySelector(
+                                        'meta[name="csrf-token"]'
+                                    )
+                                    .content
+                            },
+
+                            body: JSON.stringify({
+                                device_id: deviceId
+                            })
+                        }
+                    );
+
+
+                if (!response.ok) {
+
+                    /*
+                     * Probablemente Laravel
+                     * ya no tiene sesión activa.
+                     *
+                     * No destruimos el permiso
+                     * offline existente.
+                     */
+
+                    return;
+                }
+
+
+                const datos =
+                    await response.json();
+
+
+                /*
+                 * IMPORTANTE:
+                 *
+                 * Para reemplazar el permiso necesitamos
+                 * conservar el PIN hash existente.
+                 *
+                 * No pedimos nuevamente el PIN.
+                 */
+
+                await actualizarSoloPermisoOffline(
+                    datos
+                );
+
+
+                console.log(
+                    'Permiso offline renovado.'
+                );
+
+
+            } catch (error) {
+
+                console.log(
+                    'No fue posible renovar permiso offline:',
+                    error
+                );
+            }
         }
     </script>
 

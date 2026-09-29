@@ -14,12 +14,12 @@ return new class extends Migration
         Schema::create('clientes', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('user_id')
-                ->constrained('users')
-                ->cascadeOnDelete();
-
             $table->string('rut', 20)->unique();
             $table->string('telefono', 20)->nullable();
+            $table->string('direccion')->nullable();
+            $table->string('patente', 20)->nullable();
+            
+            $table->boolean('recibir_noticias')->default(false);
 
             $table->foreignId('region_id')
                 ->nullable()
@@ -28,6 +28,10 @@ return new class extends Migration
             $table->foreignId('comuna_id')
                 ->nullable()
                 ->constrained('comunas');
+            
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->cascadeOnDelete();
 
             $table->timestamps();
         });

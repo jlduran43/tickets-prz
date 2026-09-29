@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('region_id')
                 ->constrained('regiones')
-                ->cascadeOnDelete()
-                ->restrictOnDelete();
+                ->restrictOnDelete()
+                ->cascadeOnUpdate();
 
             $table->string('codigo', 10)->unique();
             $table->string('nombre', 150);

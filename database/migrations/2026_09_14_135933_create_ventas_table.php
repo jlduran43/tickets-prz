@@ -25,14 +25,12 @@ return new class extends Migration
             $table->string('webpay_session_id')->nullable();
             $table->string('token_ticket')->nullable()->unique();
             $table->string('ultimos_digitos_tarjeta')->nullable();
-            $table->string('buy_order', 26)->nullable()->unique();
-            $table->string('session_id', 61)->nullable();
-            $table->string('token_ws')->nullable();
             $table->string('estado')->default('PENDIENTE');
-            $table->string('authorization_code')->nullable();
-            $table->integer('response_code')->nullable();
-            $table->string('payment_type_code')->nullable();
-            $table->string('card_number')->nullable();
+            $table->string('webpay_authorization_code')->nullable();
+            $table->string('webpay_payment_type_code')->nullable();
+            $table->string('webpay_card_number')->nullable();
+
+            $table->integer('webpay_response_code')->nullable();
 
             $table->date('fecha');
 
@@ -44,6 +42,8 @@ return new class extends Migration
 
             $table->timestamp('pagada_at')->nullable();
             $table->timestamp('vigente_hasta')->nullable();
+            $table->timestamp('ticket_enviado_at')->nullable();
+            $table->timestamp('validada_at')->nullable();
 
             $table->foreignId('region_id')
                 ->nullable()
@@ -54,6 +54,18 @@ return new class extends Migration
             $table->foreignId('comuna_id')
                 ->nullable()
                 ->constrained('comunas')
+                ->restrictOnDelete()
+                ->cascadeOnUpdate();
+
+            $table->foreignId('cliente_id')
+                ->nullable()
+                ->constrained('clientes')
+                ->restrictOnDelete()
+                ->cascadeOnUpdate();
+
+            $table->foreignId('validada_por')
+                ->nullable()
+                ->constrained('users')
                 ->restrictOnDelete()
                 ->cascadeOnUpdate();
 

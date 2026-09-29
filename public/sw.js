@@ -3,7 +3,13 @@ const CACHE_NAME = 'prz-scanner-v4';
 const OFFLINE_FILES = [
     '/offline/ticket_public.pem',
     '/js/ticket-offline.js',
-    '/js/html5-qrcode.min.js'
+    '/js/html5-qrcode.min.js',
+    '/offline-login',
+    '/control',
+    '/js/offline-auth.js',
+    '/js/html5-qrcode.min.js',
+    '/offline/offline_auth_public.pem',
+    '/offline/ticket_public.pem'
 ];
 
 self.addEventListener('install', event => {
@@ -40,32 +46,187 @@ self.addEventListener('fetch', event => {
     }
 
     const request = event.request;
+    const url = new URL(request.url);
 
-    if (request.mode === 'navigate') {
+
+    /*
+     * NAVEGACIÓN A /control
+     *
+     * Intenta Internet primero.
+     * Si falla:
+     * 1. busca /control en caché
+     * 2. si tampoco existe, abre /offline-login
+     */
+    if (
+        request.mode === 'navigate' &&
+        url.pathname === '/control'
+    ) {
 
         event.respondWith(
+
             fetch(request)
+
                 .then(response => {
 
-                    const clone = response.clone();
+                    const clone =
+                        response.clone();
 
-                    caches.open(CACHE_NAME)
-                        .then(cache => {
-                            cache.put(request, clone);
-                        });
+                    if (response.ok) {
+
+                        caches
+                            .open(CACHE_NAME)
+                            .then(cache => {
+
+                                cache.put(
+                                    '/control',
+                                    clone
+                                );
+
+                            });
+
+                    }
 
                     return response;
+
                 })
-                .catch(() =>
-                    caches.match(request)
-                )
+
+                .catch(async () => {
+
+                    const cache =
+                        await caches.open(
+                            CACHE_NAME
+                        );
+
+                    const control =
+                        await cache.match(
+                            '/control'
+                        );
+
+                    if (control) {
+                        return control;
+                    }
+
+                    return cache.match(
+                        '/offline-login'
+                    );
+
+                })
+
         );
 
         return;
     }
 
+
+    /*
+     * LOGIN OFFLINE
+     *
+     * Primero busca la página guardada.
+     * Si no existe en caché, intenta Internet.
+     */
+    if (
+        request.mode === 'navigate' &&
+        url.pathname === '/offline-login'
+    ) {
+
+        event.respondWith(
+
+            caches
+                .match('/offline-login')
+                .then(cached => {
+
+                    if (cached) {
+                        return cached;
+                    }
+
+                    return fetch(request)
+                        .then(response => {
+
+                            const clone =
+                                response.clone();
+
+                            if (response.ok) {
+
+                                caches
+                                    .open(CACHE_NAME)
+                                    .then(cache => {
+
+                                        cache.put(
+                                            '/offline-login',
+                                            clone
+                                        );
+
+                                    });
+
+                            }
+
+                            return response;
+
+                        });
+
+                })
+
+        );
+
+        return;
+    }
+
+
+    /*
+     * RESTO DE NAVEGACIONES
+     *
+     * Se conserva prácticamente tu lógica actual.
+     */
+    if (request.mode === 'navigate') {
+
+        event.respondWith(
+
+            fetch(request)
+
+                .then(response => {
+
+                    const clone =
+                        response.clone();
+
+                    if (response.ok) {
+
+                        caches
+                            .open(CACHE_NAME)
+                            .then(cache => {
+
+                                cache.put(
+                                    request,
+                                    clone
+                                );
+
+                            });
+
+                    }
+
+                    return response;
+
+                })
+
+                .catch(() =>
+                    caches.match(request)
+                )
+
+        );
+
+        return;
+    }
+
+
+    /*
+     * JS, CSS, PEM, imágenes, etc.
+     *
+     * Caché primero.
+     * Si no existe, descarga y guarda.
+     */
     event.respondWith(
-        caches.match(request)
+
+        caches
+            .match(request)
             .then(cached => {
 
                 if (cached) {
@@ -73,17 +234,33 @@ self.addEventListener('fetch', event => {
                 }
 
                 return fetch(request)
+
                     .then(response => {
 
-                        const clone = response.clone();
+                        const clone =
+                            response.clone();
 
-                        caches.open(CACHE_NAME)
-                            .then(cache => {
-                                cache.put(request, clone);
-                            });
+                        if (response.ok) {
+
+                            caches
+                                .open(CACHE_NAME)
+                                .then(cache => {
+
+                                    cache.put(
+                                        request,
+                                        clone
+                                    );
+
+                                });
+
+                        }
 
                         return response;
+
                     });
+
             })
+
     );
+
 });
