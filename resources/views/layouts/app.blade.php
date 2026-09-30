@@ -4,12 +4,73 @@
 <head>
 
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>@yield('title', 'Tickets PRZ')</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <style>
+        /* =====================================
+           NAVBAR USUARIO / PERFIL
+        ====================================== */
+
+        .navbar-user-dropdown .dropdown-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            padding: .5rem .75rem;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #212529 !important;
+            border: 0;
+            background: transparent;
+            box-shadow: none !important;
+        }
+
+        .navbar-user-dropdown .dropdown-toggle:hover,
+        .navbar-user-dropdown .dropdown-toggle:focus {
+            color: #198754 !important;
+            background: #f8f9fa;
+            border-radius: .5rem;
+        }
+
+        .navbar-user-dropdown .dropdown-menu {
+            min-width: 190px;
+            border: 0;
+            border-radius: .75rem;
+            padding: .5rem;
+        }
+
+        .navbar-user-dropdown .dropdown-item {
+            border-radius: .5rem;
+            padding: .6rem .75rem;
+        }
+
+        .navbar-user-dropdown .dropdown-item:hover {
+            background: #f8f9fa;
+        }
+
+        @@media (max-width: 991.98px) {
+
+            .navbar-user-dropdown {
+                margin-top: .75rem;
+                padding-top: .75rem;
+                border-top: 1px solid #dee2e6;
+            }
+
+            .navbar-user-dropdown .dropdown-menu {
+                position: static !important;
+                transform: none !important;
+                box-shadow: none !important;
+                border: 1px solid #dee2e6;
+                margin-top: .35rem;
+            }
+        }
+    </style>
 
 </head>
 
@@ -29,13 +90,11 @@
                     ====================================== --}}
 
                     @php
-
                         $inicio = match (auth()->user()->rol) {
                             'ADMIN' => route('admin.usuarios.index'),
                             'CONTROL' => route('control.index'),
                             default => route('ventas.create'),
                         };
-
                     @endphp
 
                     <a class="navbar-brand fw-bold text-success me-lg-4" href="{{ $inicio }}">
@@ -49,9 +108,7 @@
 
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarPrz"
                         aria-controls="navbarPrz" aria-expanded="false" aria-label="Abrir menú">
-
                         <span class="navbar-toggler-icon"></span>
-
                     </button>
 
 
@@ -60,7 +117,6 @@
                     ====================================== --}}
 
                     <div class="collapse navbar-collapse" id="navbarPrz">
-
 
                         {{-- =================================
                             MENÚ PRINCIPAL
@@ -109,7 +165,6 @@
 
                                 </li>
                             @endif
-
 
 
                             {{-- =============================
@@ -172,7 +227,6 @@
                             @endif
 
 
-
                             {{-- =============================
                                 ADMIN
                             ============================== --}}
@@ -218,37 +272,60 @@
 
 
                         {{-- =================================
-                            USUARIO / CERRAR SESIÓN
+                            USUARIO / PERFIL
                         ================================== --}}
 
-                        <div class="navbar-user">
+                        <div class="navbar-user-dropdown dropdown ms-lg-auto">
 
-                            <div class="navbar-user-name">
+                            <button class="btn btn-link text-dark text-decoration-none dropdown-toggle" type="button"
+                                id="menuUsuario" data-bs-toggle="dropdown" aria-expanded="false">
 
-                                <i class="bi bi-person-circle"></i>
+                                <i class="bi bi-person-circle me-1"></i>
 
-                                <span>
-                                    {{ auth()->user()->name ?? auth()->user()->email }}
-                                </span>
+                                {{ auth()->user()->name }}
 
-                            </div>
+                            </button>
 
 
-                            <form method="POST" action="{{ route('logout') }}" class="navbar-logout-form">
+                            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="menuUsuario">
 
-                                @csrf
+                                <li>
 
-                                <button type="submit" class="navbar-logout">
+                                    <a class="dropdown-item" href="{{ route('perfil.edit') }}">
 
-                                    <i class="bi bi-box-arrow-right"></i>
+                                        <i class="bi bi-person-gear me-2"></i>
 
-                                    <span>
-                                        Cerrar sesión
-                                    </span>
+                                        Mi perfil
 
-                                </button>
+                                    </a>
 
-                            </form>
+                                </li>
+
+
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+
+
+                                <li>
+
+                                    <form method="POST" action="{{ route('logout') }}">
+
+                                        @csrf
+
+                                        <button type="submit" class="dropdown-item text-danger">
+
+                                            <i class="bi bi-box-arrow-right me-2"></i>
+
+                                            Cerrar sesión
+
+                                        </button>
+
+                                    </form>
+
+                                </li>
+
+                            </ul>
 
                         </div>
 

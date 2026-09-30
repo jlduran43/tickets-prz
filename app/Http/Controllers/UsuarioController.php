@@ -38,6 +38,15 @@ class UsuarioController extends Controller
             'email' => $datos['email'],
             'password' => Hash::make($datos['password']),
             'rol' => $datos['rol'],
+            'activo' => true,
+
+            'email_verified_at' =>
+            in_array(
+                $request->rol,
+                ['ADMIN', 'CONTROL']
+            )
+                ? now()
+                : null,
         ]);
 
         return redirect()

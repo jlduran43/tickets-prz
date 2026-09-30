@@ -28,6 +28,8 @@ class UserSeeder extends Seeder
                 ),
 
                 'rol' => 'ADMIN',
+                
+                'email_verified_at' => now(),
             ],
         );
     }
