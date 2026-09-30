@@ -122,10 +122,8 @@ class WebpayController extends Controller
     }
 
 
-    public function retorno(
-        Request $request,
-        WebpayService $webpayService
-    ) {
+    public function retorno(Request $request, WebpayService $webpayService) 
+    {
 
         /*
          * Retorno normal desde Webpay.
@@ -228,18 +226,18 @@ class WebpayController extends Controller
                     'estado' =>
                     'PAGADA',
 
-                    'authorization_code' =>
+                    'webpay_authorization_code' =>
                     $response
                         ->getAuthorizationCode(),
 
-                    'response_code' =>
+                    'webpay_response_code' =>
                     $responseCode,
 
-                    'payment_type_code' =>
+                    'webpay_payment_type_code' =>
                     $response
                         ->getPaymentTypeCode(),
 
-                    'card_number' =>
+                    'webpay_card_number' =>
                     $cardNumber,
 
                     'pagada_at' =>
@@ -304,7 +302,7 @@ class WebpayController extends Controller
                 'estado' =>
                 'RECHAZADA',
 
-                'response_code' =>
+                'webpay_response_code' =>
                 $responseCode,
 
             ]);
