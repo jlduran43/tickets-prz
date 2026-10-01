@@ -367,6 +367,7 @@ Route::get(
 Route::middleware([
     'auth',
     'verified',
+    'prevent.back.history',
 ])->group(function () {
 
     /*
@@ -455,6 +456,7 @@ Route::middleware([
 Route::middleware([
     'auth',
     'role:ADMIN',
+    'prevent.back.history',
 ])->group(function () {
 
     Route::get(
@@ -532,6 +534,7 @@ Route::middleware([
 Route::middleware([
     'auth',
     'role:CONTROL',
+    'prevent.back.history',
 ])->group(function () {
 
     Route::get(
