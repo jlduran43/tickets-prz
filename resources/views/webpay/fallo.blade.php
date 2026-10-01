@@ -26,7 +26,7 @@
                         @endif
 
 
-                        <a href="{{ route('ventas.create') }}" class="btn btn-success mt-3">
+                        <a href="{{ route('webpay.iniciar', $venta) }}" class="btn btn-success mt-3">
                             Intentar nuevamente
                         </a>
 
