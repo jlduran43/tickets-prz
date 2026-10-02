@@ -35,7 +35,7 @@ class VentaController extends Controller
 
         $tipoEntrada = TiposEntrada::where('activo', true)
             ->orderBy('id')
-            ->firstOrFail();
+            ->first();
 
         if (
             auth()->check() &&

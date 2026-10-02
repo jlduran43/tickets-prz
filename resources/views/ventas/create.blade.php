@@ -199,49 +199,56 @@
 
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Entrada</label>
+                        @if (!$tipoEntrada)
 
-                            <div class="form-control bg-light">
-                                {{ $tipoEntrada->nombre }}
-                                -
-                                ${{ number_format($tipoEntrada->precio, 0, ',', '.') }}
-
-                                <input type="hidden" name="tipo_entrada_id" value="{{ $tipoEntrada->id }}">
+                            <div class="alert alert-warning text-center">
+                                Actualmente no hay entradas disponibles para la venta.
                             </div>
-                        </div>
+                        @else
+                            <div class="mb-3">
+                                <label class="form-label">Entrada</label>
 
-                        <hr>
+                                <div class="form-control bg-light">
+                                    {{ $tipoEntrada->nombre }}
+                                    -
+                                    ${{ number_format($tipoEntrada->precio, 0, ',', '.') }}
 
-                        <div class="mb-4">
-                            <label class="form-label d-block mb-3">
-                                Medio de pago
-                            </label>
-
-                            <label class="payment-option">
-                                <input type="radio" name="medio_pago" value="WEBPAY" checked>
-
-                                <div class="payment-card">
-                                    <div class="payment-icon">
-                                        <img src="{{ asset('images/webpay.png') }}" alt="Webpay" class="webpay-logo">
-                                    </div>
-
-                                    <div>
-                                        <small class="text-muted">
-                                            Paga con débito o crédito
-                                        </small>
-                                    </div>
+                                    <input type="hidden" name="tipo_entrada_id" value="{{ $tipoEntrada->id }}">
                                 </div>
-                            </label>
-                        </div>
+                            </div>
+                        @endif
 
-                        <div class="text-end">
+                            <hr>
 
-                            <button type="submit" class="btn btn-success btn-lg">
-                                Pagar
-                            </button>
+                            <div class="mb-4">
+                                <label class="form-label d-block mb-3">
+                                    Medio de pago
+                                </label>
 
-                        </div>
+                                <label class="payment-option">
+                                    <input type="radio" name="medio_pago" value="WEBPAY" checked>
+
+                                    <div class="payment-card">
+                                        <div class="payment-icon">
+                                            <img src="{{ asset('images/webpay.png') }}" alt="Webpay" class="webpay-logo">
+                                        </div>
+
+                                        <div>
+                                            <small class="text-muted">
+                                                Paga con débito o crédito
+                                            </small>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div class="text-end">
+
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    Pagar
+                                </button>
+
+                            </div>
 
                     </form>
 
