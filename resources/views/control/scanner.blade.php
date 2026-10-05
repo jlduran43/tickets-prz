@@ -6,10 +6,10 @@
 
     <style>
         /*
-                                            |--------------------------------------------------------------------------
-                                            | ESCÁNER
-                                            |--------------------------------------------------------------------------
-                                        */
+                                                        |--------------------------------------------------------------------------
+                                                        | ESCÁNER
+                                                        |--------------------------------------------------------------------------
+                                                    */
 
         .scanner-container {
             max-width: 720px;
@@ -22,10 +22,10 @@
         }
 
         /*
-                                            |--------------------------------------------------------------------------
-                                            | RESULTADO TICKET
-                                            |--------------------------------------------------------------------------
-                                        */
+                                                        |--------------------------------------------------------------------------
+                                                        | RESULTADO TICKET
+                                                        |--------------------------------------------------------------------------
+                                                    */
 
         .verification-card {
             width: 100%;
@@ -38,10 +38,10 @@
         }
 
         /*
-                                            |--------------------------------------------------------------------------
-                                            | CABECERA
-                                            |--------------------------------------------------------------------------
-                                        */
+                                                        |--------------------------------------------------------------------------
+                                                        | CABECERA
+                                                        |--------------------------------------------------------------------------
+                                                    */
 
         .park-header {
             display: flex;
@@ -75,10 +75,10 @@
         }
 
         /*
-                                            |--------------------------------------------------------------------------
-                                            | PANEL
-                                            |--------------------------------------------------------------------------
-                                        */
+                                                        |--------------------------------------------------------------------------
+                                                        | PANEL
+                                                        |--------------------------------------------------------------------------
+                                                    */
 
         .ticket-panel {
             border: 1px solid #e2e5e3;
@@ -88,10 +88,10 @@
         }
 
         /*
-                                            |--------------------------------------------------------------------------
-                                            | CÍRCULO ESTADO
-                                            |--------------------------------------------------------------------------
-                                        */
+                                                        |--------------------------------------------------------------------------
+                                                        | CÍRCULO ESTADO
+                                                        |--------------------------------------------------------------------------
+                                                    */
 
         .state-circle {
             width: 104px;
@@ -126,10 +126,10 @@
         }
 
         /*
-                                                                                                                                                                                |--------------------------------------------------------------------------
-                                                                                                                                                                                | TÍTULOS
-                                                                                                                                                                                |--------------------------------------------------------------------------
-                                                                                                                                                                                */
+                                                                                                                                                                                            |--------------------------------------------------------------------------
+                                                                                                                                                                                            | TÍTULOS
+                                                                                                                                                                                            |--------------------------------------------------------------------------
+                                                                                                                                                                                            */
 
         .ticket-state-title {
             margin-top: 24px;
@@ -174,10 +174,10 @@
 
 
         /*
-                                                                                                                                                                                |--------------------------------------------------------------------------
-                                                                                                                                                                                | ALERTA PRINCIPAL
-                                                                                                                                                                                |--------------------------------------------------------------------------
-                                                                                                                                                                                */
+                                                                                                                                                                                            |--------------------------------------------------------------------------
+                                                                                                                                                                                            | ALERTA PRINCIPAL
+                                                                                                                                                                                            |--------------------------------------------------------------------------
+                                                                                                                                                                                            */
 
         .status-box {
             display: flex;
@@ -248,10 +248,10 @@
 
 
         /*
-                                                                                                                                                                                |--------------------------------------------------------------------------
-                                                                                                                                                                                | INFORMACIÓN
-                                                                                                                                                                                |--------------------------------------------------------------------------
-                                                                                                                                                                                */
+                                                                                                                                                                                            |--------------------------------------------------------------------------
+                                                                                                                                                                                            | INFORMACIÓN
+                                                                                                                                                                                            |--------------------------------------------------------------------------
+                                                                                                                                                                                            */
 
         .ticket-info {
             border-top: 1px solid #d9dddb;
@@ -312,10 +312,10 @@
 
 
         /*
-                                                                                                                                                                                |--------------------------------------------------------------------------
-                                                                                                                                                                                | FOOTER
-                                                                                                                                                                                |--------------------------------------------------------------------------
-                                                                                                                                                                                */
+                                                                                                                                                                                            |--------------------------------------------------------------------------
+                                                                                                                                                                                            | FOOTER
+                                                                                                                                                                                            |--------------------------------------------------------------------------
+                                                                                                                                                                                            */
 
         .ticket-footer {
             margin-top: 50px;
@@ -375,10 +375,10 @@
 
 
         /*
-                                                                                                                                                                                |--------------------------------------------------------------------------
-                                                                                                                                                                                | MOBILE
-                                                                                                                                                                                |--------------------------------------------------------------------------
-                                                                                                                                                                                */
+                                                                                                                                                                                            |--------------------------------------------------------------------------
+                                                                                                                                                                                            | MOBILE
+                                                                                                                                                                                            |--------------------------------------------------------------------------
+                                                                                                                                                                                            */
 
         @media (max-width: 576px) {
 
@@ -916,6 +916,11 @@
 
                 acciones.style.display = 'block';
 
+                /*
+                 * Después de validar no debe aparecer
+                 * nuevamente "Usar cámara".
+                 */
+                btnCamara.style.display = 'none';
 
                 /*
                 |--------------------------------------------------------------------------
@@ -1507,10 +1512,10 @@
             }
 
             /*
-        |--------------------------------------------------------------------------
-        | VALIDAR QR FIRMADO ANTES DE CONSULTAR LARAVEL
-        |--------------------------------------------------------------------------
-        */
+            |--------------------------------------------------------------------------
+            | VALIDAR QR FIRMADO ANTES DE CONSULTAR LARAVEL
+            |--------------------------------------------------------------------------
+            */
 
             async function procesarTicketOnline(codigo) {
 
@@ -1639,170 +1644,173 @@
             |--------------------------------------------------------------------------
             */
 
-            if (btnCamara) {
+            async function iniciarCamara() {
 
-                btnCamara.addEventListener('click', async function() {
+                /*
+                 * Ocultar botones mientras la cámara está funcionando
+                 */
+                btnCamara.style.display = 'none';
+                acciones.style.display = 'none';
 
-                    contenedorScanner.style.display = 'block';
-                    resultado.style.display = 'none';
-                    acciones.style.display = 'none';
+                /*
+                 * Limpiar resultados anteriores
+                 */
+                resultado.style.display = 'none';
+                resultado.innerHTML = '';
 
-                    procesando = false;
+                procesando = false;
 
-                    const reader = document.getElementById('reader');
+                /*
+                 * Preparar contenedor
+                 */
+                contenedorScanner.style.display = 'block';
 
-                    reader.style.display = 'block';
-                    reader.innerHTML = '';
+                const reader =
+                    document.getElementById('reader');
 
-                    estadoScanner.innerText =
-                        'Apunta la cámara al código QR.';
+                reader.style.display = 'block';
+                reader.innerHTML = '';
+
+                estadoScanner.innerText =
+                    'Apunta la cámara al código QR.';
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | LIMPIAR INSTANCIA ANTERIOR
+                |--------------------------------------------------------------------------
+                */
+
+                if (scannerCamara) {
+
+                    try {
+
+                        if (scannerCamara.isScanning) {
+                            await scannerCamara.stop();
+                        }
+
+                        await scannerCamara.clear();
+
+                    } catch (error) {
+
+                        console.log(
+                            'Scanner anterior ya estaba detenido.'
+                        );
+                    }
+
+                    scannerCamara = null;
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | CREAR SCANNER
+                |--------------------------------------------------------------------------
+                */
+
+                scannerCamara =
+                    new Html5Qrcode('reader');
+
+
+                try {
+
+                    const cameras =
+                        await Html5Qrcode.getCameras();
+
+
+                    if (!cameras || cameras.length === 0) {
+
+                        estadoScanner.innerText =
+                            'No se encontró una cámara disponible.';
+
+                        /*
+                         * Si falla, permitimos volver a intentar
+                         */
+                        btnCamara.style.display = 'block';
+
+                        return;
+                    }
+
+
+                    /*
+                     * Preferir cámara trasera
+                     */
+
+                    let cameraId =
+                        cameras[0].id;
+
+
+                    const trasera =
+                        cameras.find(camera => {
+
+                            const label =
+                                camera.label.toLowerCase();
+
+                            return (
+                                label.includes('back') ||
+                                label.includes('rear') ||
+                                label.includes('trasera')
+                            );
+                        });
+
+
+                    if (trasera) {
+                        cameraId = trasera.id;
+                    }
 
 
                     /*
                     |--------------------------------------------------------------------------
-                    | CREAR SCANNER SIN INTERFAZ NATIVA
+                    | INICIAR CÁMARA
                     |--------------------------------------------------------------------------
                     */
 
-                    scannerCamara = new Html5Qrcode('reader');
+                    await scannerCamara.start(
+
+                        cameraId,
+
+                        {
+                            fps: 10,
+
+                            qrbox: {
+                                width: 250,
+                                height: 250
+                            }
+                        },
+
+                        async function(decodedText) {
+
+                            /*
+                             * Evitar procesar dos veces
+                             */
+
+                            if (procesando) {
+                                return;
+                            }
 
 
-                    try {
+                            const qr =
+                                decodedText.trim();
 
-                        const cameras =
-                            await Html5Qrcode.getCameras();
 
-                        if (!cameras || cameras.length === 0) {
+                            console.log(
+                                'QR detectado:',
+                                qr
+                            );
+
 
                             estadoScanner.innerText =
-                                'No se encontró una cámara disponible.';
-
-                            return;
-                        }
+                                'QR LEÍDO: ' +
+                                qr.substring(0, 60);
 
 
-                        /*
-                         * Preferir cámara trasera
-                         */
+                            /*
+                             * Validación inicial del formato
+                             */
 
-                        let cameraId = cameras[0].id;
-
-                        const trasera =
-                            cameras.find(camera => {
-
-                                const label =
-                                    camera.label.toLowerCase();
-
-                                return (
-                                    label.includes('back') ||
-                                    label.includes('rear') ||
-                                    label.includes('trasera')
-                                );
-                            });
-
-
-                        if (trasera) {
-                            cameraId = trasera.id;
-                        }
-
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | INICIAR CÁMARA
-                        |--------------------------------------------------------------------------
-                        */
-
-                        await scannerCamara.start(
-
-                            cameraId,
-
-                            {
-                                fps: 10,
-
-                                qrbox: {
-                                    width: 250,
-                                    height: 250
-                                }
-                            },
-
-                            async function(decodedText) {
-
-                                /*
-                                 * Evitar procesar dos veces
-                                 */
-
-                                if (procesando) {
-                                    return;
-                                }
-
-
-                                const qr = decodedText.trim();
-
-
-                                console.log(
-                                    'QR detectado:',
-                                    qr
-                                );
-
-                                estadoScanner.innerText =
-                                    'QR LEÍDO: ' + qr.substring(0, 60);
-
-
-                                /*
-                                 * Validación previa del formato PRZ
-                                 */
-
-                                if (!qr.startsWith('PRZ1.')) {
-
-                                    procesando = true;
-
-                                    try {
-
-                                        await scannerCamara.stop();
-
-                                    } catch (error) {
-
-                                        console.log(
-                                            'No fue necesario detener cámara.'
-                                        );
-                                    }
-
-                                    reader.style.display = 'none';
-
-                                    contenedorScanner.style.display = 'none';
-
-                                    mostrarResultado({
-                                        ok: false,
-                                        estado: 'INVALIDO',
-                                        mensaje: 'El código QR no pertenece al sistema de tickets.'
-                                    });
-
-                                    return;
-                                }
-
-
-                                const partes = qr.split('.');
-
-                                if (partes.length !== 3) {
-
-                                    console.log(
-                                        'Lectura incompleta o incorrecta. Se ignora.'
-                                    );
-
-                                    return;
-                                }
-
-
-                                /*
-                                 * Recién ahora bloqueamos el procesamiento
-                                 */
+                            if (!qr.startsWith('PRZ1.')) {
 
                                 procesando = true;
-
-
-                                /*
-                                 * Detener cámara
-                                 */
 
                                 try {
 
@@ -1816,146 +1824,202 @@
                                 }
 
 
+                                reader.style.display =
+                                    'none';
+
+                                contenedorScanner.style.display =
+                                    'none';
+
+
+                                mostrarResultado({
+
+                                    ok: false,
+
+                                    estado: 'INVALIDO',
+
+                                    mensaje: 'El código QR no pertenece al sistema de tickets.'
+
+                                });
+
+                                return;
+                            }
+
+
+                            const partes =
+                                qr.split('.');
+
+
+                            if (partes.length !== 3) {
+
+                                console.log(
+                                    'Lectura incompleta o incorrecta. Se ignora.'
+                                );
+
+                                return;
+                            }
+
+
+                            /*
+                             * Bloquear nuevas lecturas
+                             */
+
+                            procesando = true;
+
+
+                            /*
+                             * Detener cámara
+                             */
+
+                            try {
+
+                                await scannerCamara.stop();
+
+                            } catch (error) {
+
+                                console.log(
+                                    'No fue necesario detener cámara.'
+                                );
+                            }
+
+
+                            reader.style.display =
+                                'none';
+
+
+                            /*
+                             * Obtener token
+                             */
+
+                            const token =
+                                obtenerToken(qr);
+
+
+                            if (!token) {
+
+                                contenedorScanner.style.display =
+                                    'none';
+
+
+                                mostrarResultado({
+
+                                    ok: false,
+
+                                    estado: 'INVALIDO',
+
+                                    mensaje: 'El código QR no pertenece al sistema de tickets.'
+
+                                });
+
+                                return;
+                            }
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | ONLINE
+                            |--------------------------------------------------------------------------
+                            */
+
+                            if (navigator.onLine) {
+
+                                contenedorScanner.style.display =
+                                    'none';
+
+                                await procesarTicketOnline(qr);
+
+                            }
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | OFFLINE
+                            |--------------------------------------------------------------------------
+                            */
+                            else {
+
                                 /*
-                                 * Ocultar completamente scanner
+                                 * ticket-offline.js utiliza
+                                 * #estadoScanner para mostrar el resultado.
                                  */
 
-                                reader.style.display = 'none';
+                                contenedorScanner.style.display =
+                                    'block';
 
-                                /*
-                                 * Procesar QR
-                                 */
+                                await procesarTicketOffline(qr);
 
-                                const token = obtenerToken(qr);
+                            }
+                        }
 
-
-                                if (!token) {
-
-                                    contenedorScanner.style.display = 'none';
-
-                                    mostrarResultado({
-
-                                        ok: false,
-
-                                        estado: 'INVALIDO',
-
-                                        mensaje: 'El código QR no pertenece al sistema de tickets.'
-
-                                    });
-
-                                    return;
-                                }
+                    );
 
 
-                                /*
-                                |--------------------------------------------------------------------------
-                                | CON INTERNET
-                                |--------------------------------------------------------------------------
-                                */
+                } catch (error) {
 
-                                if (navigator.onLine) {
-
-                                    contenedorScanner.style.display = 'none';
-
-                                    await procesarTicketOnline(qr);
-
-                                }
-
-                                /*
-                                |--------------------------------------------------------------------------
-                                | SIN INTERNET
-                                |--------------------------------------------------------------------------
-                                */
-                                else {
-
-                                    /*
-                                     * Dejamos visible el contenedor porque
-                                     * ticket-offline.js muestra el resultado
-                                     * dentro de #estadoScanner.
-                                     */
-
-                                    contenedorScanner.style.display = 'block';
-
-                                    await procesarTicketOffline(qr);
-
-                                }
-                            },
-
-                        );
+                    console.error(
+                        'Error iniciando cámara:',
+                        error
+                    );
 
 
-                    } catch (error) {
+                    estadoScanner.innerText =
+                        'No fue posible iniciar la cámara.';
 
-                        console.error(
-                            'Error iniciando cámara:',
-                            error
-                        );
 
-                        estadoScanner.innerText =
-                            'No fue posible iniciar la cámara.';
+                    /*
+                     * Permitir volver a intentar
+                     */
+                    btnCamara.style.display =
+                        'block';
+                }
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | BOTÓN USAR CÁMARA
+            |--------------------------------------------------------------------------
+            */
+
+            if (btnCamara) {
+
+                btnCamara.addEventListener(
+                    'click',
+                    async function() {
+
+                        await iniciarCamara();
+
                     }
-
-                });
+                );
 
             }
 
             /*
-            |--------------------------------------------------------------------------
-            | ESCANEAR OTRO TICKET
-            |--------------------------------------------------------------------------
-            */
+        |--------------------------------------------------------------------------
+        | ESCANEAR OTRO TICKET
+        |--------------------------------------------------------------------------
+        */
 
             btnNuevoEscaneo.addEventListener(
                 'click',
                 async function() {
 
+                    /*
+                     * Ocultar resultado anterior
+                     */
                     resultado.style.display = 'none';
-                    acciones.style.display = 'none';
-
                     resultado.innerHTML = '';
+
+                    acciones.style.display = 'none';
 
                     procesando = false;
 
-                    if (scannerCamara) {
 
-                        try {
+                    /*
+                     * Reiniciar directamente la cámara
+                     */
+                    await iniciarCamara();
 
-                            if (scannerCamara.isScanning) {
-                                await scannerCamara.stop();
-                            }
-
-                            await scannerCamara.clear();
-
-                        } catch (error) {
-
-                            console.log(
-                                'Scanner ya detenido.'
-                            );
-                        }
-                    }
-
-                    scannerCamara = null;
-
-                    const reader =
-                        document.getElementById('reader');
-
-                    reader.innerHTML = '';
-                    reader.style.display = 'block';
-
-                    contenedorScanner.style.display =
-                        'none';
-
-                    estadoScanner.innerText =
-                        'Selecciona una opción para comenzar.';
                 }
             );
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | FIN DOMCONTENTLOADED
-            |--------------------------------------------------------------------------
-            */
 
         });
 
