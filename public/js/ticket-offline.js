@@ -102,10 +102,8 @@ function base64UrlToString(base64Url) {
         .decode(bytes);
 }
 
-
-async function verificarTicketFirmado(
-    codigo
-) {
+async function verificarTicketFirmado(codigo) 
+{
 
     if (
         !codigo.startsWith(
