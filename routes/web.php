@@ -331,7 +331,7 @@ Route::get(
 |
 */
 
-Route::any(
+Route::match(['GET', 'POST'],
     '/webpay/retorno',
     [WebpayController::class, 'retorno']
 )->name('webpay.retorno');

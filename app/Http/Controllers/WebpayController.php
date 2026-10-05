@@ -11,10 +11,8 @@ use Illuminate\Support\Facades\Mail;
 
 class WebpayController extends Controller
 {
-    public function iniciar(
-        Venta $venta,
-        WebpayService $webpayService
-    ) {
+    public function iniciar(Venta $venta, WebpayService $webpayService) 
+    {
 
         /*
     |--------------------------------------------------------------------------
@@ -25,10 +23,7 @@ class WebpayController extends Controller
         if ($venta->estado === 'PAGADA') {
 
             return redirect()
-                ->route(
-                    'ventas.show',
-                    $venta
-                );
+                ->route('ventas.show', $venta);
         }
 
 
@@ -364,12 +359,10 @@ class WebpayController extends Controller
 
                 $venta->update([
 
-                    'estado' =>
-                    'PAGADA',
+                    'estado' => 'PAGADA',
 
                     'webpay_authorization_code' =>
-                    $response
-                        ->getAuthorizationCode(),
+                    $response ->getAuthorizationCode(),
 
                     'webpay_response_code' =>
                     $responseCode,
@@ -382,10 +375,11 @@ class WebpayController extends Controller
                     $cardNumber,
 
                     'pagada_at' =>
-                    now(),
+                    $venta->pagada_at ?? now(),
 
                     'token_ticket' =>
-                    (string) \Illuminate\Support\Str::uuid(),
+                    $venta->token_ticket
+                    ?? (string) \Illuminate\Support\Str::uuid(),
                 ]);
 
                 $correoEnviado = false;
