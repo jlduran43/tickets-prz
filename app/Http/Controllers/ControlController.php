@@ -286,62 +286,99 @@ class ControlController extends Controller
         ]);
 
 
-    $venta = Venta::where(
-        'id',
-        $request->venta_id
-    )
-        ->where(
-            'token_ticket',
-            $request->token
+        $venta = Venta::where(
+            'id',
+            $request->venta_id
         )
-        ->first();
+            ->where(
+                'token_ticket',
+                $request->token
+            )
+            ->first();
 
 
-    if (!$venta) {
+        if (!$venta) {
 
-        return response()->json([
-            'ok' => false,
-            'mensaje' => 'Ticket no encontrado.'
-        ], 404);
-    }
+            return response()->json([
+                'ok' => false,
+                'mensaje' => 'Ticket no encontrado.'
+            ], 404);
+        }
 
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | SI YA ESTÁ UTILIZADO
     |--------------------------------------------------------------------------
     */
 
-    if ($venta->validada_at) {
+        if ($venta->validada_at) {
+
+            return response()->json([
+                'ok' => true,
+                'estado' => 'YA_SINCRONIZADO',
+                'folio' => $venta->folio,
+                'validada_at' => $venta->validada_at,
+            ]);
+        }
+
+        $fechaEscaneo = \Carbon\Carbon::parse(
+            $request->scanned_at
+        );
+
+        $venta->validada_at = $fechaEscaneo;
+
+        $guardado = $venta->save();
+
+        /*
+|--------------------------------------------------------------------------
+| VOLVER A CONSULTAR DESDE LA BASE DE DATOS
+|--------------------------------------------------------------------------
+*/
+
+        $venta->refresh();
+
+        /*
+|--------------------------------------------------------------------------
+| COMPROBAR QUE REALMENTE SE GUARDÓ
+|--------------------------------------------------------------------------
+*/
+
+        if (!$guardado || !$venta->validada_at) {
+
+            \Log::error(
+                'No se pudo guardar validada_at durante sincronización offline',
+                [
+                    'venta_id' => $venta->id,
+                    'folio' => $venta->folio,
+                    'scanned_at' => $request->scanned_at,
+                    'validada_at' => $venta->validada_at,
+                ]
+            );
+
+            return response()->json([
+                'ok' => false,
+                'estado' => 'ERROR_GUARDADO',
+                'mensaje' => 'No fue posible registrar la utilización del ticket.',
+            ], 500);
+        }
+
+
+        \Log::info(
+            'Ticket offline sincronizado correctamente',
+            [
+                'venta_id' => $venta->id,
+                'folio' => $venta->folio,
+                'validada_at' => $venta->validada_at,
+            ]
+        );
+
 
         return response()->json([
             'ok' => true,
-            'estado' => 'YA_SINCRONIZADO',
+            'estado' => 'SINCRONIZADO',
             'folio' => $venta->folio,
             'validada_at' => $venta->validada_at,
         ]);
     }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | REGISTRAR FECHA REAL DEL ESCANEO OFFLINE
-    |--------------------------------------------------------------------------
-    */
-
-    $venta->validada_at =
-        \Carbon\Carbon::parse(
-            $request->scanned_at
-        );
-
-    $venta->save();
-
-
-    return response()->json([
-        'ok' => true,
-        'estado' => 'SINCRONIZADO',
-        'folio' => $venta->folio,
-        'validada_at' => $venta->validada_at,
-    ]);
-}
 }

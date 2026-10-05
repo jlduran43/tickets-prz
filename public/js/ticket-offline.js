@@ -1053,7 +1053,8 @@ async function sincronizarPendientes() {
                  */
                 if (
                     data.ok === true &&
-                    data.estado !== 'YA_SINCRONIZADO'
+                    data.estado === 'SINCRONIZADO' &&
+                    data.validada_at
                 ) {
 
                     await eliminarPendiente(
@@ -1062,12 +1063,12 @@ async function sincronizarPendientes() {
 
                     console.log(
                         'Sincronizado correctamente:',
-                        pendiente.folio
+                        pendiente.folio,
+                        data.validada_at
                     );
 
                     continue;
                 }
-
 
                 /*
                  * CASO 2
