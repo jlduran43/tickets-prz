@@ -567,7 +567,26 @@ async function procesarTicketOffline(
     }
 }
 
-function mostrarTicketValido(payload) {
+function mostrarBotonNuevoEscaneo() 
+{
+
+    const acciones =
+        document.getElementById('accionesScanner');
+
+    const btnCamara =
+        document.getElementById('btnCamara');
+
+    if (acciones) {
+        acciones.style.display = 'block';
+    }
+
+    if (btnCamara) {
+        btnCamara.style.display = 'none';
+    }
+}
+
+function mostrarTicketValido(payload) 
+{
 
     document
         .getElementById('estadoScanner')
@@ -639,9 +658,12 @@ function mostrarTicketValido(payload) {
 
             </div>
         `;
+
+        mostrarBotonNuevoEscaneo();
 }
 
-function mostrarTicketUtilizado(payload) {
+function mostrarTicketUtilizado(payload) 
+{
 
     document
         .getElementById('estadoScanner')
@@ -713,9 +735,12 @@ function mostrarTicketUtilizado(payload) {
 
             </div>
         `;
+
+        mostrarBotonNuevoEscaneo();
 }
 
-function mostrarTicketVencido() {
+function mostrarTicketVencido() 
+{
 
     document
         .getElementById('estadoScanner')
@@ -766,9 +791,12 @@ function mostrarTicketVencido() {
 
             </div>
         `;
+
+        ostrarBotonNuevoEscaneo();
 }
 
-function mostrarTicketInvalido(mensaje) {
+function mostrarTicketInvalido(mensaje) 
+{
 
     document
         .getElementById('estadoScanner')
@@ -821,6 +849,8 @@ function mostrarTicketInvalido(mensaje) {
 
             </div>
         `;
+
+        mostrarBotonNuevoEscaneo();
 }
 
 async function obtenerPendientes() {
