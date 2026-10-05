@@ -102,8 +102,7 @@ function base64UrlToString(base64Url) {
         .decode(bytes);
 }
 
-async function verificarTicketFirmado(codigo) 
-{
+async function verificarTicketFirmado(codigo) {
 
     if (
         !codigo.startsWith(
@@ -568,91 +567,258 @@ async function procesarTicketOffline(
     }
 }
 
-function mostrarTicketValido(
-    payload
-) {
-
-    const estado =
-        document.getElementById(
-            'estadoScanner'
-        );
-
-    estado.innerHTML = `
-        <div class="alert alert-success text-center">
-            <h3>
-                ✓ Ticket válido
-            </h3>
-
-            <strong>
-                ${payload.folio}
-            </strong>
-
-            <br>
-
-            <small>
-                Validado en modo contingencia
-            </small>
-        </div>
-    `;
-}
-
-
-function mostrarTicketUtilizado(
-    payload
-) {
-
-    const estado =
-        document.getElementById(
-            'estadoScanner'
-        );
-
-    estado.innerHTML = `
-        <div class="alert alert-warning text-center">
-            <h3>
-                Ticket ya utilizado
-            </h3>
-
-            <strong>
-                ${payload.folio}
-            </strong>
-        </div>
-    `;
-}
-
-
-function mostrarTicketVencido() {
+function mostrarTicketValido(payload) {
 
     document
-        .getElementById(
-            'estadoScanner'
-        )
+        .getElementById('estadoScanner')
         .innerHTML = `
-            <div class="alert alert-danger text-center">
-                <h3>
-                    Ticket vencido
-                </h3>
+            <div class="verification-card">
+
+                <div class="ticket-panel">
+
+                    <div class="state-circle valid">
+                        <i class="bi bi-check-lg"></i>
+                    </div>
+
+                    <h2 class="ticket-state-title valid">
+                        Ticket válido
+                    </h2>
+
+                    <p class="ticket-state-description">
+                        El ticket fue validado correctamente.
+                    </p>
+
+                    <div class="status-box valid">
+
+                        <div class="status-icon">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+
+                        <div>
+
+                            <div class="status-label">
+                                Acceso autorizado
+                            </div>
+
+                            <div class="status-text">
+                                Autorizar el ingreso.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="ticket-info">
+
+                        <div class="info-heading">
+                            <i class="bi bi-ticket-perforated-fill"></i>
+                            Información del ticket
+                        </div>
+
+                        <div class="info-row">
+
+                            <div class="info-label">
+                                Folio:
+                            </div>
+
+                            <div class="info-value">
+                                ${payload.folio ?? '-'}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            Validación realizada en modo offline
+                        </small>
+                    </div>
+
+                </div>
+
             </div>
         `;
 }
 
-
-function mostrarTicketInvalido(
-    mensaje
-) {
+function mostrarTicketUtilizado(payload) {
 
     document
-        .getElementById(
-            'estadoScanner'
-        )
+        .getElementById('estadoScanner')
         .innerHTML = `
-            <div class="alert alert-danger text-center">
-                <h3>
-                    Ticket inválido
-                </h3>
+            <div class="verification-card">
 
-                <p>
-                    ${mensaje}
-                </p>
+                <div class="ticket-panel">
+
+                    <div class="state-circle used">
+                        <i class="bi bi-check2-circle"></i>
+                    </div>
+
+                    <h2 class="ticket-state-title used">
+                        Ticket utilizado
+                    </h2>
+
+                    <p class="ticket-state-description">
+                        Este ticket ya fue utilizado anteriormente.
+                    </p>
+
+                    <div class="status-box used">
+
+                        <div class="status-icon">
+                            <i class="bi bi-shield-x"></i>
+                        </div>
+
+                        <div>
+
+                            <div class="status-label">
+                                Acceso rechazado
+                            </div>
+
+                            <div class="status-text">
+                                No autorizar el ingreso.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="ticket-info">
+
+                        <div class="info-heading">
+                            <i class="bi bi-ticket-perforated-fill"></i>
+                            Información del ticket
+                        </div>
+
+                        <div class="info-row">
+
+                            <div class="info-label">
+                                Folio:
+                            </div>
+
+                            <div class="info-value">
+                                ${payload.folio ?? '-'}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            Verificación realizada en modo offline
+                        </small>
+                    </div>
+
+                </div>
+
+            </div>
+        `;
+}
+
+function mostrarTicketVencido() {
+
+    document
+        .getElementById('estadoScanner')
+        .innerHTML = `
+            <div class="verification-card">
+
+                <div class="ticket-panel">
+
+                    <div class="state-circle expired">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+
+                    <h2 class="ticket-state-title expired">
+                        Ticket vencido
+                    </h2>
+
+                    <p class="ticket-state-description">
+                        Este ticket superó su período de vigencia.
+                    </p>
+
+                    <div class="status-box expired">
+
+                        <div class="status-icon">
+                            <i class="bi bi-calendar-x"></i>
+                        </div>
+
+                        <div>
+
+                            <div class="status-label">
+                                Acceso rechazado
+                            </div>
+
+                            <div class="status-text">
+                                No autorizar el ingreso.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            Validación realizada en modo offline
+                        </small>
+                    </div>
+
+                </div>
+
+            </div>
+        `;
+}
+
+function mostrarTicketInvalido(mensaje) {
+
+    document
+        .getElementById('estadoScanner')
+        .innerHTML = `
+            <div class="verification-card">
+
+                <div class="ticket-panel">
+
+                    <div class="state-circle invalid">
+                        <i class="bi bi-x-lg"></i>
+                    </div>
+
+                    <h2 class="ticket-state-title invalid">
+                        Ticket inválido
+                    </h2>
+
+                    <p class="ticket-state-description">
+                        ${mensaje ??
+        'El código QR no corresponde a un ticket válido.'
+        }
+                    </p>
+
+                    <div class="status-box invalid">
+
+                        <div class="status-icon">
+                            <i class="bi bi-shield-x"></i>
+                        </div>
+
+                        <div>
+
+                            <div class="status-label">
+                                Acceso rechazado
+                            </div>
+
+                            <div class="status-text">
+                                No autorizar el ingreso.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            Verificación realizada en modo offline
+                        </small>
+                    </div>
+
+                </div>
+
             </div>
         `;
 }
