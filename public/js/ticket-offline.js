@@ -792,7 +792,7 @@ function mostrarTicketVencido()
             </div>
         `;
 
-        ostrarBotonNuevoEscaneo();
+        mostrarBotonNuevoEscaneo();
 }
 
 function mostrarTicketInvalido(mensaje) 
