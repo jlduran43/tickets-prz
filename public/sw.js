@@ -8,8 +8,7 @@ const OFFLINE_FILES = [
     '/control',
     '/js/offline-auth.js',
     '/js/html5-qrcode.min.js',
-    '/offline/offline_auth_public.pem',
-    '/offline/ticket_public.pem'
+    '/offline/offline_auth_public.pem'
 ];
 
 self.addEventListener('install', event => {

@@ -7,10 +7,8 @@ use Illuminate\Http\Request;
 
 class OfflineAuthController extends Controller
 {
-    public function preparar(
-        Request $request,
-        OfflineAuthSigner $signer
-    ) {
+    public function preparar(Request $request, OfflineAuthSigner $signer) 
+    {
         $user = $request->user();
 
         if (!$user) {

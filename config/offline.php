@@ -20,12 +20,8 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'private_key' => storage_path(
-        'app/keys/offline_auth_private.pem'
-    ),
+    'private_key' => storage_path('app/keys/offline_auth_private.pem'),
 
-    'public_key' => public_path(
-        'offline/offline_auth_public.pem'
-    ),
+    'public_key' => public_path('offline/offline_auth_public.pem'),
 
 ];
