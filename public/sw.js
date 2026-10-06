@@ -1,4 +1,4 @@
-const CACHE_NAME = 'prz-scanner-v7';
+const CACHE_NAME = 'prz-scanner-v8';
 
 const OFFLINE_FILES = [
     '/offline/ticket_public.pem',
@@ -12,6 +12,7 @@ const OFFLINE_FILES = [
 
     '/offline-login',
     '/control',
+    '/control/scanner'
 ];
 
 self.addEventListener('install', event => {
@@ -110,6 +111,72 @@ self.addEventListener('fetch', event => {
 
                     return cache.match(
                         '/offline-login'
+                    );
+
+                })
+
+        );
+
+        return;
+    }
+
+    /*
+ * ESCÁNER OFFLINE
+ *
+ * Intenta Internet primero.
+ * Si falla, utiliza la pantalla del escáner guardada.
+ */
+    if (
+        request.mode === 'navigate' &&
+        url.pathname === '/control/scanner'
+    ) {
+
+        event.respondWith(
+
+            fetch(request)
+
+                .then(response => {
+
+                    const clone =
+                        response.clone();
+
+                    if (response.ok) {
+
+                        caches
+                            .open(CACHE_NAME)
+                            .then(cache => {
+
+                                cache.put(
+                                    '/control/scanner',
+                                    clone
+                                );
+
+                            });
+
+                    }
+
+                    return response;
+
+                })
+
+                .catch(async () => {
+
+                    const cache =
+                        await caches.open(
+                            CACHE_NAME
+                        );
+
+                    const scanner =
+                        await cache.match(
+                            '/control/scanner'
+                        );
+
+                    if (scanner) {
+                        return scanner;
+                    }
+
+                    return cache.match(
+                        '/control'
                     );
 
                 })
