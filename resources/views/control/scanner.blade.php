@@ -6,10 +6,10 @@
 
     <style>
         /*
-                                                            |--------------------------------------------------------------------------
-                                                            | ESCÁNER
-                                                            |--------------------------------------------------------------------------
-                                                        */
+                                                                |--------------------------------------------------------------------------
+                                                                | ESCÁNER
+                                                                |--------------------------------------------------------------------------
+                                                            */
 
         .scanner-container {
             max-width: 720px;
@@ -22,10 +22,10 @@
         }
 
         /*
-                                                            |--------------------------------------------------------------------------
-                                                            | RESULTADO TICKET
-                                                            |--------------------------------------------------------------------------
-                                                        */
+                                                                |--------------------------------------------------------------------------
+                                                                | RESULTADO TICKET
+                                                                |--------------------------------------------------------------------------
+                                                            */
 
         .verification-card {
             width: 100%;
@@ -38,10 +38,10 @@
         }
 
         /*
-                                                            |--------------------------------------------------------------------------
-                                                            | CABECERA
-                                                            |--------------------------------------------------------------------------
-                                                        */
+                                                                |--------------------------------------------------------------------------
+                                                                | CABECERA
+                                                                |--------------------------------------------------------------------------
+                                                            */
 
         .park-header {
             display: flex;
@@ -75,10 +75,10 @@
         }
 
         /*
-                                                            |--------------------------------------------------------------------------
-                                                            | PANEL
-                                                            |--------------------------------------------------------------------------
-                                                        */
+                                                                |--------------------------------------------------------------------------
+                                                                | PANEL
+                                                                |--------------------------------------------------------------------------
+                                                            */
 
         .ticket-panel {
             border: 1px solid #e2e5e3;
@@ -88,10 +88,10 @@
         }
 
         /*
-                                                            |--------------------------------------------------------------------------
-                                                            | CÍRCULO ESTADO
-                                                            |--------------------------------------------------------------------------
-                                                        */
+                                                                |--------------------------------------------------------------------------
+                                                                | CÍRCULO ESTADO
+                                                                |--------------------------------------------------------------------------
+                                                            */
 
         .state-circle {
             width: 104px;
@@ -126,10 +126,10 @@
         }
 
         /*
-                                                                                                                                                                                                |--------------------------------------------------------------------------
-                                                                                                                                                                                                | TÍTULOS
-                                                                                                                                                                                                |--------------------------------------------------------------------------
-                                                                                                                                                                                                */
+                                                                                                                                                                                                    |--------------------------------------------------------------------------
+                                                                                                                                                                                                    | TÍTULOS
+                                                                                                                                                                                                    |--------------------------------------------------------------------------
+                                                                                                                                                                                                    */
 
         .ticket-state-title {
             margin-top: 24px;
@@ -174,10 +174,10 @@
 
 
         /*
-                                                                                                                                                                                                |--------------------------------------------------------------------------
-                                                                                                                                                                                                | ALERTA PRINCIPAL
-                                                                                                                                                                                                |--------------------------------------------------------------------------
-                                                                                                                                                                                                */
+                                                                                                                                                                                                    |--------------------------------------------------------------------------
+                                                                                                                                                                                                    | ALERTA PRINCIPAL
+                                                                                                                                                                                                    |--------------------------------------------------------------------------
+                                                                                                                                                                                                    */
 
         .status-box {
             display: flex;
@@ -248,10 +248,10 @@
 
 
         /*
-                                                                                                                                                                                                |--------------------------------------------------------------------------
-                                                                                                                                                                                                | INFORMACIÓN
-                                                                                                                                                                                                |--------------------------------------------------------------------------
-                                                                                                                                                                                                */
+                                                                                                                                                                                                    |--------------------------------------------------------------------------
+                                                                                                                                                                                                    | INFORMACIÓN
+                                                                                                                                                                                                    |--------------------------------------------------------------------------
+                                                                                                                                                                                                    */
 
         .ticket-info {
             border-top: 1px solid #d9dddb;
@@ -312,10 +312,10 @@
 
 
         /*
-                                                                                                                                                                                                |--------------------------------------------------------------------------
-                                                                                                                                                                                                | FOOTER
-                                                                                                                                                                                                |--------------------------------------------------------------------------
-                                                                                                                                                                                                */
+                                                                                                                                                                                                    |--------------------------------------------------------------------------
+                                                                                                                                                                                                    | FOOTER
+                                                                                                                                                                                                    |--------------------------------------------------------------------------
+                                                                                                                                                                                                    */
 
         .ticket-footer {
             margin-top: 50px;
@@ -375,10 +375,10 @@
 
 
         /*
-                                                                                                                                                                                                |--------------------------------------------------------------------------
-                                                                                                                                                                                                | MOBILE
-                                                                                                                                                                                                |--------------------------------------------------------------------------
-                                                                                                                                                                                                */
+                                                                                                                                                                                                    |--------------------------------------------------------------------------
+                                                                                                                                                                                                    | MOBILE
+                                                                                                                                                                                                    |--------------------------------------------------------------------------
+                                                                                                                                                                                                    */
 
         @media (max-width: 576px) {
 
@@ -588,7 +588,7 @@
                                         PIN offline
                                     </label>
 
-                                    <input type="password" id="offline-pin" class="form-control">
+                                    <input type="password" id="offlinePin" class="form-control">
                                 </div>
 
                                 <div class="mb-3">
@@ -596,7 +596,7 @@
                                         Repetir PIN
                                     </label>
 
-                                    <input type="password" id="offline-pin-confirmation" class="form-control">
+                                    <input type="password" id="offlinePinConfirmacion" class="form-control">
                                 </div>
 
                                 <button type="button" id="btn-habilitar-offline" class="btn btn-primary">
@@ -2369,113 +2369,108 @@ ${JSON.stringify(
                 );
         }
 
-        document
-            .getElementById(
-                'btn-habilitar-offline'
-            )
-            ?.addEventListener(
-                'click',
-                async function() {
+        document.getElementById('btn-habilitar-offline')?.addEventListener(
+            'click', async function() {
 
-                    const pin =
-                        document
-                        .getElementById(
-                            'offlinePin'
-                        )
-                        .value;
+                const pin =
+                    document
+                    .getElementById(
+                        'offlinePin'
+                    )
+                    .value;
 
-                    const confirmacion =
-                        document
-                        .getElementById(
-                            'offlinePinConfirmacion'
-                        )
-                        .value;
+                const confirmacion =
+                    document
+                    .getElementById(
+                        'offlinePinConfirmacion'
+                    )
+                    .value;
 
-                    const resultado =
-                        document.getElementById(
-                            'resultadoPrepararOffline'
+                const resultado =
+                    document.getElementById(
+                        'resultadoPrepararOffline'
+                    );
+
+
+                if (
+                    pin.length < 4
+                ) {
+
+                    resultado.innerHTML =
+                        '<div class="alert alert-danger">El PIN debe tener al menos 4 caracteres.</div>';
+
+                    return;
+                }
+
+
+                if (
+                    pin !== confirmacion
+                ) {
+
+                    resultado.innerHTML =
+                        '<div class="alert alert-danger">Los PIN no coinciden.</div>';
+
+                    return;
+                }
+
+
+                try {
+
+                    const deviceId =
+                        await PRZOfflineAuth
+                        .obtenerDeviceId();
+
+
+                    const response =
+                        await fetch(
+                            '/control/offline/preparar', {
+                                method: 'POST',
+
+                                headers: {
+
+                                    'Content-Type': 'application/json',
+
+                                    'Accept': 'application/json',
+
+                                    'X-CSRF-TOKEN': document
+                                        .querySelector(
+                                            'meta[name="csrf-token"]'
+                                        )
+                                        .content
+                                },
+
+                                body: JSON.stringify({
+                                    device_id: deviceId
+                                })
+                            }
                         );
 
 
-                    if (
-                        pin.length < 4
-                    ) {
-
-                        resultado.innerHTML =
-                            '<div class="alert alert-danger">El PIN debe tener al menos 4 caracteres.</div>';
-
-                        return;
-                    }
+                    const datos =
+                        await response.json();
 
 
                     if (
-                        pin !== confirmacion
+                        !response.ok ||
+                        !datos.ok
                     ) {
 
-                        resultado.innerHTML =
-                            '<div class="alert alert-danger">Los PIN no coinciden.</div>';
-
-                        return;
+                        throw new Error(
+                            datos.message ??
+                            'No fue posible habilitar el modo offline.'
+                        );
                     }
 
 
-                    try {
-
-                        const deviceId =
-                            await PRZOfflineAuth
-                            .obtenerDeviceId();
-
-
-                        const response =
-                            await fetch(
-                                '/control/offline/preparar', {
-                                    method: 'POST',
-
-                                    headers: {
-
-                                        'Content-Type': 'application/json',
-
-                                        'Accept': 'application/json',
-
-                                        'X-CSRF-TOKEN': document
-                                            .querySelector(
-                                                'meta[name="csrf-token"]'
-                                            )
-                                            .content
-                                    },
-
-                                    body: JSON.stringify({
-                                        device_id: deviceId
-                                    })
-                                }
-                            );
+                    await PRZOfflineAuth
+                        .guardarUsuarioOffline(
+                            datos,
+                            pin
+                        );
 
 
-                        const datos =
-                            await response.json();
-
-
-                        if (
-                            !response.ok ||
-                            !datos.ok
-                        ) {
-
-                            throw new Error(
-                                datos.message ??
-                                'No fue posible habilitar el modo offline.'
-                            );
-                        }
-
-
-                        await PRZOfflineAuth
-                            .guardarUsuarioOffline(
-                                datos,
-                                pin
-                            );
-
-
-                        resultado.innerHTML =
-                            `
+                    resultado.innerHTML =
+                        `
                     <div class="alert alert-success">
                         <strong>Dispositivo preparado.</strong>
                         <br>
@@ -2487,32 +2482,32 @@ ${JSON.stringify(
                     `;
 
 
-                        document
-                            .getElementById(
-                                'offlinePin'
-                            )
-                            .value = '';
+                    document
+                        .getElementById(
+                            'offlinePin'
+                        )
+                        .value = '';
 
-                        document
-                            .getElementById(
-                                'offlinePinConfirmacion'
-                            )
-                            .value = '';
+                    document
+                        .getElementById(
+                            'offlinePinConfirmacion'
+                        )
+                        .value = '';
 
 
-                    } catch (error) {
+                } catch (error) {
 
-                        console.error(error);
+                    console.error(error);
 
-                        resultado.innerHTML =
-                            `
+                    resultado.innerHTML =
+                        `
                     <div class="alert alert-danger">
                         ${error.message}
                     </div>
                     `;
-                    }
                 }
-            );
+            }
+        );
 
         async function verificarAccesoControlOffline() {
 
