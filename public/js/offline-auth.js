@@ -829,8 +829,7 @@ async function loginOffline(
     return payload;
 }
 
-await PRZOfflineAuth.actualizarSoloPermisoOffline(datos) 
-{
+PRZOfflineAuth.actualizarSoloPermisoOffline = async function (datos) {
 
     const db =
         await abrirOfflineAuthDB();
@@ -840,17 +839,12 @@ await PRZOfflineAuth.actualizarSoloPermisoOffline(datos)
             .trim()
             .toLowerCase();
 
-
     const usuario =
-        await obtenerUsuarioOffline(
-            email
-        );
-
+        await obtenerUsuarioOffline(email);
 
     if (!usuario) {
         return;
     }
-
 
     usuario.permit =
         datos.permit;
@@ -860,7 +854,6 @@ await PRZOfflineAuth.actualizarSoloPermisoOffline(datos)
 
     usuario.actualizado_at =
         new Date().toISOString();
-
 
     return new Promise(
         (resolve, reject) => {
@@ -886,8 +879,7 @@ await PRZOfflineAuth.actualizarSoloPermisoOffline(datos)
                 );
         }
     );
-}
-
+};
 
 /*
 |--------------------------------------------------------------------------
