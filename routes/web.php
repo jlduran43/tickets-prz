@@ -331,7 +331,8 @@ Route::get(
 |
 */
 
-Route::match(['GET', 'POST'],
+Route::match(
+    ['GET', 'POST'],
     '/webpay/retorno',
     [WebpayController::class, 'retorno']
 )->name('webpay.retorno');
@@ -525,6 +526,11 @@ Route::middleware([
     )->name('admin.tipos-entradas.estado');
 });
 
+Route::view(
+    '/offline-login',
+    'auth.offline-login'
+)->name('offline.login');
+
 /*
 |--------------------------------------------------------------------------
 | CONTROL
@@ -574,9 +580,4 @@ Route::middleware([
             'sincronizarOffline'
         ]
     )->name('control.sincronizarOffline');
-
-    Route::view(
-        '/offline-login',
-        'auth.offline-login'
-    )->name('offline.login');
 });
