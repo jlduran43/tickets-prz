@@ -129,9 +129,7 @@
 
     </div>
 
-
-    <script src="/js/offline-auth.js"></script>
-
+    <script src="{{ asset('js/offline-auth.js') }}"></script>
 
     <script>
         function mostrarEstadoConexion() {
@@ -221,9 +219,14 @@
 
                     try {
 
+                        if (!window.PRZOfflineAuth) {
+                            throw new Error(
+                                'El módulo de acceso offline no está disponible en este dispositivo.'
+                            );
+                        }
+
                         const usuario =
-                            await PRZOfflineAuth
-                            .loginOffline(
+                            await window.PRZOfflineAuth.loginOffline(
                                 email,
                                 pin
                             );
