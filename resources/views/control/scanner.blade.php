@@ -2371,7 +2371,7 @@ ${JSON.stringify(
 
         document
             .getElementById(
-                'btnPrepararOffline'
+                'btn-habilitar-offline'
             )
             ?.addEventListener(
                 'click',
