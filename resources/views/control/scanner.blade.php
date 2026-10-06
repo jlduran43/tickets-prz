@@ -603,7 +603,7 @@
                                     Habilitar este dispositivo
                                 </button>
 
-                                <div id="offline-auth-message" class="mt-3"></div>
+                                <div id="resultadoPrepararOffline" class="mt-3"></div>
 
                             </div>
                         </div>
