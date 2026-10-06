@@ -220,7 +220,7 @@ async function verificarTicketFirmado(codigo) {
 const PRZ_DB_NAME =
     'PRZTicketOffline';
 
-const PRZ_DB_VERSION = 1;
+const PRZ_DB_VERSION = 2;
 
 const STORE_USADOS =
     'tickets_usados';

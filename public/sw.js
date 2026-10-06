@@ -1,4 +1,4 @@
-const CACHE_NAME = 'prz-scanner-v8';
+const CACHE_NAME = 'prz-scanner-v9';
 
 const OFFLINE_FILES = [
     '/offline/ticket_public.pem',
