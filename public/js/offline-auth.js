@@ -829,8 +829,7 @@ async function loginOffline(
     return payload;
 }
 
-PRZOfflineAuth.actualizarSoloPermisoOffline = async function (datos) {
-
+async function actualizarSoloPermisoOffline(datos) {
     const db =
         await abrirOfflineAuthDB();
 
@@ -879,7 +878,7 @@ PRZOfflineAuth.actualizarSoloPermisoOffline = async function (datos) {
                 );
         }
     );
-};
+}
 
 /*
 |--------------------------------------------------------------------------
