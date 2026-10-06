@@ -7,7 +7,6 @@ const OFFLINE_FILES = [
     '/offline-login',
     '/control',
     '/js/offline-auth.js',
-    '/js/html5-qrcode.min.js',
     '/offline/offline_auth_public.pem'
 ];
 
