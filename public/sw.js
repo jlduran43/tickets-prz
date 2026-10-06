@@ -1,4 +1,4 @@
-const CACHE_NAME = 'prz-scanner-v9';
+const CACHE_NAME = 'prz-scanner-v10';
 
 const OFFLINE_FILES = [
     '/offline/ticket_public.pem',
@@ -11,8 +11,6 @@ const OFFLINE_FILES = [
     '/images/logo-ticket.png',
 
     '/offline-login',
-    '/control',
-    '/control/scanner'
 ];
 
 self.addEventListener('install', event => {
@@ -71,10 +69,17 @@ self.addEventListener('fetch', event => {
 
                 .then(response => {
 
-                    const clone =
-                        response.clone();
+                    const clone = response.clone();
 
-                    if (response.ok) {
+                    /*
+                     * Guardar solamente si Laravel realmente
+                     * entregó /control y NO redirigió al login.
+                     */
+                    if (
+                        response.ok &&
+                        !response.redirected &&
+                        new URL(response.url).pathname === '/control'
+                    ) {
 
                         caches
                             .open(CACHE_NAME)
@@ -90,7 +95,6 @@ self.addEventListener('fetch', event => {
                     }
 
                     return response;
-
                 })
 
                 .catch(async () => {
@@ -137,10 +141,17 @@ self.addEventListener('fetch', event => {
 
                 .then(response => {
 
-                    const clone =
-                        response.clone();
+                    const clone = response.clone();
 
-                    if (response.ok) {
+                    /*
+                     * No guardar accidentalmente
+                     * una redirección al login.
+                     */
+                    if (
+                        response.ok &&
+                        !response.redirected &&
+                        new URL(response.url).pathname === '/control/scanner'
+                    ) {
 
                         caches
                             .open(CACHE_NAME)
@@ -156,7 +167,6 @@ self.addEventListener('fetch', event => {
                     }
 
                     return response;
-
                 })
 
                 .catch(async () => {
