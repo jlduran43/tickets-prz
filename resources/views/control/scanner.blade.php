@@ -668,7 +668,7 @@
 @section('js')
 
     <script src="{{ asset('js/html5-qrcode.min.js') }}"></script>
-    <script src="{{ asset('js/ticket-offline.js') }}?20261005-4""></script>
+    <script src="{{ asset('js/ticket-offline.js') }}?20261006-1""></script>
     <script src="/js/offline-auth.js"></script>
 
     <script>

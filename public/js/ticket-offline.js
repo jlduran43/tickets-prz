@@ -1216,10 +1216,21 @@ window.addEventListener(
     'online',
     function () {
 
-        intentarSincronizar();
+        console.log(
+            'Internet recuperado. Sincronización automática en 2 segundos...'
+        );
+
+        setTimeout(
+            function () {
+
+                intentarSincronizar();
+
+            },
+            2000
+        );
+
     }
 );
-
 
 /*
 |--------------------------------------------------------------------------
@@ -1231,10 +1242,21 @@ window.addEventListener(
     'load',
     function () {
 
-        intentarSincronizar();
+        if (navigator.onLine) {
+
+            setTimeout(
+                function () {
+
+                    intentarSincronizar();
+
+                },
+                1500
+            );
+
+        }
+
     }
 );
-
 
 /*
 |--------------------------------------------------------------------------
