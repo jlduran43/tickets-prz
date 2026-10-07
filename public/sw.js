@@ -1,4 +1,4 @@
-const CACHE_NAME = 'prz-scanner-v18';
+const CACHE_NAME = 'prz-scanner-v19';
 
 const OFFLINE_FILES = [
     '/offline/ticket_public.pem',
@@ -23,21 +23,109 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-    event.waitUntil(
-        Promise.all([
-            self.clients.claim(),
 
-            caches.keys().then(names =>
-                Promise.all(
-                    names.map(name => {
-                        if (name !== CACHE_NAME) {
-                            return caches.delete(name);
-                        }
-                    })
-                )
-            )
-        ])
+    event.waitUntil(
+
+        (async () => {
+
+            const cacheNueva =
+                await caches.open(CACHE_NAME);
+
+            const nombresCaches =
+                await caches.keys();
+
+            /*
+             * Páginas dinámicas que necesitamos
+             * conservar entre versiones.
+             */
+            const paginasImportantes = [
+                '/control',
+                '/control/escaner'
+            ];
+
+
+            /*
+             * Antes de eliminar cachés antiguas,
+             * recuperar las páginas protegidas.
+             */
+            for (const nombre of nombresCaches) {
+
+                if (nombre === CACHE_NAME) {
+                    continue;
+                }
+
+                const cacheAnterior =
+                    await caches.open(nombre);
+
+
+                for (const pagina of paginasImportantes) {
+
+                    /*
+                     * Si ya está en la caché nueva,
+                     * no hacemos nada.
+                     */
+                    const yaExiste =
+                        await cacheNueva.match(pagina);
+
+                    if (yaExiste) {
+                        continue;
+                    }
+
+
+                    /*
+                     * Buscar copia en caché anterior.
+                     */
+                    const respuestaAnterior =
+                        await cacheAnterior.match(pagina);
+
+                    if (respuestaAnterior) {
+
+                        console.log(
+                            'Migrando a nueva caché:',
+                            pagina
+                        );
+
+                        await cacheNueva.put(
+                            pagina,
+                            respuestaAnterior.clone()
+                        );
+                    }
+                }
+            }
+
+
+            /*
+             * Ahora sí podemos eliminar
+             * las cachés antiguas.
+             */
+            await Promise.all(
+
+                nombresCaches
+                    .filter(
+                        nombre =>
+                            nombre !== CACHE_NAME
+                    )
+                    .map(
+                        nombre =>
+                            caches.delete(nombre)
+                    )
+            );
+
+
+            /*
+             * Tomar control inmediatamente.
+             */
+            await self.clients.claim();
+
+            console.log(
+                'Service Worker activado:',
+                CACHE_NAME
+            );
+
+        })()
+
     );
+
 });
 
 self.addEventListener('fetch', event => {
@@ -104,14 +192,35 @@ self.addEventListener('fetch', event => {
                             CACHE_NAME
                         );
 
-                    const control =
+                    let control =
                         await cache.match(
                             '/control'
                         );
 
+                    /*
+                     * Segunda oportunidad:
+                     * buscar /control en cualquier caché existente.
+                     */
+                    if (!control) {
+
+                        control =
+                            await caches.match(
+                                '/control'
+                            );
+                    }
+
                     if (control) {
+
+                        console.log(
+                            'Cargando /control desde caché offline.'
+                        );
+
                         return control;
                     }
+
+                    console.warn(
+                        '/control todavía no está preparado offline.'
+                    );
 
                     return cache.match(
                         '/offline-login'
