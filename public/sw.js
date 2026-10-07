@@ -1,4 +1,4 @@
-const CACHE_NAME = 'prz-scanner-v10';
+const CACHE_NAME = 'prz-scanner-v11';
 
 const OFFLINE_FILES = [
     '/offline/ticket_public.pem',
@@ -132,7 +132,7 @@ self.addEventListener('fetch', event => {
  */
     if (
         request.mode === 'navigate' &&
-        url.pathname === '/control/scanner'
+        url.pathname === '/control/escaner'
     ) {
 
         event.respondWith(
@@ -158,7 +158,7 @@ self.addEventListener('fetch', event => {
                             .then(cache => {
 
                                 cache.put(
-                                    '/control/scanner',
+                                    '/control/escaner',
                                     clone
                                 );
 
@@ -178,7 +178,7 @@ self.addEventListener('fetch', event => {
 
                     const scanner =
                         await cache.match(
-                            '/control/scanner'
+                            '/control/escaner'
                         );
 
                     if (scanner) {
