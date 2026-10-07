@@ -1,8 +1,8 @@
 console.log(
-    'PRZ ticket-offline.js VERSION 15 CARGADA'
+    'PRZ ticket-offline.js VERSION 16 CARGADA'
 );
 
-window.PRZ_TICKET_OFFLINE_VERSION = '15';
+window.PRZ_TICKET_OFFLINE_VERSION = '16';
 
 let clavePublicaPRZ = null;
 
@@ -561,9 +561,15 @@ async function procesarTicketOffline(codigo)
             return;
         }
 
-
+        /*
+         * TEMPORAL PARA DIAGNÓSTICO.
+         * Nos mostrará el error verdadero en el teléfono.
+         */
         mostrarTicketInvalido(
-            'El código QR no corresponde a un ticket válido.'
+            'ERROR OFFLINE: ' +
+            (error?.name ?? 'Error') +
+            ' - ' +
+            (error?.message ?? String(error))
         );
     }
 }
