@@ -1,3 +1,9 @@
+console.log(
+    'PRZ ticket-offline.js VERSION 15 CARGADA'
+);
+
+window.PRZ_TICKET_OFFLINE_VERSION = '15';
+
 let clavePublicaPRZ = null;
 
 async function cargarClavePublica() {
