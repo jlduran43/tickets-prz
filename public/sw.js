@@ -1,4 +1,4 @@
-const CACHE_NAME = 'prz-scanner-v12';
+const CACHE_NAME = 'prz-scanner-v13';
 
 const OFFLINE_FILES = [
     '/offline/ticket_public.pem',
@@ -150,7 +150,7 @@ self.addEventListener('fetch', event => {
                     if (
                         response.ok &&
                         !response.redirected &&
-                        new URL(response.url).pathname === '/control/scanner'
+                        new URL(response.url).pathname === '/control/escaner'
                     ) {
 
                         caches
@@ -185,8 +185,40 @@ self.addEventListener('fetch', event => {
                         return scanner;
                     }
 
-                    return cache.match(
-                        '/control'
+                    /*
+                 * NO volver silenciosamente a /control.
+                 */
+                    return new Response(
+                        `
+                    <!DOCTYPE html>
+                    <html lang="es">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport"
+                              content="width=device-width, initial-scale=1">
+                        <title>Escáner no disponible</title>
+                    </head>
+                    <body style="font-family:Arial;padding:30px;">
+                        <h2>Escáner no disponible offline</h2>
+
+                        <p>
+                            Esta pantalla todavía no ha sido
+                            guardada en este dispositivo.
+                        </p>
+
+                        <p>
+                            Conecta Internet, inicia sesión y abre
+                            el escáner una vez antes de trabajar offline.
+                        </p>
+                    </body>
+                    </html>
+                    `,
+                        {
+                            headers: {
+                                'Content-Type':
+                                    'text/html; charset=utf-8'
+                            }
+                        }
                     );
 
                 })
