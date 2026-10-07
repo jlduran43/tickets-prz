@@ -247,11 +247,24 @@
                                             </a>
 
                                             {{-- Descargar PDF --}}
-                                            <a href="{{ route('ticket.pdf.descargar', $venta->token_ticket) }}"
-                                                class="btn btn-success flex-fill">
-                                                <i class="bi bi-file-earmark-pdf me-2"></i>
-                                                Descargar PDF
-                                            </a>
+                                            @if (!empty($venta->token_ticket))
+                                                <a href="{{ route('ticket.pdf.descargar', $venta->token_ticket) }}"
+                                                    class="btn btn-success flex-fill">
+
+                                                    <i class="bi bi-file-earmark-pdf me-2"></i>
+
+                                                    Descargar PDF
+
+                                                </a>
+                                            @else
+                                                <button type="button" class="btn btn-secondary flex-fill" disabled>
+
+                                                    <i class="bi bi-exclamation-triangle me-2"></i>
+
+                                                    Ticket sin token
+
+                                                </button>
+                                            @endif
 
                                         </div>
 
