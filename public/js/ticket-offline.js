@@ -1,8 +1,8 @@
 console.log(
-    'PRZ ticket-offline.js VERSION 16 CARGADA'
+    'PRZ ticket-offline.js VERSION 17 CARGADA'
 );
 
-window.PRZ_TICKET_OFFLINE_VERSION = '16';
+window.PRZ_TICKET_OFFLINE_VERSION = '17';
 
 let clavePublicaPRZ = null;
 
@@ -494,15 +494,20 @@ async function agregarPendiente(
     );
 }
 
-async function procesarTicketOffline(codigo) 
-{
+async function procesarTicketOffline(codigo) {
+    let etapa = 'INICIO';
 
     try {
+
+        etapa = '1 - verificar firma';
 
         const payload =
             await verificarTicketFirmado(
                 codigo
             );
+
+
+        etapa = '2 - consultar ticket usado';
 
         const usado =
             await ticketFueUsado(
@@ -519,63 +524,145 @@ async function procesarTicketOffline(codigo)
             return;
         }
 
+
+        etapa = '3 - guardar pendiente';
+
         await agregarPendiente(
             codigo,
             payload
         );
 
+
+        etapa = '4 - guardar ticket usado';
+
         await guardarTicketUsado(
             payload
         );
 
-        mostrarTicketValido(
-            payload
-        );
+
+        /*
+         * IMPORTANTE:
+         * En esta prueba no llamamos todavía
+         * a mostrarTicketValido().
+         *
+         * Escribimos directamente el resultado
+         * para saber si el problema está en esa función.
+         */
+
+        etapa = '5 - mostrar válido';
+
+        const estado =
+            document.getElementById(
+                'estadoScanner'
+            );
+
+
+        if (!estado) {
+
+            throw new Error(
+                'No existe #estadoScanner'
+            );
+        }
+
+
+        estado.innerHTML = `
+            <div style="
+                padding:25px;
+                background:#e7f6ec;
+                border:3px solid #198754;
+                border-radius:12px;
+                text-align:center;
+            ">
+
+                <h2 style="color:#198754;">
+                    TICKET VÁLIDO
+                </h2>
+
+                <p>
+                    Validación offline correcta.
+                </p>
+
+                <p>
+                    Folio:
+                    <strong>
+                        ${payload.folio ?? '-'}
+                    </strong>
+                </p>
+
+                <p style="font-size:12px;">
+                    DIAGNÓSTICO: ETAPA 5 COMPLETADA
+                </p>
+
+            </div>
+        `;
+
+
+        mostrarBotonNuevoEscaneo();
 
 
     } catch (error) {
 
-        console.error(error);
+        const mensaje =
+            'ETAPA: ' +
+            etapa +
+            ' | ' +
+            (error?.name ?? 'Error') +
+            ' | ' +
+            (error?.message ?? String(error));
 
 
-        if (
-            error.message ===
-            'TICKET_VENCIDO'
-        ) {
+        console.error(
+            'ERROR OFFLINE:',
+            mensaje,
+            error
+        );
 
-            mostrarTicketVencido();
-
-            return;
-        }
-
-
-        if (
-            error.message ===
-            'FIRMA_INVALIDA'
-        ) {
-
-            mostrarTicketInvalido(
-                'La firma digital del ticket no es válida.'
-            );
-
-            return;
-        }
 
         /*
-         * TEMPORAL PARA DIAGNÓSTICO.
-         * Nos mostrará el error verdadero en el teléfono.
+         * NO usar mostrarTicketInvalido()
+         * durante esta prueba.
+         *
+         * Escribimos directamente en pantalla.
          */
-        mostrarTicketInvalido(
-            'ERROR OFFLINE: ' +
-            (error?.name ?? 'Error') +
-            ' - ' +
-            (error?.message ?? String(error))
+        const estado =
+            document.getElementById(
+                'estadoScanner'
+            );
+
+
+        if (estado) {
+
+            estado.innerHTML = `
+                <div style="
+                    padding:20px;
+                    background:#ffe5e5;
+                    border:3px solid #dc3545;
+                    border-radius:12px;
+                ">
+
+                    <h2>
+                        ERROR DE DIAGNÓSTICO
+                    </h2>
+
+                    <p style="
+                        font-size:18px;
+                        word-break:break-word;
+                    ">
+                        ${mensaje}
+                    </p>
+
+                </div>
+            `;
+        }
+
+
+        alert(
+            mensaje
         );
     }
 }
 
-function mostrarBotonNuevoEscaneo() 
-{
+function mostrarBotonNuevoEscaneo() {
 
     const acciones =
         document.getElementById('accionesScanner');
@@ -592,8 +679,7 @@ function mostrarBotonNuevoEscaneo()
     }
 }
 
-function mostrarTicketValido(payload) 
-{
+function mostrarTicketValido(payload) {
 
     document
         .getElementById('estadoScanner')
@@ -666,11 +752,10 @@ function mostrarTicketValido(payload)
             </div>
         `;
 
-        mostrarBotonNuevoEscaneo();
+    mostrarBotonNuevoEscaneo();
 }
 
-function mostrarTicketUtilizado(payload) 
-{
+function mostrarTicketUtilizado(payload) {
 
     document
         .getElementById('estadoScanner')
@@ -743,11 +828,10 @@ function mostrarTicketUtilizado(payload)
             </div>
         `;
 
-        mostrarBotonNuevoEscaneo();
+    mostrarBotonNuevoEscaneo();
 }
 
-function mostrarTicketVencido() 
-{
+function mostrarTicketVencido() {
 
     document
         .getElementById('estadoScanner')
@@ -799,11 +883,10 @@ function mostrarTicketVencido()
             </div>
         `;
 
-        mostrarBotonNuevoEscaneo();
+    mostrarBotonNuevoEscaneo();
 }
 
-function mostrarTicketInvalido(mensaje) 
-{
+function mostrarTicketInvalido(mensaje) {
 
     document
         .getElementById('estadoScanner')
@@ -857,7 +940,7 @@ function mostrarTicketInvalido(mensaje)
             </div>
         `;
 
-        mostrarBotonNuevoEscaneo();
+    mostrarBotonNuevoEscaneo();
 }
 
 async function obtenerPendientes() {
