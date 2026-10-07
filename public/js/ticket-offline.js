@@ -220,7 +220,7 @@ async function verificarTicketFirmado(codigo) {
 const PRZ_DB_NAME =
     'PRZTicketOffline';
 
-const PRZ_DB_VERSION = 2;
+const PRZ_DB_VERSION = 3;
 
 const STORE_USADOS =
     'tickets_usados';
@@ -488,9 +488,8 @@ async function agregarPendiente(
     );
 }
 
-async function procesarTicketOffline(
-    codigo
-) {
+async function procesarTicketOffline(codigo) 
+{
 
     try {
 
@@ -498,7 +497,6 @@ async function procesarTicketOffline(
             await verificarTicketFirmado(
                 codigo
             );
-
 
         const usado =
             await ticketFueUsado(
@@ -515,17 +513,14 @@ async function procesarTicketOffline(
             return;
         }
 
-
-        await guardarTicketUsado(
-            payload
-        );
-
-
         await agregarPendiente(
             codigo,
             payload
         );
 
+        await guardarTicketUsado(
+            payload
+        );
 
         mostrarTicketValido(
             payload
