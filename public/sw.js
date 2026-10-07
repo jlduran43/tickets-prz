@@ -1,10 +1,10 @@
-const CACHE_NAME = 'prz-scanner-v17';
+const CACHE_NAME = 'prz-scanner-v18';
 
 const OFFLINE_FILES = [
     '/offline/ticket_public.pem',
     '/offline/offline_auth_public.pem',
 
-    '/js/ticket-offline.js?v=17',
+    '/js/ticket-offline.js?v=18',
     '/js/html5-qrcode.min.js',
     '/js/offline-auth.js',
 

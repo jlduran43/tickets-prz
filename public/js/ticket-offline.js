@@ -1,8 +1,8 @@
 console.log(
-    'PRZ ticket-offline.js VERSION 17 CARGADA'
+    'PRZ ticket-offline.js VERSION 18 CARGADA'
 );
 
-window.PRZ_TICKET_OFFLINE_VERSION = '17';
+window.PRZ_TICKET_OFFLINE_VERSION = '18';
 
 let clavePublicaPRZ = null;
 
@@ -402,10 +402,12 @@ function generarUUID() {
     return crypto.randomUUID();
 }
 
-function obtenerDeviceId() {
+function obtenerDeviceIdTicket() {
 
     let deviceId =
-        localStorage.getItem('prz_device_id');
+        localStorage.getItem(
+            'prz_device_id'
+        );
 
     if (!deviceId) {
 
@@ -421,10 +423,7 @@ function obtenerDeviceId() {
     return deviceId;
 }
 
-async function agregarPendiente(
-    codigo,
-    payload
-) {
+async function agregarPendiente(codigo, payload) {
 
     const db =
         await abrirDB();
@@ -455,7 +454,7 @@ async function agregarPendiente(
                 .toISOString(),
 
         device_id:
-            obtenerDeviceId()
+            obtenerDeviceIdTicket()
     };
 
 
@@ -495,25 +494,17 @@ async function agregarPendiente(
 }
 
 async function procesarTicketOffline(codigo) {
-    let etapa = 'INICIO';
-
     try {
-
-        etapa = '1 - verificar firma';
 
         const payload =
             await verificarTicketFirmado(
                 codigo
             );
 
-
-        etapa = '2 - consultar ticket usado';
-
         const usado =
             await ticketFueUsado(
                 payload.token
             );
-
 
         if (usado) {
 
@@ -524,140 +515,50 @@ async function procesarTicketOffline(codigo) {
             return;
         }
 
-
-        etapa = '3 - guardar pendiente';
-
         await agregarPendiente(
             codigo,
             payload
         );
 
-
-        etapa = '4 - guardar ticket usado';
-
         await guardarTicketUsado(
             payload
         );
 
-
-        /*
-         * IMPORTANTE:
-         * En esta prueba no llamamos todavía
-         * a mostrarTicketValido().
-         *
-         * Escribimos directamente el resultado
-         * para saber si el problema está en esa función.
-         */
-
-        etapa = '5 - mostrar válido';
-
-        const estado =
-            document.getElementById(
-                'estadoScanner'
-            );
-
-
-        if (!estado) {
-
-            throw new Error(
-                'No existe #estadoScanner'
-            );
-        }
-
-
-        estado.innerHTML = `
-            <div style="
-                padding:25px;
-                background:#e7f6ec;
-                border:3px solid #198754;
-                border-radius:12px;
-                text-align:center;
-            ">
-
-                <h2 style="color:#198754;">
-                    TICKET VÁLIDO
-                </h2>
-
-                <p>
-                    Validación offline correcta.
-                </p>
-
-                <p>
-                    Folio:
-                    <strong>
-                        ${payload.folio ?? '-'}
-                    </strong>
-                </p>
-
-                <p style="font-size:12px;">
-                    DIAGNÓSTICO: ETAPA 5 COMPLETADA
-                </p>
-
-            </div>
-        `;
-
-
-        mostrarBotonNuevoEscaneo();
-
+        mostrarTicketValido(
+            payload
+        );
 
     } catch (error) {
 
-        const mensaje =
-            'ETAPA: ' +
-            etapa +
-            ' | ' +
-            (error?.name ?? 'Error') +
-            ' | ' +
-            (error?.message ?? String(error));
-
-
         console.error(
-            'ERROR OFFLINE:',
-            mensaje,
+            'Error validando ticket offline:',
             error
         );
 
+        if (
+            error.message ===
+            'TICKET_VENCIDO'
+        ) {
 
-        /*
-         * NO usar mostrarTicketInvalido()
-         * durante esta prueba.
-         *
-         * Escribimos directamente en pantalla.
-         */
-        const estado =
-            document.getElementById(
-                'estadoScanner'
-            );
+            mostrarTicketVencido();
 
-
-        if (estado) {
-
-            estado.innerHTML = `
-                <div style="
-                    padding:20px;
-                    background:#ffe5e5;
-                    border:3px solid #dc3545;
-                    border-radius:12px;
-                ">
-
-                    <h2>
-                        ERROR DE DIAGNÓSTICO
-                    </h2>
-
-                    <p style="
-                        font-size:18px;
-                        word-break:break-word;
-                    ">
-                        ${mensaje}
-                    </p>
-
-                </div>
-            `;
+            return;
         }
 
+        if (
+            error.message ===
+            'FIRMA_INVALIDA'
+        ) {
 
-        alert(
-            mensaje
+            mostrarTicketInvalido(
+                'La firma digital del ticket no es válida.'
+            );
+
+            return;
+        }
+
+        mostrarTicketInvalido(
+            'No fue posible validar el ticket offline.'
         );
     }
 }
