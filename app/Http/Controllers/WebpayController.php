@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Mail;
 
 class WebpayController extends Controller
 {
-    public function iniciar(Venta $venta, WebpayService $webpayService) 
+    public function iniciar(Venta $venta, WebpayService $webpayService)
     {
 
         /*
@@ -37,7 +37,7 @@ class WebpayController extends Controller
             $venta->estado,
             [
                 'PENDIENTE_PAGO',
-                'RECHAZADA',
+                'FALLIDA',
             ]
         )) {
 
@@ -60,7 +60,7 @@ class WebpayController extends Controller
         | Preparar venta para un nuevo intento
         |--------------------------------------------------------------------------
         |
-        | Si venía RECHAZADA, vuelve a PENDIENTE_PAGO.
+        | Si venía FALLIDA, vuelve a PENDIENTE_PAGO.
         | También limpiamos los datos del intento anterior.
         |
         */
@@ -258,228 +258,254 @@ class WebpayController extends Controller
         }
     }
 
+
     public function retorno(Request $request, WebpayService $webpayService)
     {
-
-        /*
-         * Retorno normal desde Webpay.
-         */
         $token = $request->input('token_ws');
 
-
-        /*
-         * Si no viene token_ws puede tratarse
-         * de una cancelación/abandono.
-         */
         if (!$token) {
-
             return redirect()
                 ->route('ventas.create')
-                ->with(
-                    'error',
-                    'El pago fue cancelado o interrumpido.'
-                );
+                ->with('error', 'El pago fue cancelado o interrumpido.');
         }
 
-
-        /*
-         * Buscamos la venta por el token
-         * que guardamos al iniciar Webpay.
-         */
-        $venta = Venta::where(
-            'webpay_token',
-            $token
-        )->first();
-
+        $venta = Venta::where('webpay_token', $token)->first();
 
         if (!$venta) {
+            return redirect()
+                ->route('ventas.create')
+                ->with('error', 'No encontramos la venta asociada al pago.');
+        }
+
+        if ($venta->estado === 'PAGADA') {
+            return redirect()->route('ventas.show', $venta);
+        }
+
+        $transaccion = $webpayService->transaction();
+
+        /*
+     * 1. Intentar confirmar con Webpay.
+     */
+        try {
+            $response = $transaccion->commit($token);
+
+            /*
+         * SIMULACIÓN DE PRUEBA 56.
+         * Solo funciona en ambiente de integración.
+         * Simula perder la respuesta después del commit.
+         */
+            if (
+                config('services.webpay.environment') === 'integration'
+                && config('services.webpay.simular_fallo_commit', false)
+            ) {
+                throw new \RuntimeException(
+                    'PRUEBA 56: respuesta del commit interrumpida'
+                );
+            }
+        } catch (\Throwable $e) {
+
+            Log::warning('Webpay: error en commit', [
+                'venta_id' => $venta->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            /*
+         * 2. Consultar el estado, sin repetir commit.
+         */
+            try {
+                $response = $transaccion->status($token);
+
+                Log::info('Webpay: recuperación por status', [
+                    'venta_id' => $venta->id,
+                    'status' => $response->getStatus(),
+                ]);
+            } catch (\Throwable $consultaError) {
+
+                Log::error('Webpay: no fue posible recuperar estado', [
+                    'venta_id' => $venta->id,
+                    'error' => $consultaError->getMessage(),
+                ]);
+
+                return redirect()
+                    ->route('ventas.create')
+                    ->with(
+                        'error',
+                        'No fue posible verificar el resultado de tu pago. '
+                            . 'Contacta a soporte con el folio '
+                            . $venta->folio
+                            . ' antes de intentar pagar nuevamente.'
+                    );
+            }
+        }
+
+        /*
+     * 3. Verificar que la respuesta pertenece
+     *    exactamente a esta venta.
+     */
+        $responseCode = $response->getResponseCode();
+        $status = $response->getStatus();
+
+        $ordenCoincide =
+            $response->getBuyOrder() === $venta->webpay_buy_order;
+
+        $montoCoincide =
+            (int) round((float) $response->getAmount())
+            === (int) round((float) $venta->total);
+
+        if (!$ordenCoincide || !$montoCoincide) {
+
+            Log::error('Webpay: orden o monto no coinciden', [
+                'venta_id' => $venta->id,
+                'orden_coincide' => $ordenCoincide,
+                'monto_coincide' => $montoCoincide,
+            ]);
 
             return redirect()
                 ->route('ventas.create')
                 ->with(
                     'error',
-                    'No encontramos la venta asociada al pago.'
+                    'No fue posible validar los datos del pago. '
+                        . 'Contacta a soporte con el folio '
+                        . $venta->folio . '.'
                 );
         }
-
 
         /*
-         * Evitar confirmar una venta que
-         * ya fue procesada.
+     * 4. Pago autorizado por Transbank.
+     */
+        if ($status === 'AUTHORIZED' && $responseCode === 0) {
+
+            $cardDetail = $response->getCardDetail();
+            $cardNumber = null;
+
+            if (is_array($cardDetail)) {
+                $cardNumber = $cardDetail['card_number'] ?? null;
+            }
+
+            /*
+         * Evitar que dos retornos simultáneos
+         * confirmen nuevamente la misma venta.
          */
-        if ($venta->estado === 'PAGADA') {
+            $actualizada = \Illuminate\Support\Facades\DB::transaction(
+                function () use ($venta, $response, $cardNumber) {
 
-            return redirect()
-                ->route(
-                    'ventas.show',
-                    $venta
-                );
-        }
+                    $registro = Venta::whereKey($venta->id)
+                        ->lockForUpdate()
+                        ->firstOrFail();
 
+                    if ($registro->estado === 'PAGADA') {
+                        return false;
+                    }
 
-        try {
-
-            $response =
-                $webpayService
-                ->transaction()
-                ->commit($token);
-
-            Log::info('CARD DETAIL WEBPAY', [
-                'card_detail' => $response->getCardDetail(),
-            ]);
-
-
-            /*
-             * Datos entregados por Webpay.
-             */
-
-            $responseCode =
-                $response->getResponseCode();
-
-            $status =
-                $response->getStatus();
-
-
-            /*
-             * Transacción autorizada.
-             */
-            if (
-                $status === 'AUTHORIZED'
-                &&
-                $responseCode === 0
-            ) {
-
-                $cardDetail = $response->getCardDetail();
-
-                $cardNumber = null;
-
-                if (is_array($cardDetail)) {
-                    $cardNumber = $cardDetail['card_number'] ?? null;
-                }
-
-                $venta->update([
-
-                    'estado' => 'PAGADA',
-
-                    'webpay_authorization_code' =>
-                    $response ->getAuthorizationCode(),
-
-                    'webpay_response_code' =>
-                    $responseCode,
-
-                    'webpay_payment_type_code' =>
-                    $response
-                        ->getPaymentTypeCode(),
-
-                    'webpay_card_number' =>
-                    $cardNumber,
-
-                    'pagada_at' =>
-                    $venta->pagada_at ?? now(),
-
-                    'token_ticket' =>
-                    $venta->token_ticket
-                    ?? (string) \Illuminate\Support\Str::uuid(),
-                ]);
-
-                $correoEnviado = false;
-
-                try {
-
-                    Mail::to($venta->correo)
-                        ->send(
-                            new TicketCompradoMail($venta)
+                    if ($registro->estado !== 'PENDIENTE_PAGO') {
+                        throw new \RuntimeException(
+                            'La venta no está pendiente de pago.'
                         );
+                    }
 
-                    $venta->update([
-                        'ticket_enviado_at' => now(),
+                    $registro->update([
+                        'estado' => 'PAGADA',
+
+                        'webpay_authorization_code' =>
+                        $response->getAuthorizationCode(),
+
+                        'webpay_response_code' => 0,
+
+                        'webpay_payment_type_code' =>
+                        $response->getPaymentTypeCode(),
+
+                        'webpay_card_number' => $cardNumber,
+
+                        'pagada_at' => $registro->pagada_at ?? now(),
+
+                        'token_ticket' => $registro->token_ticket
+                            ?? (string) \Illuminate\Support\Str::uuid(),
                     ]);
 
-                    $correoEnviado = true;
-                } catch (\Throwable $e) {
+                    return true;
+                }
+            );
 
-                    Log::error(
-                        'Error enviando ticket por correo',
-                        [
-                            'venta_id' => $venta->id,
-                            'correo' => $venta->correo,
-                            'error' => $e->getMessage(),
-                        ]
+            $venta->refresh();
+
+            if (!$actualizada) {
+                return redirect()->route('ventas.show', $venta);
+            }
+
+            /*
+         * 5. Enviar ticket por correo.
+         *    Un error de correo no revierte el pago.
+         */
+            try {
+
+                Mail::to($venta->correo)
+                    ->send(new TicketCompradoMail($venta));
+
+                $venta->update([
+                    'ticket_enviado_at' => now(),
+                ]);
+
+                return redirect()
+                    ->route('ventas.show', $venta)
+                    ->with(
+                        'success',
+                        'Pago confirmado correctamente. '
+                            . 'Hemos enviado tu ticket al correo '
+                            . $venta->correo . '.'
                     );
-                }
+            } catch (\Throwable $e) {
 
-
-                if ($correoEnviado) {
-
-                    return redirect()
-                        ->route('ventas.show', $venta)
-                        ->with(
-                            'success',
-                            'Pago realizado correctamente. Hemos enviado tu ticket al correo ' . $venta->correo . '.'
-                        );
-                }
+                Log::error('Error enviando ticket', [
+                    'venta_id' => $venta->id,
+                    'error' => $e->getMessage(),
+                ]);
 
                 return redirect()
                     ->route('ventas.show', $venta)
                     ->with(
                         'warning',
-                        'Pago realizado correctamente, pero no fue posible enviar el correo con tu ticket.'
+                        'Pago confirmado, pero no fue posible '
+                            . 'enviar el correo con tu ticket.'
                     );
             }
+        }
 
-
-            /*
-             * Pago rechazado.
-             */
+        /*
+     * 6. Solo marcar FALLIDA cuando Webpay
+     *    informe expresamente FAILED.
+     *
+     * INITIALIZED u otros estados no concluyentes
+     * no deben interpretarse como pagos rechazados.
+     */
+        if ($status === 'FAILED') {
 
             $venta->update([
-
-                'estado' =>
-                'RECHAZADA',
-
-                'webpay_response_code' =>
-                $responseCode,
-
+                'estado' => 'FALLIDA',
+                'webpay_response_code' => $responseCode,
             ]);
 
-
             return redirect()
-                ->route(
-                    'webpay.fallo',
-                    $venta
-                )
-                ->with(
-                    'error',
-                    'El pago fue rechazado.'
-                );
-        } catch (\Throwable $e) {
-
-            Log::error(
-                'Error confirmando Webpay',
-                [
-                    'venta_id' =>
-                    $venta->id,
-
-                    'token' =>
-                    $token,
-
-                    'error' =>
-                    $e->getMessage(),
-                ]
-            );
-
-
-            return redirect()
-                ->route(
-                    'webpay.fallo',
-                    $venta
-                )
-                ->with(
-                    'error',
-                    'No fue posible confirmar el pago.'
-                );
+                ->route('webpay.fallo', $venta)
+                ->with('error', 'El pago fue rechazado.');
         }
+
+        Log::warning('Webpay: estado no confirmado', [
+            'venta_id' => $venta->id,
+            'status' => $status,
+            'response_code' => $responseCode,
+        ]);
+
+        return redirect()
+            ->route('ventas.create')
+            ->with(
+                'error',
+                'El pago no pudo confirmarse. '
+                    . 'Antes de intentar nuevamente, consulta '
+                    . 'con soporte e indica el folio '
+                    . $venta->folio . '.'
+            );
     }
+
 
 
     public function fallo(
