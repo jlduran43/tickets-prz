@@ -23,6 +23,18 @@ class RegistroClienteController extends Controller
 
     public function store(Request $request)
     {
+        // LIMPIAR TELÉFONO CHILENO
+
+        $telefono = preg_replace(
+            '/[\s-]+/',
+            '',
+            (string) $request->input('telefono', '')
+        );
+
+        $request->merge([
+            'telefono' => $telefono,
+        ]);
+
         $request->validate(
             [
                 'name' => 'required|string|max:255',
@@ -42,7 +54,12 @@ class RegistroClienteController extends Controller
                     'unique:users,email',
                 ],
 
-                'telefono' => 'required|string|max:20',
+                'telefono' => [
+                    'required',
+                    'string',
+                    'regex:/^(?:\+?56)?9[0-9]{8}$/',
+                ],
+
                 'region_id' => 'required|exists:regiones,id',
                 'comuna_id' => 'required|exists:comunas,id',
                 'password' => 'required|string|min:8|confirmed',
@@ -58,10 +75,25 @@ class RegistroClienteController extends Controller
                 'password.required' => 'La contraseña es obligatoria.',
                 'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
                 'password.confirmed' => 'Las contraseñas no coinciden.',
+
+                'telefono.required' => 'El teléfono es obligatorio.',
+                'telefono.regex' => 'Ingresa un celular chileno válido de 9 dígitos, comenzando con 9.',
             ]
         );
 
-        $user = DB::transaction(function () use ($request) {
+        // NORMALIZAR TELÉFONO AL FORMATO +569XXXXXXXX
+
+        $telefono = $request->telefono;
+
+        if (str_starts_with($telefono, '+56')) {
+            $telefonoNormalizado = $telefono;
+        } elseif (str_starts_with($telefono, '56')) {
+            $telefonoNormalizado = '+' . $telefono;
+        } else {
+            $telefonoNormalizado = '+56' . $telefono;
+        }
+
+        $user = DB::transaction(function () use ($request, $telefonoNormalizado) {
 
             $user = User::create([
                 'name' => $request->name,
@@ -73,7 +105,7 @@ class RegistroClienteController extends Controller
             Cliente::create([
                 'user_id' => $user->id,
                 'rut' => $request->rut,
-                'telefono' => $request->telefono,
+                'telefono' => $telefonoNormalizado,
                 'region_id' => $request->region_id,
                 'comuna_id' => $request->comuna_id,
             ]);

@@ -311,6 +311,20 @@
                 width: 100px;
             }
 
+            /* Evitar espacio extra en el campo teléfono */
+
+            .input-icon .input-group .form-control {
+                padding-left: 15px;
+            }
+
+            .input-icon .input-group .input-group-text {
+                border-radius: 12px 0 0 12px;
+            }
+
+            .input-icon .input-group .form-control {
+                border-radius: 0 12px 12px 0;
+            }
+
         }
     </style>
 
@@ -1445,7 +1459,7 @@
             const telefonoCompleto = document.getElementById('telefono_completo');
             const feedback = document.getElementById('telefono_feedback');
 
-            const telefonoInicial = @json(old('telefono', $cliente?->telefono ?? ''));
+            const telefonoInicial = @json(old('telefono', ''));
 
             function actualizarTelefono() {
 
