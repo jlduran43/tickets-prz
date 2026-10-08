@@ -288,20 +288,6 @@ class WebpayController extends Controller
      */
         try {
             $response = $transaccion->commit($token);
-
-            /*
-         * SIMULACIÓN DE PRUEBA 56.
-         * Solo funciona en ambiente de integración.
-         * Simula perder la respuesta después del commit.
-         */
-            if (
-                config('services.webpay.environment') === 'integration'
-                && config('services.webpay.simular_fallo_commit', false)
-            ) {
-                throw new \RuntimeException(
-                    'PRUEBA 56: respuesta del commit interrumpida'
-                );
-            }
         } catch (\Throwable $e) {
 
             Log::warning('Webpay: error en commit', [
