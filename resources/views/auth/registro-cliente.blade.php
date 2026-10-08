@@ -454,10 +454,7 @@
                                 Teléfono
                             </label>
 
-                            <div class="input-icon">
-
-                                <i class="bi bi-telephone"></i>
-
+                            <div>
                                 <div class="input-group">
 
                                     <span class="input-group-text">
