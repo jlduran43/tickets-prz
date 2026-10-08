@@ -58,6 +58,7 @@ class VentaController extends Controller
     {
         Log::info('=== ENTRO A STORE DE VENTA ===', [
             'fecha' => now()->toDateTimeString(),
+            'checkout_token' => $request->checkout_token,
         ]);
 
         $request->validate([
@@ -92,6 +93,12 @@ class VentaController extends Controller
                 'required',
                 'in:WEBPAY',
             ],
+
+            // NUEVO
+            'checkout_token' => [
+                'required',
+                'uuid',
+            ],
         ]);
 
         $rut = Rut::parse($request->rut_cliente);
@@ -104,76 +111,127 @@ class VentaController extends Controller
                 ->withInput();
         }
 
-        $tipoEntrada = TiposEntrada::where('id', $request['tipo_entrada_id'])
+        $tipoEntrada = TiposEntrada::where(
+            'id',
+            $request->tipo_entrada_id
+        )
             ->where('activo', true)
             ->firstOrFail();
 
-        // Precio fijo por vehículo
         $precioTicket = $tipoEntrada->precio;
-
-        $venta = Venta::create([
-
-            'folio' =>
-            'TCK-' .
-                str_pad(
-                    (Venta::max('id') ?? 0) + 1,
-                    6,
-                    '0',
-                    STR_PAD_LEFT
-                ),
-
-
-            'cliente_id' =>
-            auth()->user()->cliente?->id,
-
-            'nombre_cliente' =>
-            $request->nombre_cliente,
-
-            'rut_cliente' =>
-            $request->rut_cliente,
-
-            'correo' =>
-            $request->correo,
-
-            'telefono' =>
-            $request->telefono,
-
-            'region_id' =>
-            $request->region_id,
-
-            'comuna_id' =>
-            $request->comuna_id,
-
-            'cantidad_personas' =>
-            $request->cantidad_personas,
-
-            'fecha' =>
-            now()->toDateString(),
-
-            'subtotal' =>
-            $precioTicket,
-
-            'descuento' =>
-            0,
-
-            'total' =>
-            $precioTicket,
-
-            'medio_pago' =>
-            'WEBPAY',
-
-            'estado' =>
-            'PENDIENTE_PAGO',
-        ]);
 
         /*
     |--------------------------------------------------------------------------
-    | Aquí NO redirigimos todavía a ventas.show
+    | EVITAR VENTAS DUPLICADAS
     |--------------------------------------------------------------------------
     |
-    | Primero hay que iniciar Webpay.
+    | Si el mismo formulario llega varias veces,
+    | checkout_token será exactamente el mismo.
     |
     */
+
+        $venta = Venta::firstOrCreate(
+
+            [
+                'checkout_token' => $request->checkout_token,
+            ],
+
+            [
+                /*
+             * Folio temporal.
+             *
+             * Después de insertar obtenemos el ID real
+             * y generamos TCK-000XXX.
+             */
+                'folio' => 'TMP-' . strtoupper(
+                    \Illuminate\Support\Str::random(12)
+                ),
+
+                'cliente_id' =>
+                auth()->user()->cliente?->id,
+
+                'nombre_cliente' =>
+                $request->nombre_cliente,
+
+                'rut_cliente' =>
+                $request->rut_cliente,
+
+                'correo' =>
+                $request->correo,
+
+                'telefono' =>
+                $request->telefono,
+
+                'region_id' =>
+                $request->region_id,
+
+                'comuna_id' =>
+                $request->comuna_id,
+
+                'cantidad_personas' =>
+                $request->cantidad_personas,
+
+                'fecha' =>
+                now()->toDateString(),
+
+                'subtotal' =>
+                $precioTicket,
+
+                'descuento' =>
+                0,
+
+                'total' =>
+                $precioTicket,
+
+                'medio_pago' =>
+                'WEBPAY',
+
+                'estado' =>
+                'PENDIENTE_PAGO',
+            ]
+        );
+
+        /*
+    |--------------------------------------------------------------------------
+    | GENERAR FOLIO USANDO EL ID REAL
+    |--------------------------------------------------------------------------
+    |
+    | Solo ocurre cuando esta petición creó realmente la venta.
+    |
+    */
+
+        if ($venta->wasRecentlyCreated) {
+
+            $venta->folio =
+                'TCK-' .
+                str_pad(
+                    $venta->id,
+                    6,
+                    '0',
+                    STR_PAD_LEFT
+                );
+
+            $venta->save();
+
+            Log::info('Venta creada', [
+                'venta_id' => $venta->id,
+                'folio' => $venta->folio,
+                'checkout_token' => $venta->checkout_token,
+            ]);
+        } else {
+
+            Log::warning('Intento duplicado detectado', [
+                'venta_id' => $venta->id,
+                'folio' => $venta->folio,
+                'checkout_token' => $venta->checkout_token,
+            ]);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | INICIAR WEBPAY
+        |--------------------------------------------------------------------------
+        */
 
         return redirect()
             ->route('webpay.iniciar', $venta);

@@ -35,6 +35,7 @@ class Venta extends Model
         'ticket_enviado_at',
         'validada_at',
         'validada_por',
+        'checkout_token',
     ];
 
     protected $casts = [

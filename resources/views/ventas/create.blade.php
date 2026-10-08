@@ -200,7 +200,6 @@
                         </div>
 
                         @if (!$tipoEntrada)
-
                             <div class="alert alert-warning text-center">
                                 Actualmente no hay entradas disponibles para la venta.
                             </div>
@@ -218,37 +217,40 @@
                             </div>
                         @endif
 
-                            <hr>
+                        <hr>
 
-                            <div class="mb-4">
-                                <label class="form-label d-block mb-3">
-                                    Medio de pago
-                                </label>
+                        <div class="mb-4">
+                            <label class="form-label d-block mb-3">
+                                Medio de pago
+                            </label>
 
-                                <label class="payment-option">
-                                    <input type="radio" name="medio_pago" value="WEBPAY" checked>
+                            <label class="payment-option">
+                                <input type="radio" name="medio_pago" value="WEBPAY" checked>
 
-                                    <div class="payment-card">
-                                        <div class="payment-icon">
-                                            <img src="{{ asset('images/webpay.png') }}" alt="Webpay" class="webpay-logo">
-                                        </div>
-
-                                        <div>
-                                            <small class="text-muted">
-                                                Paga con débito o crédito
-                                            </small>
-                                        </div>
+                                <div class="payment-card">
+                                    <div class="payment-icon">
+                                        <img src="{{ asset('images/webpay.png') }}" alt="Webpay" class="webpay-logo">
                                     </div>
-                                </label>
-                            </div>
 
-                            <div class="text-end">
+                                    <div>
+                                        <small class="text-muted">
+                                            Paga con débito o crédito
+                                        </small>
+                                    </div>
+                                </div>
+                            </label>
+                            <input type="hidden" name="checkout_token"
+                                value="{{ old('checkout_token', (string) \Illuminate\Support\Str::uuid()) }}">
+                        </div>
 
-                                <button type="submit" class="btn btn-success btn-lg">
-                                    Pagar
-                                </button>
+                        <div class="text-end">
 
-                            </div>
+                            <button type="submit" id="btn-pagar" class="btn btn-success btn-lg"
+                                @if (!$tipoEntrada) disabled @endif>
+                                Pagar
+                            </button>
+
+                        </div>
 
                     </form>
 
@@ -369,6 +371,43 @@
                 );
 
             }
+
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const boton = document.getElementById('btn-pagar');
+
+            if (!boton) {
+                return;
+            }
+
+            const formulario = boton.closest('form');
+
+            let procesando = false;
+
+            formulario.addEventListener('submit', function(event) {
+
+                if (procesando) {
+                    event.preventDefault();
+                    return;
+                }
+
+                if (!formulario.checkValidity()) {
+                    return;
+                }
+
+                procesando = true;
+
+                boton.disabled = true;
+
+                boton.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-2"
+                  role="status"
+                  aria-hidden="true"></span>
+            Procesando pago...
+        `;
+
+            });
 
         });
     </script>
