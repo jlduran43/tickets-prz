@@ -121,35 +121,37 @@
                                 </div>
                             </div>
 
+                            {{-- Región --}}
                             <div class="col-md-6">
                                 <label class="form-label">
                                     Región
                                 </label>
 
-                                <select name="region_id" id="region_id" class="form-select" required>
-                                    <option value="">
-                                        Seleccione región...
-                                    </option>
-
+                                <select id="region_id" class="form-select bg-light" disabled>
                                     @foreach ($regiones as $region)
                                         <option value="{{ $region->id }}"
-                                            {{ old('region_id', $cliente?->region_id) == $region->id ? 'selected' : '' }}>
+                                            {{ $cliente?->region_id == $region->id ? 'selected' : '' }}>
                                             {{ $region->nombre }}
                                         </option>
                                     @endforeach
                                 </select>
+
+                                <input type="hidden" name="region_id" value="{{ $cliente?->region_id }}">
                             </div>
 
+                            {{-- Comuna --}}
                             <div class="col-md-6">
                                 <label class="form-label">
                                     Comuna
                                 </label>
 
-                                <select name="comuna_id" id="comuna" class="form-select" required disabled>
+                                <select id="comuna" class="form-select bg-light" disabled>
                                     <option value="">
-                                        Seleccione primero una región...
+                                        Cargando comuna...
                                     </option>
                                 </select>
+
+                                <input type="hidden" name="comuna_id" value="{{ $cliente?->comuna_id }}">
                             </div>
 
                             {{-- Cantidad personas --}}
@@ -329,8 +331,6 @@
                             comunaSelect.appendChild(option);
                         });
 
-                        comunaSelect.disabled = false;
-
                     })
                     .catch(error => {
 
@@ -419,6 +419,5 @@
             });
 
         });
-
     </script>
 @endsection

@@ -56,6 +56,16 @@ class VentaController extends Controller
      */
     public function store(Request $request)
     {
+        $usuario = auth()->user();
+
+        $cliente = $usuario->cliente;
+
+        if (! $cliente) {
+            return back()->withErrors([
+                'cliente' => 'No se encontró el perfil del cliente.',
+            ]);
+        }
+
         Log::info('=== ENTRO A STORE DE VENTA ===', [
             'fecha' => now()->toDateTimeString(),
             'checkout_token' => $request->checkout_token,
@@ -70,11 +80,13 @@ class VentaController extends Controller
         $telefono = preg_replace(
             '/[\s-]+/',
             '',
-            (string) $request->input('telefono', '')
+            (string) $cliente->telefono
         );
 
         $request->merge([
             'telefono' => $telefono,
+            'region_id' => $cliente->region_id,
+            'comuna_id' => $cliente->comuna_id,
         ]);
 
         $request->validate([
@@ -136,7 +148,7 @@ class VentaController extends Controller
             $telefonoNormalizado = '+56' . $telefono;
         }
 
-        $rut = Rut::parse($request->rut_cliente);
+        $rut = Rut::parse($cliente->rut);
 
         if (! $rut->validate()) {
             return back()
@@ -182,19 +194,19 @@ class VentaController extends Controller
                     \Illuminate\Support\Str::random(12)
                 ),
 
-                'cliente_id' => auth()->user()->cliente?->id,
+                'cliente_id' => $cliente->id,
 
-                'nombre_cliente' => $request->nombre_cliente,
+                'nombre_cliente' => $usuario->name,
 
-                'rut_cliente' => $request->rut_cliente,
+                'rut_cliente' => $cliente->rut,
 
-                'correo' => $request->correo,
+                'correo' => $usuario->email,
 
-                'telefono' => $request->telefonoNormalizado,
+                'telefono' => $telefonoNormalizado,
 
-                'region_id' => $request->region_id,
+                'region_id' => $cliente->region_id,
 
-                'comuna_id' => $request->comuna_id,
+                'comuna_id' => $cliente->comuna_id,
 
                 'cantidad_personas' => $request->cantidad_personas,
 
