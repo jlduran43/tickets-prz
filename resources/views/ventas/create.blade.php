@@ -104,25 +104,20 @@
 
                             {{-- Teléfono --}}
                             <div class="col-md-6">
-                                <label class="form-label">
+                                <label for="telefono" class="form-label">
                                     Teléfono
                                 </label>
 
                                 <div class="input-group">
-
                                     <span class="input-group-text">
                                         🇨🇱 +56
                                     </span>
 
-                                    <input type="tel" id="telefono" class="form-control" placeholder="9 1234 5678"
-                                        inputmode="numeric" maxlength="9" autocomplete="tel-national" required>
+                                    <input type="tel" id="telefono" class="form-control bg-light"
+                                        value="{{ preg_replace('/^(?:\+?56)/', '', $cliente?->telefono ?? '') }}" readonly>
 
-                                    <input type="hidden" name="telefono" id="telefono_completo">
-
-                                </div>
-
-                                <div id="telefono_feedback" class="form-text">
-                                    Ingresa los 9 dígitos de tu celular, comenzando con 9.
+                                    <input type="hidden" name="telefono" id="telefono_completo"
+                                        value="{{ $cliente?->telefono }}">
                                 </div>
                             </div>
 
@@ -425,63 +420,5 @@
 
         });
 
-
-        document.addEventListener('DOMContentLoaded', function() {
-
-            const telefono = document.getElementById('telefono');
-            const telefonoCompleto = document.getElementById('telefono_completo');
-            const feedback = document.getElementById('telefono_feedback');
-
-            const telefonoInicial = @json(old('telefono', $cliente?->telefono ?? ''));
-
-            function actualizarTelefono() {
-
-                telefono.value = telefono.value
-                    .replace(/\D/g, '')
-                    .slice(0, 9);
-
-                const numero = telefono.value;
-
-                telefonoCompleto.value = numero ?
-                    '+56' + numero :
-                    '';
-
-                if (!numero) {
-                    feedback.textContent =
-                        'Ingresa los 9 dígitos de tu celular, comenzando con 9.';
-                    feedback.className = 'form-text';
-                } else if (/^9\d{8}$/.test(numero)) {
-                    feedback.textContent = '✓ Número de celular válido';
-                    feedback.className = 'form-text text-success';
-                } else {
-                    feedback.textContent =
-                        'El celular debe comenzar con 9 y tener 9 dígitos.';
-                    feedback.className = 'form-text text-danger';
-                }
-
-                telefono.setCustomValidity(
-                    /^9\d{8}$/.test(numero) ?
-                    '' :
-                    'Ingresa un celular chileno válido de 9 dígitos.'
-                );
-            }
-
-            // Cargar el teléfono guardado en el perfil.
-            let numeroInicial = String(telefonoInicial).replace(/\D/g, '');
-
-            if (numeroInicial.startsWith('56')) {
-                numeroInicial = numeroInicial.slice(2);
-            }
-
-            telefono.value = numeroInicial;
-            actualizarTelefono();
-
-            telefono.addEventListener('input', actualizarTelefono);
-
-            telefono.closest('form').addEventListener('submit', function() {
-                actualizarTelefono();
-            });
-
-        });
     </script>
 @endsection
