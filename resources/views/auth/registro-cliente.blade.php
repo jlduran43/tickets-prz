@@ -471,9 +471,7 @@
 
                                 </div>
 
-                                <div id="telefono_feedback" class="form-text">
-                                    Ingresa los 9 dígitos de tu celular, comenzando con 9.
-                                </div>
+                                <div id="telefono_feedback" class="form-text"></div>
 
                             </div>
 
@@ -1461,7 +1459,8 @@
 
             const telefonoInicial = @json(old('telefono', ''));
 
-            function actualizarTelefono() {
+            function actualizarTelefono() 
+            {
 
                 telefono.value = telefono.value
                     .replace(/\D/g, '')
@@ -1474,8 +1473,7 @@
                     '';
 
                 if (!numero) {
-                    feedback.textContent =
-                        'Ingresa los 9 dígitos de tu celular, comenzando con 9.';
+                    feedback.textContent = '';
                     feedback.className = 'form-text';
                 } else if (/^9\d{8}$/.test(numero)) {
                     feedback.textContent = '✓ Número de celular válido';
