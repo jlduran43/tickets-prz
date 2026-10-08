@@ -61,11 +61,27 @@ class VentaController extends Controller
             'checkout_token' => $request->checkout_token,
         ]);
 
+        /*
+        |--------------------------------------------------------------------------
+        | LIMPIAR FORMATO DEL TELÉFONO
+        |--------------------------------------------------------------------------
+        */
+
+        $telefono = preg_replace(
+            '/[\s-]+/',
+            '',
+            (string) $request->input('telefono', '')
+        );
+
+        $request->merge([
+            'telefono' => $telefono,
+        ]);
+
         $request->validate([
             'telefono' => [
                 'required',
                 'string',
-                'max:20',
+                'regex:/^(?:\+?56)?9[0-9]{8}$/',
             ],
 
             'region_id' => [
@@ -100,6 +116,25 @@ class VentaController extends Controller
                 'uuid',
             ],
         ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | NORMALIZAR TELÉFONO CHILENO
+        |--------------------------------------------------------------------------
+        */
+
+        $telefono = $request->telefono;
+
+        if (str_starts_with($telefono, '+56')) {
+
+            $telefonoNormalizado = $telefono;
+        } elseif (str_starts_with($telefono, '56')) {
+
+            $telefonoNormalizado = '+' . $telefono;
+        } else {
+
+            $telefonoNormalizado = '+56' . $telefono;
+        }
 
         $rut = Rut::parse($request->rut_cliente);
 
@@ -147,47 +182,33 @@ class VentaController extends Controller
                     \Illuminate\Support\Str::random(12)
                 ),
 
-                'cliente_id' =>
-                auth()->user()->cliente?->id,
+                'cliente_id' => auth()->user()->cliente?->id,
 
-                'nombre_cliente' =>
-                $request->nombre_cliente,
+                'nombre_cliente' => $request->nombre_cliente,
 
-                'rut_cliente' =>
-                $request->rut_cliente,
+                'rut_cliente' => $request->rut_cliente,
 
-                'correo' =>
-                $request->correo,
+                'correo' => $request->correo,
 
-                'telefono' =>
-                $request->telefono,
+                'telefono' => $request->telefonoNormalizado,
 
-                'region_id' =>
-                $request->region_id,
+                'region_id' => $request->region_id,
 
-                'comuna_id' =>
-                $request->comuna_id,
+                'comuna_id' => $request->comuna_id,
 
-                'cantidad_personas' =>
-                $request->cantidad_personas,
+                'cantidad_personas' => $request->cantidad_personas,
 
-                'fecha' =>
-                now()->toDateString(),
+                'fecha' => now()->toDateString(),
 
-                'subtotal' =>
-                $precioTicket,
+                'subtotal' => $precioTicket,
 
-                'descuento' =>
-                0,
+                'descuento' => 0,
 
-                'total' =>
-                $precioTicket,
+                'total' => $precioTicket,
 
-                'medio_pago' =>
-                'WEBPAY',
+                'medio_pago' => 'WEBPAY',
 
-                'estado' =>
-                'PENDIENTE_PAGO',
+                'estado' => 'PENDIENTE_PAGO',
             ]
         );
 
