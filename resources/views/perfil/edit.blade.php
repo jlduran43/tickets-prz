@@ -214,14 +214,21 @@
                             Teléfono
                         </label>
 
-                        <div class="input-icon">
+                        <div class="input-group">
 
-                            <i class="bi bi-telephone"></i>
+                            <span class="input-group-text">
+                                🇨🇱 +56
+                            </span>
 
-                            <input type="text" id="telefono" name="telefono" class="form-control"
-                                value="{{ old('telefono', $cliente->telefono) }}" placeholder="+56 9 1234 5678" required>
+                            <input type="tel" id="telefono"
+                                class="form-control @error('telefono') is-invalid @enderror" placeholder="9 1234 5678"
+                                inputmode="numeric" maxlength="9" autocomplete="tel-national" required>
+
+                            <input type="hidden" name="telefono" id="telefono_completo">
 
                         </div>
+
+                        <div id="telefono_feedback" class="form-text"></div>
 
                         @error('telefono')
                             <div class="text-danger small mt-1">
@@ -230,7 +237,6 @@
                         @enderror
 
                     </div>
-
 
                     {{-- REGIÓN --}}
                     <div class="col-md-6 mb-3">
@@ -516,6 +522,73 @@
 
             }
         );
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const telefono = document.getElementById('telefono');
+            const telefonoCompleto = document.getElementById('telefono_completo');
+            const feedback = document.getElementById('telefono_feedback');
+
+            const telefonoInicial = @json(old('telefono', $cliente->telefono ?? ''));
+
+            function actualizarTelefono() {
+
+                telefono.value = telefono.value
+                    .replace(/\D/g, '')
+                    .slice(0, 9);
+
+                const numero = telefono.value;
+                const esValido = /^9\d{8}$/.test(numero);
+
+                telefonoCompleto.value = esValido ?
+                    '+56' + numero :
+                    '';
+
+                if (!numero) {
+
+                    feedback.textContent =
+                        'Ingresa los 9 dígitos de tu celular, comenzando con 9.';
+
+                    feedback.className = 'form-text';
+
+                } else if (esValido) {
+
+                    feedback.textContent = '✓ Número de celular válido';
+
+                    feedback.className = 'form-text text-success';
+
+                } else {
+
+                    feedback.textContent =
+                        'El celular debe comenzar con 9 y tener 9 dígitos.';
+
+                    feedback.className = 'form-text text-danger';
+                }
+
+                telefono.setCustomValidity(
+                    esValido ?
+                    '' :
+                    'Ingresa un celular chileno válido de 9 dígitos.'
+                );
+            }
+
+            let numeroInicial = String(telefonoInicial)
+                .replace(/\D/g, '');
+
+            if (numeroInicial.startsWith('56')) {
+                numeroInicial = numeroInicial.slice(2);
+            }
+
+            telefono.value = numeroInicial;
+
+            actualizarTelefono();
+
+            telefono.addEventListener('input', actualizarTelefono);
+
+            telefono.closest('form').addEventListener('submit', function() {
+                actualizarTelefono();
+            });
+
+        });
     </script>
 
 @endsection

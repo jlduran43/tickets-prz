@@ -41,6 +41,20 @@ class PerfilController extends Controller
         $user = Auth::user();
         $cliente = $user->cliente;
 
+        $telefono = preg_replace(
+            '/\D/',
+            '',
+            (string) $request->input('telefono', '')
+        );
+
+        if (str_starts_with($telefono, '56')) {
+            $telefono = substr($telefono, 2);
+        }
+
+        $request->merge([
+            'telefono' => $telefono,
+        ]);
+
         $request->validate(
             [
                 'name' => [
@@ -52,7 +66,7 @@ class PerfilController extends Controller
                 'telefono' => [
                     'required',
                     'string',
-                    'max:20',
+                    'regex:/^9[0-9]{8}$/',
                 ],
 
                 'region_id' => [
@@ -84,16 +98,19 @@ class PerfilController extends Controller
             ],
             [
                 'name.required' =>
-                    'El nombre es obligatorio.',
+                'El nombre es obligatorio.',
 
                 'telefono.required' =>
-                    'El teléfono es obligatorio.',
+                'El teléfono es obligatorio.',
 
                 'region_id.required' =>
-                    'Debes seleccionar una región.',
+                'Debes seleccionar una región.',
 
                 'comuna_id.required' =>
-                    'Debes seleccionar una comuna.',
+                'Debes seleccionar una comuna.',
+
+                'telefono.regex' =>
+                'El celular debe comenzar con 9 y contener exactamente 9 dígitos.',
             ]
         );
 
@@ -104,28 +121,28 @@ class PerfilController extends Controller
 
 
         $cliente->update([
-            'telefono' => $request->telefono,
+            'telefono' => '+56' . $request->telefono,
 
             'region_id' => $request->region_id,
 
             'comuna_id' => $request->comuna_id,
 
             'direccion' =>
-                $request->filled('direccion')
-                    ? trim($request->direccion)
-                    : null,
+            $request->filled('direccion')
+                ? trim($request->direccion)
+                : null,
 
             'patente' =>
-                $request->filled('patente')
-                    ? strtoupper(
-                        trim($request->patente)
-                    )
-                    : null,
+            $request->filled('patente')
+                ? strtoupper(
+                    trim($request->patente)
+                )
+                : null,
 
             'recibir_noticias' =>
-                $request->boolean(
-                    'recibir_noticias'
-                ),
+            $request->boolean(
+                'recibir_noticias'
+            ),
         ]);
 
 
