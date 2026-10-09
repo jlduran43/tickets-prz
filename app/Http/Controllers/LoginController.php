@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Venta;
+use Illuminate\Support\Facades\URL;
 
 class LoginController extends Controller
 {
@@ -51,6 +51,21 @@ class LoginController extends Controller
             $usuario->rol === 'CLIENTE' &&
             !$usuario->hasVerifiedEmail()
         ) {
+            $urlIntended = $request->session()->get('url.intended');
+
+            if (
+                is_string($urlIntended) &&
+                URL::isValidUrl($urlIntended) &&
+                str_starts_with(
+                    $urlIntended,
+                    url('/email/verificar/')
+                )
+            ) {
+                return redirect()->intended(
+                    route('verification.notice')
+                );
+            }
+
             return redirect()
                 ->route('verification.notice');
         }
