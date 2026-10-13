@@ -277,16 +277,31 @@ class VentaController extends Controller
     {
         abort_unless(
             auth()->check()
-                &&
-                $venta->cliente_id
-                === auth()->user()->cliente?->id,
+                && $venta->cliente_id === auth()->user()->cliente?->id,
             403
         );
 
-        return view(
-            'ventas.show',
-            compact('venta')
-        );
+        if ($venta->estado !== 'PAGADA') {
+            return redirect()
+                ->route('ventas.create')
+                ->with(
+                    'error',
+                    'Esta venta todavía no tiene un pago confirmado.'
+                );
+        }
+
+        if (blank($venta->token_ticket)) {
+            return redirect()
+                ->route('tickets.index')
+                ->with(
+                    'warning',
+                    'El pago de la venta ' . $venta->folio .
+                        ' está registrado, pero su ticket requiere revisión. ' .
+                        'Contacta a soporte antes de intentar realizar otro pago.'
+                );
+        }
+
+        return view('ventas.show', compact('venta'));
     }
 
     public function exito(Venta $venta)
