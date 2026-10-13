@@ -15,7 +15,11 @@ class TicketController extends Controller
     {
         $venta = Venta::where('token_ticket', $token)->firstOrFail();
 
-        if ($venta->estado !== 'PAGADA') {
+        if (
+            $venta->estado !== 'PAGADA' ||
+            blank($venta->token_ticket) ||
+            !$venta->pagada_at
+        ) {
             abort(404);
         }
 
@@ -82,7 +86,11 @@ class TicketController extends Controller
             return view('tickets.invalido');
         }
 
-        if ($venta->estado !== 'PAGADA') {
+        if (
+            $venta->estado !== 'PAGADA' ||
+            blank($venta->token_ticket) ||
+            !$venta->pagada_at
+        ) {
             return view('tickets.invalido', compact('venta'));
         }
 
