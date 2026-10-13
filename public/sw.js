@@ -1,4 +1,4 @@
-const CACHE_NAME = 'prz-scanner-v19';
+const CACHE_NAME = 'prz-scanner-v20';
 
 const OFFLINE_FILES = [
     '/offline/ticket_public.pem',
@@ -137,6 +137,44 @@ self.addEventListener('fetch', event => {
     const request = event.request;
     const url = new URL(request.url);
 
+    // No interceptar solicitudes de otros dominios.
+    if (url.origin !== self.location.origin) {
+        return;
+    }
+
+    // Nunca interceptar las rutas de compras,
+    // tickets ni transacciones de Webpay.
+    const rutasExcluidas = [
+        '/webpay',
+        '/ventas',
+        '/ticket',
+        '/mis-tickets'
+    ];
+
+    if (
+        rutasExcluidas.some(
+            ruta =>
+                url.pathname === ruta ||
+                url.pathname.startsWith(ruta + '/')
+        )
+    ) {
+        return;
+    }
+
+    // Solo intervenir en las páginas que
+    // necesitan navegación offline.
+    const paginasOffline = [
+        '/control',
+        '/control/escaner',
+        '/offline-login'
+    ];
+
+    if (
+        request.mode === 'navigate' &&
+        !paginasOffline.includes(url.pathname)
+    ) {
+        return;
+    }
 
     /*
      * NAVEGACIÓN A /control
