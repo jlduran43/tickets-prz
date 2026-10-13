@@ -354,27 +354,30 @@ class VentaController extends Controller
 
 
         /*
-     * Determinamos estado real del ticket.
-     */
+|--------------------------------------------------------------------------
+| DETERMINAR ESTADO REAL DEL TICKET
+|--------------------------------------------------------------------------
+*/
+
         $vencimiento = $venta->pagada_at
             ? $venta->pagada_at->copy()->addMonths(3)
             : null;
 
-
-        if ($venta->validada_at) {
+        if (
+            blank($venta->token_ticket) ||
+            !$venta->pagada_at
+        ) {
+            $estadoTicket = 'REQUIERE_REVISION';
+        } elseif ($venta->validada_at) {
 
             $estadoTicket = 'UTILIZADO';
-        } elseif (
-            $vencimiento &&
-            now()->greaterThan($vencimiento)
-        ) {
+        } elseif (now()->greaterThan($vencimiento)) {
 
             $estadoTicket = 'VENCIDO';
         } else {
 
             $estadoTicket = 'VIGENTE';
         }
-
 
         /*
      * Generamos QR solamente si está vigente.

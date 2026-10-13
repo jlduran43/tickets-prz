@@ -51,33 +51,27 @@
 
                             @if ($estadoTicket === 'VIGENTE')
                                 <span class="badge bg-success rounded-pill px-4 py-2">
-
                                     <i class="bi bi-check-circle me-1"></i>
-
                                     VIGENTE
-
                                 </span>
-                            @elseif($estadoTicket === 'UTILIZADO')
+                            @elseif ($estadoTicket === 'UTILIZADO')
                                 <span class="badge bg-secondary rounded-pill px-4 py-2">
-
                                     <i class="bi bi-check2-circle me-1"></i>
-
                                     UTILIZADO
-
                                 </span>
-                            @else
+                            @elseif ($estadoTicket === 'REQUIERE_REVISION')
+                                <span class="badge bg-danger rounded-pill px-4 py-2">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                    REQUIERE REVISIÓN
+                                </span>
+                            @elseif ($estadoTicket === 'VENCIDO')
                                 <span class="badge bg-warning text-dark rounded-pill px-4 py-2">
-
                                     <i class="bi bi-clock-history me-1"></i>
-
                                     VENCIDO
-
                                 </span>
                             @endif
 
                         </div>
-
-
 
                         {{-- QR --}}
                         @if ($estadoTicket === 'VIGENTE' && $qrBase64)
@@ -149,7 +143,39 @@
                             </div>
                         @endif
 
+                        {{-- TICKET REQUIERE REVISIÓN --}}
+                        @if ($estadoTicket === 'REQUIERE_REVISION')
+                            <div class="alert alert-warning mt-4">
 
+                                <div class="d-flex gap-2">
+
+                                    <i class="bi bi-exclamation-triangle fs-4"></i>
+
+                                    <div>
+                                        <strong>
+                                            Ticket requiere revisión
+                                        </strong>
+
+                                        <div class="mt-2">
+                                            Tu pago está registrado correctamente,
+                                            pero no encontramos la información
+                                            necesaria para utilizar este ticket.
+                                        </div>
+
+                                        <div class="mt-2">
+                                            Contacta a soporte indicando el folio
+                                            <strong>{{ $venta->folio }}</strong>.
+                                        </div>
+
+                                        <div class="mt-2">
+                                            No realices otro pago por esta misma compra.
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        @endif
 
                         {{-- VENCIDO --}}
                         @if ($estadoTicket === 'VENCIDO')
