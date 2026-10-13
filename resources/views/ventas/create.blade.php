@@ -154,6 +154,8 @@
                                 <input type="hidden" name="comuna_id" value="{{ $cliente?->comuna_id }}">
                             </div>
 
+
+
                             {{-- Cantidad personas --}}
                             <div class="mb-3">
 
@@ -163,17 +165,19 @@
 
                                 <input type="number" id="cantidad_personas" name="cantidad_personas"
                                     class="form-control @error('cantidad_personas') is-invalid @enderror" min="0"
-                                    value="{{ old('cantidad_personas') }}" placeholder="Ej: 3" required>
+                                    step="1" value="{{ old('cantidad_personas') }}" placeholder="Ej: 3"
+                                    aria-describedby="cantidad_personas_ayuda cantidad_personas_error" required>
 
-                                <div class="form-text">
+                                <div class="form-text" id="cantidad_personas_ayuda">
                                     Indica cuántas personas te acompañarán en el vehículo.
                                 </div>
 
-                                @error('cantidad_personas')
-                                    <div class="invalid-feedback">
+                                <div id="cantidad_personas_error" class="invalid-feedback" role="alert"
+                                    aria-live="polite">
+                                    @error('cantidad_personas')
                                         {{ $message }}
-                                    </div>
-                                @enderror
+                                    @enderror
+                                </div>
 
                             </div>
 
@@ -382,17 +386,56 @@
             }
 
         });
+
         document.addEventListener('DOMContentLoaded', function() {
 
             const boton = document.getElementById('btn-pagar');
+            const cantidad = document.getElementById('cantidad_personas');
+            const error = document.getElementById('cantidad_personas_error');
 
-            if (!boton) {
+            if (!boton || !cantidad || !error) {
                 return;
             }
 
             const formulario = boton.closest('form');
-
             let procesando = false;
+
+            function validarCantidad() {
+
+                let mensaje = '';
+
+                if (cantidad.validity.valueMissing || cantidad.value.trim() === '') {
+                    mensaje = 'Debes indicar la cantidad de acompañantes.';
+                } else if (cantidad.validity.badInput ||
+                    !Number.isFinite(Number(cantidad.value))) {
+                    mensaje = 'Ingresa un número válido.';
+                } else if (Number(cantidad.value) < 0 ||
+                    cantidad.validity.rangeUnderflow) {
+                    mensaje = 'La cantidad de acompañantes no puede ser negativa.';
+                } else if (!Number.isInteger(Number(cantidad.value)) ||
+                    cantidad.validity.stepMismatch) {
+                    mensaje = 'Debes ingresar un número entero.';
+                }
+
+                if (mensaje) {
+                    cantidad.classList.add('is-invalid');
+                    cantidad.setAttribute('aria-invalid', 'true');
+                    error.textContent = mensaje;
+                    return false;
+                }
+
+                cantidad.classList.remove('is-invalid');
+                cantidad.removeAttribute('aria-invalid');
+                error.textContent = '';
+
+                return true;
+            }
+
+            // Evita que la validación nativa oculte nuestro mensaje.
+            formulario.noValidate = true;
+
+            cantidad.addEventListener('input', validarCantidad);
+            cantidad.addEventListener('change', validarCantidad);
 
             formulario.addEventListener('submit', function(event) {
 
@@ -401,12 +444,20 @@
                     return;
                 }
 
+                if (!validarCantidad()) {
+                    event.preventDefault();
+                    cantidad.focus();
+                    return;
+                }
+
+                // Conserva las demás validaciones del formulario.
                 if (!formulario.checkValidity()) {
+                    event.preventDefault();
+                    formulario.reportValidity();
                     return;
                 }
 
                 procesando = true;
-
                 boton.disabled = true;
 
                 boton.innerHTML = `
@@ -415,7 +466,6 @@
                   aria-hidden="true"></span>
             Procesando pago...
         `;
-
             });
 
         });
