@@ -67,14 +67,6 @@ class TiposEntradaController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(TiposEntrada $tiposEntrada)
-    {
-        //
-    }
-
-    /**
      * Show the form for editing the specified resource.
      */
     public function edit(TiposEntrada $tipoEntrada)
@@ -121,14 +113,6 @@ class TiposEntradaController extends Controller
                 'success',
                 'Tipo de entrada actualizado correctamente.'
             );
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(TiposEntrada $tipoEntrada)
-    {
-        //
     }
 
     public function cambiarEstado(TiposEntrada $tipoEntrada)
