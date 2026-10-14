@@ -19,16 +19,16 @@ class OfflineTicketController extends Controller
         $datos =
             $request->validate([
                 'scan_uuid' =>
-                    'required|uuid',
+                'required|uuid',
 
                 'signed_qr' =>
-                    'required|string',
+                'required|string',
 
                 'device_id' =>
-                    'required|string|max:255',
+                'required|string|max:255',
 
                 'scanned_at' =>
-                    'required|date',
+                'required|date',
             ]);
 
 
@@ -50,7 +50,7 @@ class OfflineTicketController extends Controller
             return response()->json([
                 'ok' => true,
                 'resultado' =>
-                    $existente->resultado,
+                $existente->resultado,
             ]);
         }
 
@@ -72,7 +72,7 @@ class OfflineTicketController extends Controller
             return response()->json([
                 'ok' => false,
                 'resultado' =>
-                    'FIRMA_INVALIDA',
+                'FIRMA_INVALIDA',
             ], 422);
         }
 
@@ -86,7 +86,7 @@ class OfflineTicketController extends Controller
             return response()->json([
                 'ok' => false,
                 'resultado' =>
-                    'PAYLOAD_INVALIDO',
+                'PAYLOAD_INVALIDO',
             ], 422);
         }
 
@@ -111,7 +111,7 @@ class OfflineTicketController extends Controller
             return response()->json([
                 'ok' => false,
                 'resultado' =>
-                    'VENCIDO',
+                'VENCIDO',
             ], 422);
         }
 
@@ -139,27 +139,22 @@ class OfflineTicketController extends Controller
                 if (!$venta) {
 
                     $this->guardarScan(
-                        datos:
-                            $datos,
+                        datos: $datos,
 
-                        payload:
-                            $payload,
+                        payload: $payload,
 
-                        venta:
-                            null,
+                        venta: null,
 
-                        resultado:
-                            'NO_EXISTE',
+                        resultado: 'NO_EXISTE',
 
-                        scanDate:
-                            $scanDate
+                        scanDate: $scanDate
                     );
 
 
                     return response()->json([
                         'ok' => false,
                         'resultado' =>
-                            'NO_EXISTE',
+                        'NO_EXISTE',
                     ], 404);
                 }
 
@@ -171,8 +166,9 @@ class OfflineTicketController extends Controller
                 */
 
                 if (
-                    $venta->estado_pago
-                    !== 'PAGADO'
+                    $venta->estado !== 'PAGADA' ||
+                    !$venta->pagada_at ||
+                    blank($venta->token_ticket)
                 ) {
 
                     $this->guardarScan(
@@ -187,7 +183,7 @@ class OfflineTicketController extends Controller
                     return response()->json([
                         'ok' => false,
                         'resultado' =>
-                            'NO_PAGADO',
+                        'NO_PAGADO',
                     ], 422);
                 }
 
@@ -212,7 +208,7 @@ class OfflineTicketController extends Controller
                     return response()->json([
                         'ok' => false,
                         'resultado' =>
-                            'YA_UTILIZADO',
+                        'YA_UTILIZADO',
                     ]);
                 }
 
@@ -241,10 +237,10 @@ class OfflineTicketController extends Controller
                 return response()->json([
                     'ok' => true,
                     'resultado' =>
-                        'VALIDADO',
+                    'VALIDADO',
 
                     'folio' =>
-                        $venta->folio,
+                    $venta->folio,
                 ]);
             }
         );
@@ -262,29 +258,29 @@ class OfflineTicketController extends Controller
         TicketOfflineScan::create([
 
             'scan_uuid' =>
-                $datos['scan_uuid'],
+            $datos['scan_uuid'],
 
             'venta_id' =>
-                $venta?->id,
+            $venta?->id,
 
             'token_ticket' =>
-                $payload['token']
+            $payload['token']
                 ?? null,
 
             'device_id' =>
-                $datos['device_id'],
+            $datos['device_id'],
 
             'scanned_at' =>
-                $scanDate,
+            $scanDate,
 
             'received_at' =>
-                now(),
+            now(),
 
             'resultado' =>
-                $resultado,
+            $resultado,
 
             'payload' =>
-                $payload,
+            $payload,
         ]);
     }
 }

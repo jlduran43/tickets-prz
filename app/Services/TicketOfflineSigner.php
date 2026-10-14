@@ -21,6 +21,11 @@ class TicketOfflineSigner
 
     public function generarQrFirmado(Venta $venta): string
     {
+        if ($venta->estado !== 'PAGADA') {
+            throw new RuntimeException(
+                'No se puede generar un QR para una venta no pagada.'
+            );
+        }
         if (!$venta->pagada_at) {
             throw new RuntimeException(
                 'La venta todavía no está pagada.'
@@ -51,7 +56,7 @@ class TicketOfflineSigner
         $json = json_encode(
             $payload,
             JSON_UNESCAPED_SLASHES |
-            JSON_UNESCAPED_UNICODE
+                JSON_UNESCAPED_UNICODE
         );
 
         $payloadBase64 = $this->base64UrlEncode($json);

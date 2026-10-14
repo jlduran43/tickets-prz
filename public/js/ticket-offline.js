@@ -1004,6 +1004,9 @@ async function sincronizarPendientes() {
                                 scan_uuid:
                                     pendiente.scan_uuid,
 
+                                signed_qr:
+                                    pendiente.signed_qr,
+
                                 token:
                                     pendiente.token,
 
@@ -1018,6 +1021,7 @@ async function sincronizarPendientes() {
 
                                 device_id:
                                     pendiente.device_id
+
                             })
                         }
                     );

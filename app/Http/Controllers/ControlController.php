@@ -6,6 +6,7 @@ use App\Models\Venta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Services\TicketOfflineSigner;
 
 class ControlController extends Controller
 {
@@ -130,12 +131,15 @@ class ControlController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
-                if ($venta->estado !== 'PAGADA') {
-
+                if (
+                    $venta->estado !== 'PAGADA' ||
+                    blank($venta->token_ticket) ||
+                    !$venta->pagada_at
+                ) {
                     return response()->json([
                         'ok' => false,
                         'estado' => 'INVALIDO',
-                        'mensaje' => 'El ticket no se encuentra pagado.',
+                        'mensaje' => 'El ticket no se encuentra pagado o está incompleto.',
                         'folio' => $venta->folio,
                     ], 422);
                 }
@@ -270,115 +274,212 @@ class ControlController extends Controller
         }
     }
 
-    public function sincronizarOffline(Request $request)
-    {
-        \Log::info('ENTRO A sincronizarOffline', [
-            'data' => $request->all()
-        ]);
-
-        $request->validate([
+    public function sincronizarOffline(
+        Request $request,
+        TicketOfflineSigner $signer
+    ) {
+        $datos = $request->validate([
+            'signed_qr' => 'required|string|max:8192',
             'token' => 'required|string',
             'venta_id' => 'required|integer',
             'folio' => 'required|string',
             'scanned_at' => 'required|date',
-            'scan_uuid' => 'required|string',
-            'device_id' => 'nullable|string',
+            'scan_uuid' => 'required|uuid',
+            'device_id' => 'nullable|string|max:255',
         ]);
-
-
-        $venta = Venta::where(
-            'id',
-            $request->venta_id
-        )
-            ->where(
-                'token_ticket',
-                $request->token
-            )
-            ->first();
-
-
-        if (!$venta) {
-
-            return response()->json([
-                'ok' => false,
-                'mensaje' => 'Ticket no encontrado.'
-            ], 404);
-        }
-
 
         /*
     |--------------------------------------------------------------------------
-    | SI YA ESTÁ UTILIZADO
+    | VERIFICAR FIRMA DIGITAL RSA
     |--------------------------------------------------------------------------
     */
 
-        if ($venta->validada_at) {
+        $payload = $signer->verificar($datos['signed_qr']);
 
+        if (
+            !$payload ||
+            ($payload['v'] ?? null) !== 1 ||
+            !isset(
+                $payload['id'],
+                $payload['folio'],
+                $payload['token'],
+                $payload['iat'],
+                $payload['exp']
+            )
+        ) {
             return response()->json([
-                'ok' => true,
-                'estado' => 'YA_SINCRONIZADO',
-                'folio' => $venta->folio,
-                'validada_at' => $venta->validada_at,
-            ]);
+                'ok' => false,
+                'estado' => 'FIRMA_INVALIDA',
+                'mensaje' => 'La firma digital del ticket no es válida.',
+            ], 422);
         }
 
+        /*
+    |--------------------------------------------------------------------------
+    | COMPROBAR DATOS DEL QR
+    |--------------------------------------------------------------------------
+    */
+
+        if (
+            !is_int($payload['id']) ||
+            !is_string($payload['folio']) ||
+            !is_string($payload['token']) ||
+            !is_int($payload['iat']) ||
+            !is_int($payload['exp']) ||
+            $payload['id'] !== (int) $datos['venta_id'] ||
+            $payload['folio'] !== $datos['folio'] ||
+            $payload['token'] !== $datos['token']
+        ) {
+            return response()->json([
+                'ok' => false,
+                'estado' => 'DATOS_INVALIDOS',
+                'mensaje' => 'Los datos del QR no coinciden.',
+            ], 422);
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | VALIDAR FECHA DE ESCANEO
+    |--------------------------------------------------------------------------
+    */
+
         $fechaEscaneo = \Carbon\Carbon::parse(
-            $request->scanned_at
+            $datos['scanned_at']
         );
 
-        $venta->validada_at = $fechaEscaneo;
+        $ahora = now();
 
-        $guardado = $venta->save();
-
-        /*
-|--------------------------------------------------------------------------
-| VOLVER A CONSULTAR DESDE LA BASE DE DATOS
-|--------------------------------------------------------------------------
-*/
-
-        $venta->refresh();
+        if ($fechaEscaneo->greaterThan($ahora->copy()->addMinutes(5))) {
+            return response()->json([
+                'ok' => false,
+                'estado' => 'FECHA_INVALIDA',
+                'mensaje' => 'La fecha de escaneo es posterior a la fecha actual.',
+            ], 422);
+        }
 
         /*
-|--------------------------------------------------------------------------
-| COMPROBAR QUE REALMENTE SE GUARDÓ
-|--------------------------------------------------------------------------
-*/
+    |--------------------------------------------------------------------------
+    | TRANSACCIÓN PROTEGIDA
+    |--------------------------------------------------------------------------
+    */
 
-        if (!$guardado || !$venta->validada_at) {
+        try {
+            return DB::transaction(function () use (
+                $datos,
+                $payload,
+                $fechaEscaneo
+            ) {
+                $venta = Venta::whereKey($datos['venta_id'])
+                    ->lockForUpdate()
+                    ->first();
 
-            \Log::error(
-                'No se pudo guardar validada_at durante sincronización offline',
-                [
+                if (!$venta) {
+                    return response()->json([
+                        'ok' => false,
+                        'estado' => 'INVALIDO',
+                        'mensaje' => 'Ticket no encontrado.',
+                    ], 404);
+                }
+
+                /*
+            | Comprobar identidad y estado.
+            */
+
+                if (
+                    $venta->folio !== $payload['folio'] ||
+                    $venta->token_ticket !== $payload['token'] ||
+                    $venta->estado !== 'PAGADA' ||
+                    !$venta->pagada_at
+                ) {
+                    return response()->json([
+                        'ok' => false,
+                        'estado' => 'INVALIDO',
+                        'mensaje' => 'El ticket no tiene un pago válido.',
+                    ], 422);
+                }
+
+                /*
+            | Comprobar fechas firmadas contra la venta.
+            */
+
+                $vencimiento = $venta->pagada_at
+                    ->copy()
+                    ->addMonthsNoOverflow(3);
+
+                if (
+                    $payload['iat'] !== $venta->pagada_at->timestamp ||
+                    $payload['exp'] !== $vencimiento->timestamp
+                ) {
+                    return response()->json([
+                        'ok' => false,
+                        'estado' => 'DATOS_INVALIDOS',
+                        'mensaje' => 'Las fechas del QR no coinciden.',
+                    ], 422);
+                }
+
+                /*
+            | Validar que el escaneo se realizó
+            | durante la vigencia del ticket.
+            */
+
+                if (
+                    $fechaEscaneo->lt($venta->pagada_at) ||
+                    $fechaEscaneo->gt($vencimiento)
+                ) {
+                    return response()->json([
+                        'ok' => false,
+                        'estado' => 'VENCIDO',
+                        'mensaje' => 'El escaneo está fuera de vigencia.',
+                    ], 422);
+                }
+
+                /*
+            | Ticket utilizado previamente.
+            */
+
+                if ($venta->validada_at) {
+                    return response()->json([
+                        'ok' => true,
+                        'estado' => 'YA_UTILIZADO',
+                        'mensaje' => 'El ticket ya estaba utilizado.',
+                        'folio' => $venta->folio,
+                        'validada_at' => $venta->validada_at,
+                    ]);
+                }
+
+                /*
+            | Registrar utilización.
+            */
+
+                $venta->validada_at = $fechaEscaneo;
+                $venta->validada_por = auth()->id();
+                $venta->save();
+
+                Log::info('Ticket offline sincronizado', [
                     'venta_id' => $venta->id,
                     'folio' => $venta->folio,
-                    'scanned_at' => $request->scanned_at,
+                    'scan_uuid' => $datos['scan_uuid'],
+                    'device_id' => $datos['device_id'] ?? null,
+                ]);
+
+                return response()->json([
+                    'ok' => true,
+                    'estado' => 'SINCRONIZADO',
+                    'folio' => $venta->folio,
                     'validada_at' => $venta->validada_at,
-                ]
-            );
+                ]);
+            });
+        } catch (\Throwable $e) {
+            Log::error('Error sincronizando ticket offline', [
+                'error' => $e->getMessage(),
+                'scan_uuid' => $datos['scan_uuid'],
+            ]);
 
             return response()->json([
                 'ok' => false,
-                'estado' => 'ERROR_GUARDADO',
-                'mensaje' => 'No fue posible registrar la utilización del ticket.',
+                'estado' => 'ERROR',
+                'mensaje' => 'No fue posible sincronizar el ticket.',
             ], 500);
         }
-
-
-        \Log::info(
-            'Ticket offline sincronizado correctamente',
-            [
-                'venta_id' => $venta->id,
-                'folio' => $venta->folio,
-                'validada_at' => $venta->validada_at,
-            ]
-        );
-
-
-        return response()->json([
-            'ok' => true,
-            'estado' => 'SINCRONIZADO',
-            'folio' => $venta->folio,
-            'validada_at' => $venta->validada_at,
-        ]);
     }
 }
