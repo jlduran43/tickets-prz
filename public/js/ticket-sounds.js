@@ -11,21 +11,26 @@ sonidoTicketValido.volume = 0.8;
 
 // Habilitar audio tras interacción del usuario
 async function habilitarSonidoTicket() {
-    try {
-        sonidoTicketValido.muted = true;
+    for (const audio of [
+        sonidoTicketValido,
+        sonidoTicketUtilizado
+    ]) {
+        try {
+            audio.muted = true;
 
-        await sonidoTicketValido.play();
+            await audio.play();
 
-        sonidoTicketValido.pause();
-        sonidoTicketValido.currentTime = 0;
-        sonidoTicketValido.muted = false;
+            audio.pause();
+            audio.currentTime = 0;
+            audio.muted = false;
 
-    } catch (error) {
-        sonidoTicketValido.muted = false;
-        console.warn(
-            'No se pudo habilitar el sonido:',
-            error
-        );
+        } catch (error) {
+            audio.muted = false;
+            console.warn(
+                'No se pudo habilitar el sonido:',
+                error
+            );
+        }
     }
 }
 
