@@ -21,7 +21,6 @@ class ControlController extends Controller
         return view('control.index');
     }
 
-
     /*
     |--------------------------------------------------------------------------
     | Escáner
@@ -32,7 +31,6 @@ class ControlController extends Controller
     {
         return view('control.scanner');
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -53,7 +51,6 @@ class ControlController extends Controller
             compact('ventas')
         );
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -86,7 +83,6 @@ class ControlController extends Controller
 
         ]);
 
-
         try {
 
             /*
@@ -99,7 +95,8 @@ class ControlController extends Controller
             |
             */
 
-            return DB::transaction(function () use ($datos) {
+            return DB::transaction(function () use ($datos) 
+            {
 
                 $venta = Venta::where(
                     'token_ticket',
@@ -108,15 +105,14 @@ class ControlController extends Controller
                     ->lockForUpdate()
                     ->first();
 
-
                 /*
                 |--------------------------------------------------------------------------
                 | No existe
                 |--------------------------------------------------------------------------
                 */
 
-                if (!$venta) {
-
+                if (!$venta) 
+                {
                     return response()->json([
                         'ok' => false,
                         'estado' => 'INVALIDO',
@@ -124,18 +120,14 @@ class ControlController extends Controller
                     ], 404);
                 }
 
-
                 /*
                 |--------------------------------------------------------------------------
                 | No pagado
                 |--------------------------------------------------------------------------
                 */
 
-                if (
-                    $venta->estado !== 'PAGADA' ||
-                    blank($venta->token_ticket) ||
-                    !$venta->pagada_at
-                ) {
+                if ($venta->estado !== 'PAGADA' || blank($venta->token_ticket) || !$venta->pagada_at) 
+                {
                     return response()->json([
                         'ok' => false,
                         'estado' => 'INVALIDO',
@@ -144,25 +136,20 @@ class ControlController extends Controller
                     ], 422);
                 }
 
-
                 /*
                 |--------------------------------------------------------------------------
                 | Vencido
                 |--------------------------------------------------------------------------
                 */
 
-                $fechaVencimiento =
-                    $venta->pagada_at
-                    ? $venta->pagada_at
+                $fechaVencimiento = $venta->pagada_at ? $venta->pagada_at
                     ->copy()
                     ->addMonths(3)
                     : null;
 
 
-                if (
-                    $fechaVencimiento &&
-                    now()->greaterThan($fechaVencimiento)
-                ) {
+                if ($fechaVencimiento && now()->greaterThan($fechaVencimiento)) 
+                {
 
                     return response()->json([
                         'ok' => false,
@@ -175,14 +162,14 @@ class ControlController extends Controller
                     ], 422);
                 }
 
-
                 /*
                 |--------------------------------------------------------------------------
                 | Ya utilizado
                 |--------------------------------------------------------------------------
                 */
 
-                if ($venta->validada_at) {
+                if ($venta->validada_at) 
+                {
 
                     return response()->json([
                         'ok' => false,
@@ -195,7 +182,6 @@ class ControlController extends Controller
                     ], 409);
                 }
 
-
                 /*
                 |--------------------------------------------------------------------------
                 | VALIDACIÓN CORRECTA
@@ -203,13 +189,9 @@ class ControlController extends Controller
                 */
 
                 $venta->update([
-
                     'validada_at' => now(),
-
                     'validada_por' => auth()->id(),
-
                 ]);
-
 
                 Log::info(
                     'Ticket validado',
@@ -220,7 +202,6 @@ class ControlController extends Controller
                     ]
                 );
 
-
                 /*
                 |--------------------------------------------------------------------------
                 | Respuesta
@@ -228,34 +209,17 @@ class ControlController extends Controller
                 */
 
                 return response()->json([
-
                     'ok' => true,
-
                     'estado' => 'VALIDO',
-
-                    'mensaje' =>
-                    'Ticket validado correctamente.',
-
-                    'folio' =>
-                    $venta->folio,
-
-                    'visitante' =>
-                    $venta->nombre_cliente,
-
-                    'rut' =>
-                    $venta->rut_cliente,
-
-                    'personas' =>
-                    $venta->cantidad_personas,
-
-                    'validada_at' =>
-                    $venta->validada_at
-                        ->format('d/m/Y H:i'),
-
+                    'mensaje' => 'Ticket validado correctamente.',
+                    'folio' => $venta->folio,
+                    'visitante' => $venta->nombre_cliente,
+                    'rut' => $venta->rut_cliente,
+                    'personas' => $venta->cantidad_personas,
+                    'validada_at' => $venta->validada_at -> format('d/m/Y H:i'),
                 ]);
             });
         } catch (\Throwable $e) {
-
             Log::error(
                 'Error validando ticket',
                 [
@@ -263,7 +227,6 @@ class ControlController extends Controller
                     'usuario' => auth()->id(),
                 ]
             );
-
 
             return response()->json([
                 'ok' => false,
@@ -274,10 +237,8 @@ class ControlController extends Controller
         }
     }
 
-    public function sincronizarOffline(
-        Request $request,
-        TicketOfflineSigner $signer
-    ) {
+    public function sincronizarOffline(Request $request, TicketOfflineSigner $signer) 
+    {
         $datos = $request->validate([
             'signed_qr' => 'required|string|max:8192',
             'token' => 'required|string',
@@ -289,10 +250,10 @@ class ControlController extends Controller
         ]);
 
         /*
-    |--------------------------------------------------------------------------
-    | VERIFICAR FIRMA DIGITAL RSA
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | VERIFICAR FIRMA DIGITAL RSA
+        |--------------------------------------------------------------------------
+        */
 
         $payload = $signer->verificar($datos['signed_qr']);
 
@@ -306,7 +267,8 @@ class ControlController extends Controller
                 $payload['iat'],
                 $payload['exp']
             )
-        ) {
+        ) 
+        {
             return response()->json([
                 'ok' => false,
                 'estado' => 'FIRMA_INVALIDA',
@@ -315,10 +277,10 @@ class ControlController extends Controller
         }
 
         /*
-    |--------------------------------------------------------------------------
-    | COMPROBAR DATOS DEL QR
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | COMPROBAR DATOS DEL QR
+        |--------------------------------------------------------------------------
+        */
 
         if (
             !is_int($payload['id']) ||
@@ -329,7 +291,8 @@ class ControlController extends Controller
             $payload['id'] !== (int) $datos['venta_id'] ||
             $payload['folio'] !== $datos['folio'] ||
             $payload['token'] !== $datos['token']
-        ) {
+        ) 
+        {
             return response()->json([
                 'ok' => false,
                 'estado' => 'DATOS_INVALIDOS',
@@ -338,14 +301,12 @@ class ControlController extends Controller
         }
 
         /*
-    |--------------------------------------------------------------------------
-    | VALIDAR FECHA DE ESCANEO
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | VALIDAR FECHA DE ESCANEO
+        |--------------------------------------------------------------------------
+        */
 
-        $fechaEscaneo = \Carbon\Carbon::parse(
-            $datos['scanned_at']
-        );
+        $fechaEscaneo = \Carbon\Carbon::parse($datos['scanned_at']);
 
         $ahora = now();
 
@@ -358,10 +319,10 @@ class ControlController extends Controller
         }
 
         /*
-    |--------------------------------------------------------------------------
-    | TRANSACCIÓN PROTEGIDA
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | TRANSACCIÓN PROTEGIDA
+        |--------------------------------------------------------------------------
+        */
 
         try {
             return DB::transaction(function () use (
@@ -382,8 +343,8 @@ class ControlController extends Controller
                 }
 
                 /*
-            | Comprobar identidad y estado.
-            */
+                | Comprobar identidad y estado.
+                */
 
                 if (
                     $venta->folio !== $payload['folio'] ||
@@ -399,8 +360,8 @@ class ControlController extends Controller
                 }
 
                 /*
-            | Comprobar fechas firmadas contra la venta.
-            */
+                | Comprobar fechas firmadas contra la venta.
+                */
 
                 $vencimiento = $venta->pagada_at
                     ->copy()
@@ -418,9 +379,9 @@ class ControlController extends Controller
                 }
 
                 /*
-            | Validar que el escaneo se realizó
-            | durante la vigencia del ticket.
-            */
+                | Validar que el escaneo se realizó
+                | durante la vigencia del ticket.
+                */
 
                 if (
                     $fechaEscaneo->lt($venta->pagada_at) ||
@@ -434,8 +395,8 @@ class ControlController extends Controller
                 }
 
                 /*
-            | Ticket utilizado previamente.
-            */
+                | Ticket utilizado previamente.
+                */
 
                 if ($venta->validada_at) {
                     return response()->json([
@@ -448,8 +409,8 @@ class ControlController extends Controller
                 }
 
                 /*
-            | Registrar utilización.
-            */
+                | Registrar utilización.
+                */
 
                 $venta->validada_at = $fechaEscaneo;
                 $venta->validada_por = auth()->id();
