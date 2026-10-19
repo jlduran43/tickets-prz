@@ -4,13 +4,17 @@ const OFFLINE_FILES = [
     '/offline/ticket_public.pem',
     '/offline/offline_auth_public.pem',
 
-    '/js/ticket-offline.js?v=21',
+    '/js/ticket-offline.js?v=22',
     '/js/html5-qrcode.min.js',
     '/js/offline-auth.js',
 
     '/images/logo-ticket.png',
 
     '/offline-login',
+
+    '/sounds/ticket-valido.wav',
+    '/sounds/ticket-utilizado.wav',
+    '/js/ticket-sounds.js?v=5',
 ];
 
 self.addEventListener('install', event => {
