@@ -46,3 +46,26 @@ function reproducirSonidoTicketValido() {
         console.warn('Error de audio:', error);
     }
 }
+
+const sonidoTicketUtilizado = new Audio(
+    '/sounds/ticket-utilizado.wav'
+);
+
+sonidoTicketUtilizado.preload = 'auto';
+sonidoTicketUtilizado.volume = 0.8;
+
+function reproducirSonidoTicketUtilizado() {
+    try {
+        sonidoTicketUtilizado.pause();
+        sonidoTicketUtilizado.currentTime = 0;
+
+        sonidoTicketUtilizado.play().catch(error => {
+            console.warn(
+                'No se pudo reproducir sonido utilizado:',
+                error
+            );
+        });
+    } catch (error) {
+        console.warn(error);
+    }
+}

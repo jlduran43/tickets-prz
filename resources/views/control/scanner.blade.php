@@ -1083,6 +1083,8 @@
 
                 if (data.estado === 'UTILIZADO') {
 
+                    reproducirSonidoTicketUtilizado();
+
                     resultado.innerHTML = `
 
                 <div class="verification-card">
