@@ -506,9 +506,6 @@
 
         <div id="usuarioOfflineActual" class="alert alert-warning" style="display:none;">
         </div>
-        <button type="button" id="btnCerrarSesionOffline" class="btn btn-outline-danger" style="display:none;">
-            Cerrar sesión offline
-        </button>
 
         {{-- CABECERA --}}
         <div class="mb-4">
@@ -663,7 +660,6 @@
 
     <script src="{{ asset('js/html5-qrcode.min.js') }}"></script>
     <script src="{{ asset('js/ticket-offline.js') }}?v=22"></script>
-    <script src="{{ asset('js/offline-auth.js') }}"></script>
     <script src="{{ asset('js/ticket-sounds.js') }}?v=2"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -2724,41 +2720,9 @@ ${JSON.stringify(
             mostrarUsuarioOffline
         );
 
-        async function prepararCerrarSesionOffline() {
-
-            if (navigator.onLine) {
-                return;
-            }
-
-            const boton =
-                document.getElementById(
-                    'btnCerrarSesionOffline'
-                );
-
-            boton.style.display =
-                'inline-block';
-
-            boton.addEventListener(
-                'click',
-                async function() {
-
-                    await PRZOfflineAuth
-                        .cerrarSesionOffline();
-
-                    window.location.href =
-                        '/offline-login';
-                }
-            );
-        }
-
         window.addEventListener(
             'online',
             renovarPermisoOffline
-        );
-
-        document.addEventListener(
-            'DOMContentLoaded',
-            prepararCerrarSesionOffline
         );
 
         document.addEventListener(

@@ -309,16 +309,12 @@
 
                                 <li>
 
-                                    <form method="POST" action="{{ route('logout') }}">
-
+                                    <form id="formCerrarSesionPRZ" method="POST" action="{{ route('logout') }}">
                                         @csrf
 
-                                        <button type="submit" class="dropdown-item text-danger">
-
+                                        <button type="submit" class="dropdown-item text-danger" id="btnCerrarSesionPRZ">
                                             <i class="bi bi-box-arrow-right me-2"></i>
-
                                             Cerrar sesión
-
                                         </button>
 
                                     </form>
@@ -354,7 +350,61 @@
         JS EXTRA
     ====================================== --}}
 
+    <script src="{{ asset('js/offline-auth.js') }}"></script>
+
     @yield('js')
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const formulario = document.getElementById(
+                'formCerrarSesionPRZ'
+            );
+
+            if (!formulario) {
+                return;
+            }
+
+            formulario.addEventListener('submit', async function(event) {
+
+                // Solamente en modo offline
+                if (!navigator.onLine) {
+
+                    event.preventDefault();
+
+                    try {
+
+                        if (!window.PRZOfflineAuth) {
+                            throw new Error(
+                                'El módulo de autenticación offline no está disponible.'
+                            );
+                        }
+
+                        // Eliminar sesión local
+                        await window.PRZOfflineAuth.cerrarSesionOffline();
+
+                        // Ir al login offline
+                        window.location.replace('/offline-login');
+
+                    } catch (error) {
+
+                        console.error(
+                            'Error cerrando sesión offline:',
+                            error
+                        );
+
+                        alert(
+                            'No fue posible cerrar la sesión offline.'
+                        );
+                    }
+                }
+
+                // Con Internet:
+                // se mantiene el POST normal de Laravel.
+            });
+
+        });
+    </script>
 
 </body>
 
