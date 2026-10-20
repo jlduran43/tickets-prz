@@ -11,26 +11,15 @@ use Illuminate\Support\Facades\DB;
 
 class OfflineTicketController extends Controller
 {
-    public function sincronizar(
-        Request $request,
-        TicketOfflineSigner $signer
-    ) {
+    public function sincronizar(Request $request, TicketOfflineSigner $signer) 
+    {
 
-        $datos =
-            $request->validate([
-                'scan_uuid' =>
-                'required|uuid',
-
-                'signed_qr' =>
-                'required|string',
-
-                'device_id' =>
-                'required|string|max:255',
-
-                'scanned_at' =>
-                'required|date',
+        $datos = $request->validate([
+                'scan_uuid' => 'required|uuid',
+                'signed_qr' => 'required|string',
+                'device_id' => 'required|string|max:255',
+                'scanned_at' => 'required|date',
             ]);
-
 
         /*
         |--------------------------------------------------------------------------
@@ -38,15 +27,10 @@ class OfflineTicketController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $existente =
-            TicketOfflineScan::where(
-                'scan_uuid',
-                $datos['scan_uuid']
-            )->first();
+        $existente = TicketOfflineScan::where('scan_uuid', $datos['scan_uuid'])->first();
 
-
-        if ($existente) {
-
+        if ($existente) 
+        {
             return response()->json([
                 'ok' => true,
                 'resultado' =>
@@ -54,20 +38,16 @@ class OfflineTicketController extends Controller
             ]);
         }
 
-
         /*
         |--------------------------------------------------------------------------
         | Validar firma
         |--------------------------------------------------------------------------
         */
 
-        $payload =
-            $signer->verificar(
-                $datos['signed_qr']
-            );
+        $payload = $signer->verificar($datos['signed_qr']);
 
-
-        if (!$payload) {
+        if (!$payload) 
+        {
 
             return response()->json([
                 'ok' => false,
@@ -76,13 +56,8 @@ class OfflineTicketController extends Controller
             ], 422);
         }
 
-
-        if (
-            empty($payload['id']) ||
-            empty($payload['token']) ||
-            empty($payload['exp'])
-        ) {
-
+        if (empty($payload['id']) || empty($payload['token']) || empty($payload['exp'])) 
+        {
             return response()->json([
                 'ok' => false,
                 'resultado' =>
@@ -90,12 +65,7 @@ class OfflineTicketController extends Controller
             ], 422);
         }
 
-
-        $scanDate =
-            Carbon::parse(
-                $datos['scanned_at']
-            );
-
+        $scanDate = Carbon::parse($datos['scanned_at']);
 
         /*
         |--------------------------------------------------------------------------
@@ -103,11 +73,8 @@ class OfflineTicketController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if (
-            $scanDate->timestamp >
-            $payload['exp']
-        ) {
-
+        if ($scanDate->timestamp > $payload['exp']) 
+        {
             return response()->json([
                 'ok' => false,
                 'resultado' =>
@@ -115,19 +82,10 @@ class OfflineTicketController extends Controller
             ], 422);
         }
 
-
         return DB::transaction(
-            function () use (
-                $payload,
-                $datos,
-                $scanDate
-            ) {
-
-                $venta =
-                    Venta::where(
-                        'id',
-                        $payload['id']
-                    )
+            function () use ($payload, $datos, $scanDate) 
+            {
+                $venta = Venta::where('id', $payload['id'])
                     ->where(
                         'token_ticket',
                         $payload['token']
@@ -135,21 +93,15 @@ class OfflineTicketController extends Controller
                     ->lockForUpdate()
                     ->first();
 
-
-                if (!$venta) {
-
+                if (!$venta) 
+                {
                     $this->guardarScan(
                         datos: $datos,
-
                         payload: $payload,
-
                         venta: null,
-
                         resultado: 'NO_EXISTE',
-
                         scanDate: $scanDate
                     );
-
 
                     return response()->json([
                         'ok' => false,
@@ -158,19 +110,14 @@ class OfflineTicketController extends Controller
                     ], 404);
                 }
 
-
                 /*
                 |--------------------------------------------------------------------------
                 | Comprobar pago
                 |--------------------------------------------------------------------------
                 */
 
-                if (
-                    $venta->estado !== 'PAGADA' ||
-                    !$venta->pagada_at ||
-                    blank($venta->token_ticket)
-                ) {
-
+                if ($venta->estado !== 'PAGADA' || !$venta->pagada_at || blank($venta->token_ticket)) 
+                {
                     $this->guardarScan(
                         $datos,
                         $payload,
@@ -178,7 +125,6 @@ class OfflineTicketController extends Controller
                         'NO_PAGADO',
                         $scanDate
                     );
-
 
                     return response()->json([
                         'ok' => false,
@@ -187,15 +133,14 @@ class OfflineTicketController extends Controller
                     ], 422);
                 }
 
-
                 /*
                 |--------------------------------------------------------------------------
                 | Ya estaba utilizado en servidor
                 |--------------------------------------------------------------------------
                 */
 
-                if ($venta->validada_at) {
-
+                if ($venta->validada_at) 
+                {
                     $this->guardarScan(
                         $datos,
                         $payload,
@@ -204,7 +149,6 @@ class OfflineTicketController extends Controller
                         $scanDate
                     );
 
-
                     return response()->json([
                         'ok' => false,
                         'resultado' =>
@@ -212,18 +156,14 @@ class OfflineTicketController extends Controller
                     ]);
                 }
 
-
                 /*
                 |--------------------------------------------------------------------------
                 | VALIDACIÓN CORRECTA
                 |--------------------------------------------------------------------------
                 */
 
-                $venta->validada_at =
-                    $scanDate;
-
+                $venta->validada_at = $scanDate;
                 $venta->save();
-
 
                 $this->guardarScan(
                     $datos,
@@ -233,54 +173,28 @@ class OfflineTicketController extends Controller
                     $scanDate
                 );
 
-
                 return response()->json([
                     'ok' => true,
-                    'resultado' =>
-                    'VALIDADO',
-
-                    'folio' =>
-                    $venta->folio,
+                    'resultado' => 'VALIDADO',
+                    'folio' => $venta->folio,
                 ]);
             }
         );
     }
 
 
-    private function guardarScan(
-        array $datos,
-        array $payload,
-        ?Venta $venta,
-        string $resultado,
-        Carbon $scanDate
-    ): void {
-
+    private function guardarScan(array $datos, array $payload, ?Venta $venta, string $resultado, Carbon $scanDate): void 
+    {
         TicketOfflineScan::create([
 
-            'scan_uuid' =>
-            $datos['scan_uuid'],
-
-            'venta_id' =>
-            $venta?->id,
-
-            'token_ticket' =>
-            $payload['token']
-                ?? null,
-
-            'device_id' =>
-            $datos['device_id'],
-
-            'scanned_at' =>
-            $scanDate,
-
-            'received_at' =>
-            now(),
-
-            'resultado' =>
-            $resultado,
-
-            'payload' =>
-            $payload,
+            'scan_uuid' => $datos['scan_uuid'],
+            'venta_id' => $venta?->id,
+            'token_ticket' => $payload['token'] ?? null,
+            'device_id' => $datos['device_id'],
+            'scanned_at' => $scanDate,
+            'received_at' => now(),
+            'resultado' => $resultado,
+            'payload' => $payload,
         ]);
     }
 }

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'prz-scanner-v21';
+const CACHE_NAME = 'prz-scanner-v22';
 
 const OFFLINE_FILES = [
     '/offline/ticket_public.pem',
@@ -379,60 +379,99 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-
     /*
-     * LOGIN OFFLINE
-     *
-     * Primero busca la página guardada.
-     * Si no existe en caché, intenta Internet.
-     */
+|--------------------------------------------------------------------------
+| LOGIN OFFLINE
+|--------------------------------------------------------------------------
+*/
+
     if (
         request.mode === 'navigate' &&
         url.pathname === '/offline-login'
     ) {
-
         event.respondWith(
+            (async () => {
 
-            caches
-                .match('/offline-login')
-                .then(cached => {
+                // 1. Buscar login guardado
+                const cached = await caches.match(
+                    '/offline-login'
+                );
 
-                    if (cached) {
-                        return cached;
+                if (cached && cached.ok) {
+                    console.log(
+                        'Login offline cargado desde caché'
+                    );
+
+                    return cached;
+                }
+
+                // 2. Intentar obtener login desde servidor
+                try {
+                    const response = await fetch(request);
+
+                    if (
+                        response.ok &&
+                        !response.redirected &&
+                        new URL(response.url).pathname === '/offline-login'
+                    ) {
+                        const cache = await caches.open(
+                            CACHE_NAME
+                        );
+
+                        await cache.put(
+                            '/offline-login',
+                            response.clone()
+                        );
                     }
 
-                    return fetch(request)
-                        .then(response => {
+                    return response;
 
-                            const clone =
-                                response.clone();
+                } catch (error) {
 
-                            if (response.ok) {
+                    console.error(
+                        'No se pudo cargar login offline:',
+                        error
+                    );
 
-                                caches
-                                    .open(CACHE_NAME)
-                                    .then(cache => {
-
-                                        cache.put(
-                                            '/offline-login',
-                                            clone
-                                        );
-
-                                    });
-
+                    // 3. Evitar pantalla en blanco
+                    return new Response(
+                        `<!DOCTYPE html>
+                    <html lang="es">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport"
+                              content="width=device-width, initial-scale=1">
+                        <title>Login offline no disponible</title>
+                    </head>
+                    <body style="font-family:Arial;
+                                 padding:30px;
+                                 text-align:center;">
+                        <h2>Inicio de sesión no disponible</h2>
+                        <p>
+                            La pantalla de acceso offline
+                            no está almacenada en este dispositivo.
+                        </p>
+                        <p>
+                            Conecta Internet, abre el inicio
+                            de sesión offline y vuelve a intentarlo.
+                        </p>
+                    </body>
+                    </html>`,
+                        {
+                            status: 503,
+                            headers: {
+                                'Content-Type':
+                                    'text/html; charset=utf-8'
                             }
+                        }
+                    );
+                }
 
-                            return response;
-
-                        });
-
-                })
-
+            })()
         );
 
         return;
     }
-
 
     /*
      * RESTO DE NAVEGACIONES

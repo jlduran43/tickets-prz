@@ -31,13 +31,15 @@ class RegistroClienteController extends Controller
             (string) $request->input('telefono', '')
         );
 
-        $request->merge([
-            'telefono' => $telefono,
-        ]);
+        $request->merge(['telefono' => $telefono]);
 
         $request->validate(
             [
-                'name' => 'required|string|max:255',
+                'name' => [
+                    'required'.
+                    'string',
+                    'max:255',
+                ],
 
                 'rut' => [
                     'required',
@@ -85,16 +87,18 @@ class RegistroClienteController extends Controller
 
         $telefono = $request->telefono;
 
-        if (str_starts_with($telefono, '+56')) {
+        if (str_starts_with($telefono, '+56')) 
+        {
             $telefonoNormalizado = $telefono;
-        } elseif (str_starts_with($telefono, '56')) {
+        } elseif (str_starts_with($telefono, '56')) 
+        {
             $telefonoNormalizado = '+' . $telefono;
         } else {
             $telefonoNormalizado = '+56' . $telefono;
         }
 
-        $user = DB::transaction(function () use ($request, $telefonoNormalizado) {
-
+        $user = DB::transaction(function () use ($request, $telefonoNormalizado) 
+        {
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,

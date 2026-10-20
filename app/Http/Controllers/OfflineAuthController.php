@@ -11,14 +11,16 @@ class OfflineAuthController extends Controller
     {
         $user = $request->user();
 
-        if (!$user) {
+        if (!$user) 
+        {
             return response()->json([
                 'ok' => false,
                 'message' => 'Sesión no válida.',
             ], 401);
         }
 
-        if ($user->rol !== 'CONTROL') {
+        if ($user->rol !== 'CONTROL') 
+        {
             return response()->json([
                 'ok' => false,
                 'message' => 'Usuario no autorizado.',

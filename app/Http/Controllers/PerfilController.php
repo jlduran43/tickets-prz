@@ -12,27 +12,13 @@ class PerfilController extends Controller
     public function edit()
     {
         $user = Auth::user();
-
         $cliente = $user->cliente;
-
         $regiones = Region::orderBy('nombre')->get();
-
-        $comunas = Comuna::where(
-            'region_id',
-            $cliente->region_id
-        )
+        $comunas = Comuna::where('region_id', $cliente->region_id)
             ->orderBy('nombre')
             ->get();
 
-        return view(
-            'perfil.edit',
-            compact(
-                'user',
-                'cliente',
-                'regiones',
-                'comunas'
-            )
-        );
+        return view('perfil.edit', compact('user', 'cliente', 'regiones', 'comunas'));
     }
 
 
@@ -47,13 +33,12 @@ class PerfilController extends Controller
             (string) $request->input('telefono', '')
         );
 
-        if (str_starts_with($telefono, '56')) {
+        if (str_starts_with($telefono, '56')) 
+        {
             $telefono = substr($telefono, 2);
         }
 
-        $request->merge([
-            'telefono' => $telefono,
-        ]);
+        $request->merge(['telefono' => $telefono]);
 
         $request->validate(
             [
@@ -115,18 +100,12 @@ class PerfilController extends Controller
         );
 
 
-        $user->update([
-            'name' => $request->name,
-        ]);
-
+        $user->update(['name' => $request->name]);
 
         $cliente->update([
             'telefono' => '+56' . $request->telefono,
-
             'region_id' => $request->region_id,
-
             'comuna_id' => $request->comuna_id,
-
             'direccion' =>
             $request->filled('direccion')
                 ? trim($request->direccion)
@@ -140,15 +119,10 @@ class PerfilController extends Controller
                 : null,
 
             'recibir_noticias' =>
-            $request->boolean(
-                'recibir_noticias'
-            ),
+            $request->boolean('recibir_noticias'),
         ]);
 
 
-        return back()->with(
-            'success',
-            'Tus datos fueron actualizados correctamente.'
-        );
+        return back()->with('success', 'Tus datos fueron actualizados correctamente.');
     }
 }

@@ -23,7 +23,8 @@ class GenerarClavesTickets extends Command
 
         $privateKey = openssl_pkey_new($config);
 
-        if ($privateKey === false) {
+        if ($privateKey === false) 
+        {
 
             $this->error('No fue posible generar la clave RSA.');
 
@@ -36,7 +37,8 @@ class GenerarClavesTickets extends Command
 
         $details = openssl_pkey_get_details($privateKey);
 
-        if ($details === false || empty($details['key'])) {
+        if ($details === false || empty($details['key'])) 
+        {
             $this->error('No fue posible obtener la clave pública.');
 
             while ($error = openssl_error_string()) {
@@ -50,7 +52,8 @@ class GenerarClavesTickets extends Command
 
         $privateKeyPem = '';
 
-        if (!openssl_pkey_export($privateKey, $privateKeyPem)) {
+        if (!openssl_pkey_export($privateKey, $privateKeyPem)) 
+        {
 
             $this->error('No fue posible exportar la clave privada.');
 
@@ -63,7 +66,8 @@ class GenerarClavesTickets extends Command
 
         $keysDirectory = storage_path('app/keys');
 
-        if (!is_dir($keysDirectory)) {
+        if (!is_dir($keysDirectory)) 
+        {
             mkdir($keysDirectory, 0700, true);
         }
 
