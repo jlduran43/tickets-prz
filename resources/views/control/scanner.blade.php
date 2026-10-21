@@ -659,8 +659,8 @@
 @section('js')
 
     <script src="{{ asset('js/html5-qrcode.min.js') }}"></script>
-    <script src="{{ asset('js/ticket-offline.js') }}?v=22"></script>
-    <script src="{{ asset('js/ticket-sounds.js') }}?v=2"></script>
+    <script src="{{ asset('js/ticket-offline.js') }}?v=23"></script>
+    <script src="{{ asset('js/ticket-sounds.js') }}?v=6"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
 

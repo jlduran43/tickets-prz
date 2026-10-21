@@ -661,6 +661,7 @@ function mostrarTicketValido(payload) {
     mostrarBotonNuevoEscaneo();
 }
 
+
 function mostrarTicketUtilizado(payload) {
 
     document
@@ -794,6 +795,11 @@ function mostrarTicketVencido() {
             </div>
         `;
 
+    // Sonido de ticket vencido OFFLINE
+    if (typeof reproducirSonidoTicketUtilizado === 'function') {
+        reproducirSonidoTicketUtilizado();
+    }
+
     mostrarBotonNuevoEscaneo();
 }
 
@@ -852,6 +858,11 @@ function mostrarTicketInvalido(mensaje) {
         `;
 
     // Sonido de ticket inválido OFFLINE
+    if (typeof reproducirSonidoTicketUtilizado === 'function') {
+        reproducirSonidoTicketUtilizado();
+    }
+
+    // Sonido de ticket inválido offline
     if (typeof reproducirSonidoTicketUtilizado === 'function') {
         reproducirSonidoTicketUtilizado();
     }

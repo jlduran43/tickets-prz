@@ -1,10 +1,10 @@
-const CACHE_NAME = 'prz-scanner-v23';
+const CACHE_NAME = 'prz-scanner-v24';
 
 const OFFLINE_FILES = [
     '/offline/ticket_public.pem',
     '/offline/offline_auth_public.pem',
 
-    '/js/ticket-offline.js?v=22',
+    '/js/ticket-offline.js?v=23',
     '/js/html5-qrcode.min.js',
     '/js/offline-auth.js',
 
@@ -14,7 +14,7 @@ const OFFLINE_FILES = [
 
     '/sounds/ticket-valido.wav',
     '/sounds/ticket-utilizado.wav',
-    '/js/ticket-sounds.js?v=5',
+    '/js/ticket-sounds.js?v=6',
 ];
 
 self.addEventListener('install', event => {
