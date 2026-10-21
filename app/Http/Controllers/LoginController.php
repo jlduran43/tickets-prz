@@ -21,9 +21,7 @@ class LoginController extends Controller
             'password' => 'required',
         ]);
 
-
-        if (!Auth::attempt($credenciales, $request->boolean('remember'))) 
-        {
+        if (!Auth::attempt($credenciales, $request->boolean('remember'))) {
 
             return back()
                 ->withErrors([
@@ -38,9 +36,27 @@ class LoginController extends Controller
         |--------------------------------------------------------------------------
         */
 
+        $usuario = Auth::user();
+
+        // Comprobar si la cuenta está desactivada
+        if (!$usuario->activo) {
+
+            Auth::logout();
+
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()
+                ->route('login')
+                ->with(
+                    'cuenta_inactiva',
+                    'Tu cuenta se encuentra desactivada. Comunícate con el administrador del sistema para solicitar su reactivación.'
+                );
+        }
+
         $request->session()->regenerate();
 
-        $usuario = Auth::user();
+
 
         /*
         |--------------------------------------------------------------------------
@@ -48,12 +64,10 @@ class LoginController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if ($usuario->rol === 'CLIENTE' && !$usuario->hasVerifiedEmail()) 
-        {
+        if ($usuario->rol === 'CLIENTE' && !$usuario->hasVerifiedEmail()) {
             $urlIntended = $request->session()->get('url.intended');
 
-            if (is_string($urlIntended) && URL::isValidUrl($urlIntended) && str_starts_with($urlIntended, url('/email/verificar/'))) 
-            {
+            if (is_string($urlIntended) && URL::isValidUrl($urlIntended) && str_starts_with($urlIntended, url('/email/verificar/'))) {
                 return redirect()->intended(
                     route('verification.notice')
                 );
@@ -63,16 +77,14 @@ class LoginController extends Controller
                 ->route('verification.notice');
         }
 
-        if ($usuario->rol === 'ADMIN') 
-        {
+        if ($usuario->rol === 'ADMIN') {
 
             return redirect()
                 ->route('admin.usuarios.index');
         }
 
 
-        if ($usuario->rol === 'CONTROL') 
-        {
+        if ($usuario->rol === 'CONTROL') {
 
             return redirect()
                 ->route('control.index');
