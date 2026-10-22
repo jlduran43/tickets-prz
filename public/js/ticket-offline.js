@@ -997,6 +997,24 @@ async function sincronizarPendientes() {
                 'meta[name="csrf-token"]'
             )?.getAttribute('content');
 
+        const sesionOffline =
+            typeof window.PRZOfflineAuth !== 'undefined'
+                ? await window.PRZOfflineAuth.obtenerSesionOffline()
+                : null;
+
+        const usarPermisoOffline =
+            Boolean(sesionOffline?.permit);
+
+        const rutaSincronizacion = usarPermisoOffline
+            ? '/control/sincronizar-offline-dispositivo'
+            : '/control/sincronizar-offline';
+
+        console.log(
+            'Modo de sincronización:',
+            usarPermisoOffline
+                ? 'Permiso offline firmado'
+                : 'Sesión Laravel'
+        );
 
         for (const pendiente of pendientes) {
 
@@ -1007,51 +1025,35 @@ async function sincronizarPendientes() {
                     pendiente.folio
                 );
 
+                const response = await fetch(
+                    rutaSincronizacion,
+                    {
+                        method: 'POST',
+                        credentials: 'same-origin',
 
-                const response =
-                    await fetch(
-                        '/control/sincronizar-offline',
-                        {
-                            method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            ...(!usarPermisoOffline && csrfToken
+                                ? { 'X-CSRF-TOKEN': csrfToken }
+                                : {})
+                        },
 
-                            headers: {
-                                'Content-Type':
-                                    'application/json',
+                        body: JSON.stringify({
+                            scan_uuid: pendiente.scan_uuid,
+                            signed_qr: pendiente.signed_qr,
+                            token: pendiente.token,
+                            venta_id: pendiente.venta_id,
+                            folio: pendiente.folio,
+                            scanned_at: pendiente.scanned_at,
+                            device_id: pendiente.device_id,
 
-                                'Accept':
-                                    'application/json',
-
-                                'X-CSRF-TOKEN':
-                                    csrfToken
-                            },
-
-                            body: JSON.stringify({
-
-                                scan_uuid:
-                                    pendiente.scan_uuid,
-
-                                signed_qr:
-                                    pendiente.signed_qr,
-
-                                token:
-                                    pendiente.token,
-
-                                venta_id:
-                                    pendiente.venta_id,
-
-                                folio:
-                                    pendiente.folio,
-
-                                scanned_at:
-                                    pendiente.scanned_at,
-
-                                device_id:
-                                    pendiente.device_id
-
-                            })
-                        }
-                    );
-
+                            ...(usarPermisoOffline
+                                ? { permit: sesionOffline.permit }
+                                : {})
+                        })
+                    }
+                );
 
                 /*
                  * Intentar leer JSON de Laravel
@@ -1130,17 +1132,16 @@ async function sincronizarPendientes() {
                  * También debe eliminarse de la cola.
                  */
                 if (
-                    data.estado === 'YA_SINCRONIZADO' ||
-                    data.estado === 'YA_UTILIZADO' ||
-                    data.mensaje === 'Ya sincronizado'
+                    data.ok === true &&
+                    data.estado === 'YA_SINCRONIZADO' &&
+                    data.validada_at
                 ) {
-
                     await eliminarPendiente(
                         pendiente.scan_uuid
                     );
 
                     console.log(
-                        'Pendiente resuelto porque ya estaba sincronizado:',
+                        'Ticket previamente sincronizado:',
                         pendiente.folio
                     );
 
@@ -1208,7 +1209,8 @@ async function sincronizarPendientes() {
 |--------------------------------------------------------------------------
 */
 
-async function intentarSincronizar() {
+async function intentarSincronizar() 
+{
 
     if (!navigator.onLine) {
 
@@ -1297,3 +1299,49 @@ document.addEventListener(
         }
     }
 );
+
+/*
+|--------------------------------------------------------------------------
+| SINCRONIZACIÓN AUTOMÁTICA PERIÓDICA
+|--------------------------------------------------------------------------
+|
+| Cada 30 segundos revisa si existen tickets
+| pendientes y vuelve a intentar su envío.
+|
+*/
+
+setInterval(async function () {
+
+    if (!navigator.onLine) {
+        return;
+    }
+
+    if (sincronizandoPendientes) {
+        return;
+    }
+
+    try {
+
+        const pendientes = await obtenerPendientes();
+
+        if (pendientes.length > 0) {
+
+            console.log(
+                'Sincronización automática: ' +
+                pendientes.length +
+                ' ticket(s) pendientes.'
+            );
+
+            await sincronizarPendientes();
+        }
+
+    } catch (error) {
+
+        console.error(
+            'Error en sincronización automática:',
+            error
+        );
+
+    }
+
+}, 30000);

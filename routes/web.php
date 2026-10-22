@@ -581,3 +581,13 @@ Route::middleware([
         ]
     )->name('control.sincronizarOffline');
 });
+
+Route::post(
+    '/control/sincronizar-offline-dispositivo',
+    [
+        ControlController::class,
+        'sincronizarOfflineDispositivo'
+    ]
+)
+->middleware('throttle:60,1')
+->name('control.sincronizarOfflineDispositivo');

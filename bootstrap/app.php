@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->validateCsrfTokens(except: [
             'webpay/retorno',
+            'control/sincronizar-offline-dispositivo',
         ]);
 
         $middleware->alias([

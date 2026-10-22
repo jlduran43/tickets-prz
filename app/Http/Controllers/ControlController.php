@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Services\TicketOfflineSigner;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class ControlController extends Controller
 {
@@ -95,8 +97,7 @@ class ControlController extends Controller
             |
             */
 
-            return DB::transaction(function () use ($datos) 
-            {
+            return DB::transaction(function () use ($datos) {
 
                 $venta = Venta::where(
                     'token_ticket',
@@ -111,8 +112,7 @@ class ControlController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
-                if (!$venta) 
-                {
+                if (!$venta) {
                     return response()->json([
                         'ok' => false,
                         'estado' => 'INVALIDO',
@@ -126,8 +126,7 @@ class ControlController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
-                if ($venta->estado !== 'PAGADA' || blank($venta->token_ticket) || !$venta->pagada_at) 
-                {
+                if ($venta->estado !== 'PAGADA' || blank($venta->token_ticket) || !$venta->pagada_at) {
                     return response()->json([
                         'ok' => false,
                         'estado' => 'INVALIDO',
@@ -148,8 +147,7 @@ class ControlController extends Controller
                     : null;
 
 
-                if ($fechaVencimiento && now()->greaterThan($fechaVencimiento)) 
-                {
+                if ($fechaVencimiento && now()->greaterThan($fechaVencimiento)) {
 
                     return response()->json([
                         'ok' => false,
@@ -168,8 +166,7 @@ class ControlController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
-                if ($venta->validada_at) 
-                {
+                if ($venta->validada_at) {
 
                     return response()->json([
                         'ok' => false,
@@ -216,7 +213,7 @@ class ControlController extends Controller
                     'visitante' => $venta->nombre_cliente,
                     'rut' => $venta->rut_cliente,
                     'personas' => $venta->cantidad_personas,
-                    'validada_at' => $venta->validada_at -> format('d/m/Y H:i'),
+                    'validada_at' => $venta->validada_at->format('d/m/Y H:i'),
                 ]);
             });
         } catch (\Throwable $e) {
@@ -237,7 +234,7 @@ class ControlController extends Controller
         }
     }
 
-    public function sincronizarOffline(Request $request, TicketOfflineSigner $signer) 
+    public function sincronizarOffline(Request $request, TicketOfflineSigner $signer)
     {
         $datos = $request->validate([
             'signed_qr' => 'required|string|max:8192',
@@ -267,8 +264,7 @@ class ControlController extends Controller
                 $payload['iat'],
                 $payload['exp']
             )
-        ) 
-        {
+        ) {
             return response()->json([
                 'ok' => false,
                 'estado' => 'FIRMA_INVALIDA',
@@ -291,8 +287,7 @@ class ControlController extends Controller
             $payload['id'] !== (int) $datos['venta_id'] ||
             $payload['folio'] !== $datos['folio'] ||
             $payload['token'] !== $datos['token']
-        ) 
-        {
+        ) {
             return response()->json([
                 'ok' => false,
                 'estado' => 'DATOS_INVALIDOS',
@@ -442,5 +437,126 @@ class ControlController extends Controller
                 'mensaje' => 'No fue posible sincronizar el ticket.',
             ], 500);
         }
+    }
+
+    public function sincronizarOfflineDispositivo(Request $request, TicketOfflineSigner $signer)
+    {
+        $datos = $request->validate([
+            'permit' => 'required|string|max:8192',
+            'device_id' => 'required|string|max:100',
+        ]);
+
+        $partes = explode('.', $datos['permit']);
+
+        if (
+            count($partes) !== 3 ||
+            $partes[0] !== 'PRZAUTH1'
+        ) {
+            return response()->json([
+                'ok' => false,
+                'estado' => 'PERMISO_INVALIDO',
+            ], 403);
+        }
+
+        [$version, $payloadBase64, $firmaBase64] = $partes;
+
+        $decodificar = function (string $valor) {
+            if (!preg_match('/^[A-Za-z0-9_-]+$/', $valor)) {
+                return false;
+            }
+
+            return base64_decode(
+                strtr($valor, '-_', '+/'),
+                true
+            );
+        };
+
+        $firma = $decodificar($firmaBase64);
+        $contenido = $decodificar($payloadBase64);
+
+        $rutaClave = public_path(
+            'offline/offline_auth_public.pem'
+        );
+
+        if (
+            $firma === false ||
+            $contenido === false ||
+            !is_file($rutaClave)
+        ) {
+            return response()->json([
+                'ok' => false,
+                'estado' => 'PERMISO_INVALIDO',
+            ], 403);
+        }
+
+        $clavePublica = openssl_pkey_get_public(
+            file_get_contents($rutaClave)
+        );
+
+        if (
+            !$clavePublica ||
+            openssl_verify(
+                $payloadBase64,
+                $firma,
+                $clavePublica,
+                OPENSSL_ALGO_SHA256
+            ) !== 1
+        ) {
+            return response()->json([
+                'ok' => false,
+                'estado' => 'FIRMA_INVALIDA',
+            ], 403);
+        }
+
+        $payload = json_decode($contenido, true);
+
+        if (
+            !is_array($payload) ||
+            !isset(
+                $payload['v'],
+                $payload['user_id'],
+                $payload['role'],
+                $payload['device_id'],
+                $payload['iat'],
+                $payload['exp']
+            ) ||
+            $payload['v'] !== 1 ||
+            !is_int($payload['user_id']) ||
+            !is_int($payload['iat']) ||
+            !is_int($payload['exp']) ||
+            $payload['iat'] > time() + 300 ||
+            $payload['exp'] <= time() ||
+            $payload['role'] !== 'CONTROL' ||
+            !is_string($payload['device_id']) ||
+            !hash_equals(
+                $payload['device_id'],
+                $datos['device_id']
+            )
+        ) {
+            return response()->json([
+                'ok' => false,
+                'estado' => 'PERMISO_VENCIDO_O_INVALIDO',
+            ], 403);
+        }
+
+        $usuario = User::find($payload['user_id']);
+
+        if (
+            !$usuario ||
+            $usuario->rol !== 'CONTROL' ||
+            !$usuario->activo
+        ) {
+            return response()->json([
+                'ok' => false,
+                'estado' => 'USUARIO_NO_AUTORIZADO',
+            ], 403);
+        }
+
+        // Identidad verificada para esta solicitud.
+        Auth::setUser($usuario);
+
+        // Reutilizar toda la validación RSA y transacción
+        // que ya existen para sincronizar tickets.
+        return $this->sincronizarOffline($request, $signer);
     }
 }
