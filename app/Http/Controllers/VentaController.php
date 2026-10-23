@@ -16,31 +16,21 @@ use App\Models\TiposEntrada;
 class VentaController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
      * Show the form for creating a new resource.
      */
+
     public function create()
     {
         $regiones = Region::orderBy('nombre')->get();
 
         $cliente = null;
 
-
         $tipoEntrada = TiposEntrada::where('activo', true)
             ->orderBy('id')
             ->first();
 
-        if (
-            auth()->check() &&
-            auth()->user()->rol === 'CLIENTE'
-        ) {
+        if (auth()->check() && auth()->user()->rol === 'CLIENTE') 
+        {
             $cliente = auth()->user()->cliente;
         }
 
@@ -54,13 +44,15 @@ class VentaController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+
     public function store(Request $request)
     {
         $usuario = auth()->user();
 
         $cliente = $usuario->cliente;
 
-        if (! $cliente) {
+        if (! $cliente) 
+        {
             return back()->withErrors([
                 'cliente' => 'No se encontró el perfil del cliente.',
             ]);
@@ -137,20 +129,21 @@ class VentaController extends Controller
 
         $telefono = $request->telefono;
 
-        if (str_starts_with($telefono, '+56')) {
-
+        if (str_starts_with($telefono, '+56')) 
+        {
             $telefonoNormalizado = $telefono;
-        } elseif (str_starts_with($telefono, '56')) {
-
+        } elseif (str_starts_with($telefono, '56')) 
+        {
             $telefonoNormalizado = '+' . $telefono;
-        } else {
-
+        } else 
+        {
             $telefonoNormalizado = '+56' . $telefono;
         }
 
         $rut = Rut::parse($cliente->rut);
 
-        if (! $rut->validate()) {
+        if (! $rut->validate()) 
+        {
             return back()
                 ->withErrors([
                     'rut_cliente' => 'El RUT ingresado no es válido.',
@@ -158,83 +151,65 @@ class VentaController extends Controller
                 ->withInput();
         }
 
-        $tipoEntrada = TiposEntrada::where(
-            'id',
-            $request->tipo_entrada_id
-        )
+        $tipoEntrada = TiposEntrada::where('id', $request->tipo_entrada_id)
             ->where('activo', true)
             ->firstOrFail();
 
         $precioTicket = $tipoEntrada->precio;
 
         /*
-    |--------------------------------------------------------------------------
-    | EVITAR VENTAS DUPLICADAS
-    |--------------------------------------------------------------------------
-    |
-    | Si el mismo formulario llega varias veces,
-    | checkout_token será exactamente el mismo.
-    |
-    */
+        |--------------------------------------------------------------------------
+        | EVITAR VENTAS DUPLICADAS
+        |--------------------------------------------------------------------------
+        |
+        | Si el mismo formulario llega varias veces,
+        | checkout_token será exactamente el mismo.
+        |
+        */
 
         $venta = Venta::firstOrCreate(
-
             [
                 'checkout_token' => $request->checkout_token,
             ],
 
             [
-                /*
+            
+            /*
              * Folio temporal.
              *
              * Después de insertar obtenemos el ID real
              * y generamos TCK-000XXX.
              */
-                'folio' => 'TMP-' . strtoupper(
-                    \Illuminate\Support\Str::random(12)
-                ),
 
+                'folio' => 'TMP-' . strtoupper(\Illuminate\Support\Str::random(12)),
                 'cliente_id' => $cliente->id,
-
                 'nombre_cliente' => $usuario->name,
-
                 'rut_cliente' => $cliente->rut,
-
                 'correo' => $usuario->email,
-
                 'telefono' => $telefonoNormalizado,
-
                 'region_id' => $cliente->region_id,
-
                 'comuna_id' => $cliente->comuna_id,
-
                 'cantidad_personas' => $request->cantidad_personas,
-
                 'fecha' => now()->toDateString(),
-
                 'subtotal' => $precioTicket,
-
                 'descuento' => 0,
-
                 'total' => $precioTicket,
-
                 'medio_pago' => 'WEBPAY',
-
                 'estado' => 'PENDIENTE_PAGO',
             ]
         );
 
         /*
-    |--------------------------------------------------------------------------
-    | GENERAR FOLIO USANDO EL ID REAL
-    |--------------------------------------------------------------------------
-    |
-    | Solo ocurre cuando esta petición creó realmente la venta.
-    |
-    */
+        |--------------------------------------------------------------------------
+        | GENERAR FOLIO USANDO EL ID REAL
+        |--------------------------------------------------------------------------
+        |
+        | Solo ocurre cuando esta petición creó realmente la venta.
+        |
+        */
 
-        if ($venta->wasRecentlyCreated) {
-
+        if ($venta->wasRecentlyCreated) 
+        {
             $venta->folio =
                 'TCK-' .
                 str_pad(
@@ -251,8 +226,8 @@ class VentaController extends Controller
                 'folio' => $venta->folio,
                 'checkout_token' => $venta->checkout_token,
             ]);
-        } else {
-
+        } else 
+        {
             Log::warning('Intento duplicado detectado', [
                 'venta_id' => $venta->id,
                 'folio' => $venta->folio,
@@ -266,13 +241,13 @@ class VentaController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        return redirect()
-            ->route('webpay.iniciar', $venta);
+        return redirect() -> route('webpay.iniciar', $venta);
     }
 
     /**
      * Display the specified resource.
      */
+
     public function show(Venta $venta)
     {
         abort_unless(
@@ -281,16 +256,15 @@ class VentaController extends Controller
             403
         );
 
-        if ($venta->estado !== 'PAGADA') {
+        if ($venta->estado !== 'PAGADA') 
+        {
             return redirect()
                 ->route('ventas.create')
-                ->with(
-                    'error',
-                    'Esta venta todavía no tiene un pago confirmado.'
-                );
+                ->with('error', 'Esta venta todavía no tiene un pago confirmado.');
         }
 
-        if (blank($venta->token_ticket)) {
+        if (blank($venta->token_ticket)) 
+        {
             return redirect()
                 ->route('tickets.index')
                 ->with(
@@ -306,16 +280,12 @@ class VentaController extends Controller
 
     public function exito(Venta $venta)
     {
-        if ($venta->estado !== 'PAGADA') {
-
-            return redirect()
-                ->route('ventas.create');
+        if ($venta->estado !== 'PAGADA') 
+        {
+            return redirect() -> route('ventas.create');
         }
 
-        return view(
-            'webpay.exito',
-            compact('venta')
-        );
+        return view('webpay.exito', compact('venta'));
     }
 
     public function misTickets()
@@ -327,10 +297,7 @@ class VentaController extends Controller
             ->orderByDesc('id')
             ->get();
 
-        return view(
-            'tickets.index',
-            compact('ventas')
-        );
+        return view('tickets.index', compact('ventas'));
     }
 
     public function verTicket(Venta $venta)
@@ -338,61 +305,55 @@ class VentaController extends Controller
         $usuario = auth()->user();
 
         /*
-     * Seguridad:
-     * solamente el dueño puede visualizar el ticket.
-     */
-        if (
-            strtolower($venta->correo)
-            !== strtolower($usuario->email)
-        ) {
+        * Seguridad:
+        * solamente el dueño puede visualizar el ticket.
+        */
+
+        if (strtolower($venta->correo) !== strtolower($usuario->email)) 
+        {
             abort(403);
         }
 
-        if ($venta->estado !== 'PAGADA') {
+        if ($venta->estado !== 'PAGADA') 
+        {
             abort(404);
         }
 
-
         /*
-|--------------------------------------------------------------------------
-| DETERMINAR ESTADO REAL DEL TICKET
-|--------------------------------------------------------------------------
-*/
+        |--------------------------------------------------------------------------
+        | DETERMINAR ESTADO REAL DEL TICKET
+        |--------------------------------------------------------------------------
+        */
 
         $vencimiento = $venta->pagada_at
             ? $venta->pagada_at->copy()->addMonths(3)
             : null;
 
-        if (
-            blank($venta->token_ticket) ||
-            !$venta->pagada_at
-        ) {
+        if (blank($venta->token_ticket) || !$venta->pagada_at) 
+        {
             $estadoTicket = 'REQUIERE_REVISION';
-        } elseif ($venta->validada_at) {
-
+        } elseif ($venta->validada_at) 
+        {
             $estadoTicket = 'UTILIZADO';
-        } elseif (now()->greaterThan($vencimiento)) {
-
+        } elseif (now()->greaterThan($vencimiento)) 
+        {
             $estadoTicket = 'VENCIDO';
-        } else {
-
+        } else 
+        {
             $estadoTicket = 'VIGENTE';
         }
 
         /*
-     * Generamos QR solamente si está vigente.
-     */
+        * Generamos QR solamente si está vigente.
+        */
+
         $qrBase64 = null;
 
-        if (
-            $estadoTicket === 'VIGENTE' &&
-            $venta->token_ticket
-        ) {
-
+        if ($estadoTicket === 'VIGENTE' && $venta->token_ticket) 
+        {
             $signer = app(TicketOfflineSigner::class);
 
-            $codigoQr =
-                $signer->generarQrFirmado($venta);
+            $codigoQr = $signer->generarQrFirmado($venta);
 
             $qrCode = new QrCode(
                 data: $codigoQr,
@@ -404,15 +365,12 @@ class VentaController extends Controller
 
             $writer = new PngWriter();
 
-            $resultado =
-                $writer->write($qrCode);
-
+            $resultado = $writer->write($qrCode);
 
             $qrBase64 = base64_encode(
                 $resultado->getString()
             );
         }
-
 
         return view(
             'tickets.detalle',
@@ -423,29 +381,5 @@ class VentaController extends Controller
                 'qrBase64'
             )
         );
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Venta $venta)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Venta $venta)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Venta $venta)
-    {
-        //
     }
 }

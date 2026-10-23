@@ -13,25 +13,22 @@ class WebpayController extends Controller
 {
     public function iniciar(Venta $venta, WebpayService $webpayService)
     {
-
         /*
-    |--------------------------------------------------------------------------
-    | Si ya está pagada, no permitir otro intento
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Si ya está pagada, no permitir otro intento
+        |--------------------------------------------------------------------------
+        */
 
-        if ($venta->estado === 'PAGADA') {
-
-            return redirect()
-                ->route('ventas.show', $venta);
+        if ($venta->estado === 'PAGADA') 
+        {
+            return redirect() -> route('ventas.show', $venta);
         }
 
-
         /*
-    |--------------------------------------------------------------------------
-    | Solo permitir estados que puedan iniciar/reintentar pago
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Solo permitir estados que puedan iniciar/reintentar pago
+        |--------------------------------------------------------------------------
+        */
 
         if (!in_array(
             $venta->estado,
@@ -39,154 +36,104 @@ class WebpayController extends Controller
                 'PENDIENTE_PAGO',
                 'FALLIDA',
             ]
-        )) {
-
+        )) 
+        {
             return redirect()
-                ->route(
-                    'webpay.fallo',
-                    $venta
-                )
-                ->with(
-                    'error',
-                    'Esta venta no puede iniciar un nuevo intento de pago.'
-                );
+                ->route('webpay.fallo', $venta)
+                ->with('error', 'Esta venta no puede iniciar un nuevo intento de pago.');
         }
 
-
-        try {
-
+        try 
+        {
             /*
-        |--------------------------------------------------------------------------
-        | Preparar venta para un nuevo intento
-        |--------------------------------------------------------------------------
-        |
-        | Si venía FALLIDA, vuelve a PENDIENTE_PAGO.
-        | También limpiamos los datos del intento anterior.
-        |
-        */
+            |--------------------------------------------------------------------------
+            | Preparar venta para un nuevo intento
+            |--------------------------------------------------------------------------
+            |
+            | Si venía FALLIDA, vuelve a PENDIENTE_PAGO.
+            | También limpiamos los datos del intento anterior.
+            |
+            */
 
             $venta->update([
 
-                'estado' =>
-                'PENDIENTE_PAGO',
+                'estado' => 'PENDIENTE_PAGO',
+                'webpay_token' => null,
+                'webpay_authorization_code' => null,
+                'webpay_response_code' => null,
+                'webpay_payment_type_code' => null,
+                'webpay_card_number' => null,
 
-                'webpay_token' =>
-                null,
+            ]);
 
-                'webpay_authorization_code' =>
-                null,
+            /*
+            |--------------------------------------------------------------------------
+            | Generar datos únicos para Webpay
+            |--------------------------------------------------------------------------
+            */
 
-                'webpay_response_code' =>
-                null,
+            $buyOrder = 'TCK-' . $venta->id . '-' . now()->format('YmdHis');
+            $sessionId = 'SES-' . $venta->id . '-' . \Illuminate\Support\Str::random(8);
 
-                'webpay_payment_type_code' =>
-                null,
+            /*
+            |--------------------------------------------------------------------------
+            | Guardar datos del nuevo intento
+            |--------------------------------------------------------------------------
+            */
 
-                'webpay_card_number' =>
-                null,
+            $venta->update([
+
+                'webpay_buy_order' => $buyOrder,
+                'webpay_session_id' => $sessionId,
 
             ]);
 
 
             /*
-        |--------------------------------------------------------------------------
-        | Generar datos únicos para Webpay
-        |--------------------------------------------------------------------------
-        */
+            |--------------------------------------------------------------------------
+            | URL de retorno
+            |--------------------------------------------------------------------------
+            */
 
-            $buyOrder =
-                'TCK-' .
-                $venta->id .
-                '-' .
-                now()->format('YmdHis');
-
-            $sessionId =
-                'SES-' .
-                $venta->id .
-                '-' .
-                \Illuminate\Support\Str::random(8);
-
-
-            /*
-        |--------------------------------------------------------------------------
-        | Guardar datos del nuevo intento
-        |--------------------------------------------------------------------------
-        */
-
-            $venta->update([
-
-                'webpay_buy_order' =>
-                $buyOrder,
-
-                'webpay_session_id' =>
-                $sessionId,
-
-            ]);
-
-
-            /*
-        |--------------------------------------------------------------------------
-        | URL de retorno
-        |--------------------------------------------------------------------------
-        */
-
-            $returnUrl =
-                route('webpay.retorno');
-
+            $returnUrl = route('webpay.retorno');
 
             Log::info(
                 'Iniciando Webpay',
                 [
-                    'venta_id' =>
-                    $venta->id,
-
-                    'buy_order' =>
-                    $buyOrder,
-
-                    'session_id' =>
-                    $sessionId,
-
-                    'total' =>
-                    $venta->total,
-
-                    'return_url' =>
-                    $returnUrl,
+                    'venta_id' => $venta->id,
+                    'buy_order' => $buyOrder,
+                    'session_id' => $sessionId,
+                    'total' => $venta->total,
+                    'return_url' => $returnUrl,
                 ]
             );
 
-
             /*
-        |--------------------------------------------------------------------------
-        | Crear transacción en Webpay
-        |--------------------------------------------------------------------------
-        */
+            |--------------------------------------------------------------------------
+            | Crear transacción en Webpay
+            |--------------------------------------------------------------------------
+            */
 
-            $response =
-                $webpayService
+            $response = $webpayService
                 ->transaction()
                 ->create(
 
                     $buyOrder,
-
                     $sessionId,
-
                     $venta->total,
-
                     $returnUrl
 
                 );
 
-
             /*
-        |--------------------------------------------------------------------------
-        | Guardar token entregado por Webpay
-        |--------------------------------------------------------------------------
-        */
+            |--------------------------------------------------------------------------
+            | Guardar token entregado por Webpay
+            |--------------------------------------------------------------------------
+            */
 
             $venta->update([
 
-                'webpay_token' =>
-                $response->getToken(),
+                'webpay_token' => $response->getToken(),
 
             ]);
 
@@ -194,76 +141,50 @@ class WebpayController extends Controller
             Log::info(
                 'Webpay iniciado correctamente',
                 [
-                    'venta_id' =>
-                    $venta->id,
-
-                    'token' =>
-                    $response->getToken(),
-
-                    'url' =>
-                    $response->getUrl(),
+                    'venta_id' => $venta->id,
+                    'token' => $response->getToken(),
+                    'url' => $response->getUrl(),
                 ]
             );
 
-
             /*
-        |--------------------------------------------------------------------------
-        | Redirigir a Webpay
-        |--------------------------------------------------------------------------
-        */
+            |--------------------------------------------------------------------------
+            | Redirigir a Webpay
+            |--------------------------------------------------------------------------
+            */
 
             return view(
                 'webpay.redirect',
                 [
-
-                    'url' =>
-                    $response->getUrl(),
-
-                    'token' =>
-                    $response->getToken(),
-
+                    'url' => $response->getUrl(),
+                    'token' => $response->getToken(),
                 ]
             );
-        } catch (\Throwable $e) {
-
+        } catch (\Throwable $e) 
+        {
             Log::error(
                 'Error iniciando Webpay',
                 [
-
-                    'venta_id' =>
-                    $venta->id,
-
-                    'error' =>
-                    $e->getMessage(),
-
-                    'archivo' =>
-                    $e->getFile(),
-
-                    'linea' =>
-                    $e->getLine(),
-
+                    'venta_id' => $venta->id,
+                    'error' => $e->getMessage(),
+                    'archivo' => $e->getFile(),
+                    'linea' => $e->getLine(),
                 ]
             );
 
 
             return redirect()
-                ->route(
-                    'webpay.fallo',
-                    $venta
-                )
-                ->with(
-                    'error',
-                    'No fue posible iniciar el pago.'
-                );
+                ->route('webpay.fallo', $venta)
+                ->with('error', 'No fue posible iniciar el pago.');
         }
     }
-
 
     public function retorno(Request $request, WebpayService $webpayService)
     {
         $token = $request->input('token_ws');
 
-        if (!$token) {
+        if (!$token) 
+        {
             return redirect()
                 ->route('ventas.create')
                 ->with('error', 'El pago fue cancelado o interrumpido.');
@@ -271,42 +192,48 @@ class WebpayController extends Controller
 
         $venta = Venta::where('webpay_token', $token)->first();
 
-        if (!$venta) {
+        if (!$venta) 
+        {
             return redirect()
                 ->route('ventas.create')
                 ->with('error', 'No encontramos la venta asociada al pago.');
         }
 
-        if ($venta->estado === 'PAGADA') {
+        if ($venta->estado === 'PAGADA') 
+        {
             return redirect()->route('ventas.show', $venta);
         }
 
         $transaccion = $webpayService->transaction();
 
         /*
-     * 1. Intentar confirmar con Webpay.
-     */
-        try {
-            $response = $transaccion->commit($token);
-        } catch (\Throwable $e) {
+        * 1. Intentar confirmar con Webpay.
+        */
 
+        try 
+        {
+            $response = $transaccion->commit($token);
+        } catch (\Throwable $e) 
+        {
             Log::warning('Webpay: error en commit', [
                 'venta_id' => $venta->id,
                 'error' => $e->getMessage(),
             ]);
 
             /*
-         * 2. Consultar el estado, sin repetir commit.
-         */
-            try {
+            * 2. Consultar el estado, sin repetir commit.
+            */
+
+            try 
+            {
                 $response = $transaccion->status($token);
 
                 Log::info('Webpay: recuperación por status', [
                     'venta_id' => $venta->id,
                     'status' => $response->getStatus(),
                 ]);
-            } catch (\Throwable $consultaError) {
-
+            } catch (\Throwable $consultaError) 
+            {
                 Log::error('Webpay: no fue posible recuperar estado', [
                     'venta_id' => $venta->id,
                     'error' => $consultaError->getMessage(),
@@ -325,21 +252,20 @@ class WebpayController extends Controller
         }
 
         /*
-     * 3. Verificar que la respuesta pertenece
-     *    exactamente a esta venta.
-     */
+        * 3. Verificar que la respuesta pertenece
+        *    exactamente a esta venta.
+        */
+
         $responseCode = $response->getResponseCode();
         $status = $response->getStatus();
-
-        $ordenCoincide =
-            $response->getBuyOrder() === $venta->webpay_buy_order;
+        $ordenCoincide = $response->getBuyOrder() === $venta->webpay_buy_order;
 
         $montoCoincide =
             (int) round((float) $response->getAmount())
             === (int) round((float) $venta->total);
 
-        if (!$ordenCoincide || !$montoCoincide) {
-
+        if (!$ordenCoincide || !$montoCoincide) 
+        {
             Log::error('Webpay: orden o monto no coinciden', [
                 'venta_id' => $venta->id,
                 'orden_coincide' => $ordenCoincide,
@@ -357,21 +283,24 @@ class WebpayController extends Controller
         }
 
         /*
-     * 4. Pago autorizado por Transbank.
-     */
-        if ($status === 'AUTHORIZED' && $responseCode === 0) {
+        * 4. Pago autorizado por Transbank.
+        */
 
+        if ($status === 'AUTHORIZED' && $responseCode === 0) 
+        {
             $cardDetail = $response->getCardDetail();
             $cardNumber = null;
 
-            if (is_array($cardDetail)) {
+            if (is_array($cardDetail)) 
+            {
                 $cardNumber = $cardDetail['card_number'] ?? null;
             }
 
             /*
-         * Evitar que dos retornos simultáneos
-         * confirmen nuevamente la misma venta.
-         */
+            * Evitar que dos retornos simultáneos
+            * confirmen nuevamente la misma venta.
+            */
+
             $actualizada = \Illuminate\Support\Facades\DB::transaction(
                 function () use ($venta, $response, $cardNumber) {
 
@@ -379,33 +308,24 @@ class WebpayController extends Controller
                         ->lockForUpdate()
                         ->firstOrFail();
 
-                    if ($registro->estado === 'PAGADA') {
+                    if ($registro->estado === 'PAGADA') 
+                    {
                         return false;
                     }
 
-                    if ($registro->estado !== 'PENDIENTE_PAGO') {
-                        throw new \RuntimeException(
-                            'La venta no está pendiente de pago.'
-                        );
+                    if ($registro->estado !== 'PENDIENTE_PAGO') 
+                    {
+                        throw new \RuntimeException('La venta no está pendiente de pago.');
                     }
 
                     $registro->update([
-                        'estado' => 'PAGADA',
-
-                        'webpay_authorization_code' =>
-                        $response->getAuthorizationCode(),
-
+                        'estado' => 'PAGADA',   
+                        'webpay_authorization_code' => $response->getAuthorizationCode(),
                         'webpay_response_code' => 0,
-
-                        'webpay_payment_type_code' =>
-                        $response->getPaymentTypeCode(),
-
+                        'webpay_payment_type_code' => $response->getPaymentTypeCode(),
                         'webpay_card_number' => $cardNumber,
-
                         'pagada_at' => $registro->pagada_at ?? now(),
-
-                        'token_ticket' => $registro->token_ticket
-                            ?? (string) \Illuminate\Support\Str::uuid(),
+                        'token_ticket' => $registro->token_ticket ?? (string) \Illuminate\Support\Str::uuid(),
                     ]);
 
                     return true;
@@ -414,18 +334,18 @@ class WebpayController extends Controller
 
             $venta->refresh();
 
-            if (!$actualizada) {
+            if (!$actualizada) 
+            {
                 return redirect()->route('ventas.show', $venta);
             }
 
             /*
-         * 5. Enviar ticket por correo.
-         *    Un error de correo no revierte el pago.
-         */
-            try {
-
-                Mail::to($venta->correo)
-                    ->send(new TicketCompradoMail($venta));
+            * 5. Enviar ticket por correo.
+            *   Un error de correo no revierte el pago.
+            */
+            try 
+            {
+                Mail::to($venta->correo) ->send(new TicketCompradoMail($venta));
 
                 $venta->update([
                     'ticket_enviado_at' => now(),
@@ -439,8 +359,8 @@ class WebpayController extends Controller
                             . 'Hemos enviado tu ticket al correo '
                             . $venta->correo . '.'
                     );
-            } catch (\Throwable $e) {
-
+            } catch (\Throwable $e) 
+            {
                 Log::error('Error enviando ticket', [
                     'venta_id' => $venta->id,
                     'error' => $e->getMessage(),
@@ -457,14 +377,14 @@ class WebpayController extends Controller
         }
 
         /*
-     * 6. Solo marcar FALLIDA cuando Webpay
-     *    informe expresamente FAILED.
-     *
-     * INITIALIZED u otros estados no concluyentes
-     * no deben interpretarse como pagos rechazados.
-     */
-        if ($status === 'FAILED') {
-
+        * 6. Solo marcar FALLIDA cuando Webpay
+        *    informe expresamente FAILED.
+        *
+        * INITIALIZED u otros estados no concluyentes
+        * no deben interpretarse como pagos rechazados.
+        */
+        if ($status === 'FAILED') 
+        {
             $venta->update([
                 'estado' => 'FALLIDA',
                 'webpay_response_code' => $responseCode,
@@ -492,15 +412,8 @@ class WebpayController extends Controller
             );
     }
 
-
-
-    public function fallo(
-        ?Venta $venta = null
-    ) {
-
-        return view(
-            'webpay.fallo',
-            compact('venta')
-        );
+    public function fallo(?Venta $venta = null) 
+    {
+        return view('webpay.fallo', compact('venta'));
     }
 }

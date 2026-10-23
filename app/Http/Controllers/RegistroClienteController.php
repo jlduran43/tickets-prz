@@ -62,9 +62,22 @@ class RegistroClienteController extends Controller
                     'regex:/^(?:\+?56)?9[0-9]{8}$/',
                 ],
 
-                'region_id' => 'required|exists:regiones,id',
-                'comuna_id' => 'required|exists:comunas,id',
-                'password' => 'required|string|min:8|confirmed',
+                'region_id' => [
+                    'required',
+                    'exists:regiones,id',
+                ],
+
+                'comuna_id' => [
+                    'required',
+                    'exists:comunas,id',
+                ],
+
+                'password' => [
+                    'required',
+                    'string',
+                    'min:8',
+                    'confirmed',
+                ]
             ],
             [
                 'rut.unique' => 'Este RUT ya se encuentra registrado.',

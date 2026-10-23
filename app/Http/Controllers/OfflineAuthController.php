@@ -35,10 +35,7 @@ class OfflineAuthController extends Controller
             ],
         ]);
 
-        $resultado = $signer->generarPermiso(
-            $user,
-            $request->device_id
-        );
+        $resultado = $signer->generarPermiso($user, $request->device_id);
 
         return response()->json([
             'ok' => true,

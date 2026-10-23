@@ -14,10 +14,7 @@ class TiposEntradaController extends Controller
     {
         $tiposEntradas = TiposEntrada::orderBy('nombre')->get();
 
-        return view(
-            'admin.tipos-entradas.index',
-            compact('tiposEntradas')
-        );
+        return view('admin.tipos-entradas.index', compact('tiposEntradas'));
     }
 
     /**
@@ -71,10 +68,7 @@ class TiposEntradaController extends Controller
      */
     public function edit(TiposEntrada $tipoEntrada)
     {
-        return view(
-            'admin.tipos-entradas.edit',
-            compact('tipoEntrada')
-        );
+        return view('admin.tipos-entradas.edit', compact('tipoEntrada'));
     }
 
     /**

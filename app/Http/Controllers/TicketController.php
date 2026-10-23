@@ -15,18 +15,14 @@ class TicketController extends Controller
     {
         $venta = Venta::where('token_ticket', $token)->firstOrFail();
 
-        if (
-            $venta->estado !== 'PAGADA' ||
-            blank($venta->token_ticket) ||
-            !$venta->pagada_at
-        ) {
+        if ($venta->estado !== 'PAGADA' || blank($venta->token_ticket) || !$venta->pagada_at) 
+        {
             abort(404);
         }
 
         $signer = app(TicketOfflineSigner::class);
 
-        $codigoQr =
-            $signer->generarQrFirmado($venta);
+        $codigoQr = $signer->generarQrFirmado($venta);
 
         $qrCode = new QrCode(
             data: $codigoQr,
@@ -40,9 +36,7 @@ class TicketController extends Controller
 
         $result = $writer->write($qrCode);
 
-        $qrBase64 = base64_encode(
-            $result->getString()
-        );
+        $qrBase64 = base64_encode($result->getString());
 
         $vencimiento = $venta->pagada_at
             ? $venta->pagada_at->copy()->addMonths(3)
@@ -59,9 +53,7 @@ class TicketController extends Controller
 
         $pdf->setPaper('a4', 'portrait');
 
-        return $pdf->download(
-            'ticket-' . $venta->folio . '.pdf'
-        );
+        return $pdf->download('ticket-' . $venta->folio . '.pdf');
     }
     /*
     |--------------------------------------------------------------------------
@@ -82,74 +74,64 @@ class TicketController extends Controller
     {
         $venta = Venta::where('token_ticket', $token)->first();
 
-        if (!$venta) {
+        if (!$venta) 
+        {
             return view('tickets.invalido');
         }
 
-        if (
-            $venta->estado !== 'PAGADA' ||
-            blank($venta->token_ticket) ||
-            !$venta->pagada_at
-        ) {
+        if ($venta->estado !== 'PAGADA' || blank($venta->token_ticket) || !$venta->pagada_at) 
+        {
             return view('tickets.invalido', compact('venta'));
         }
 
         /*
-    |--------------------------------------------------------------------------
-    | FECHA DE VENCIMIENTO
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | FECHA DE VENCIMIENTO
+        |--------------------------------------------------------------------------
+        */
 
         $vencimiento = $venta->pagada_at
             ? $venta->pagada_at->copy()->addMonths(3)
             : null;
 
-
         /*
-    |--------------------------------------------------------------------------
-    | TICKET VENCIDO
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | TICKET VENCIDO
+        |--------------------------------------------------------------------------
+        */
 
-        if (
-            $vencimiento &&
-            now()->greaterThan($vencimiento)
-        ) {
+        if ($vencimiento && now()->greaterThan($vencimiento)) 
+        {
             return view(
                 'tickets.vencido',
                 compact('venta', 'vencimiento')
             );
         }
 
-
         /*
-    |--------------------------------------------------------------------------
-    | TICKET YA UTILIZADO
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | TICKET YA UTILIZADO
+        |--------------------------------------------------------------------------
+        */
 
-        if ($venta->validada_at) {
-
+        if ($venta->validada_at) 
+        {
             return view(
                 'tickets.utilizado',
                 compact('venta', 'vencimiento')
             );
         }
 
-
         /*
-    |--------------------------------------------------------------------------
-    | TICKET VIGENTE
-    |--------------------------------------------------------------------------
-    |
-    | IMPORTANTE:
-    | Escanearlo públicamente NO lo marca como utilizado.
-    |
-    */
+        |--------------------------------------------------------------------------
+        | TICKET VIGENTE
+        |--------------------------------------------------------------------------
+        |
+        | IMPORTANTE:
+        | Escanearlo públicamente NO lo marca como utilizado.
+        |
+        */
 
-        return view(
-            'tickets.consulta',
-            compact('venta', 'vencimiento')
-        );
+        return view('tickets.consulta', compact('venta', 'vencimiento'));
     }
 }

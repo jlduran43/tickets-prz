@@ -82,20 +82,15 @@ class PerfilController extends Controller
                 ],
             ],
             [
-                'name.required' =>
-                'El nombre es obligatorio.',
+                'name.required' => 'El nombre es obligatorio.',
 
-                'telefono.required' =>
-                'El teléfono es obligatorio.',
+                'telefono.required' => 'El teléfono es obligatorio.',
 
-                'region_id.required' =>
-                'Debes seleccionar una región.',
+                'region_id.required' => 'Debes seleccionar una región.',
 
-                'comuna_id.required' =>
-                'Debes seleccionar una comuna.',
+                'comuna_id.required' => 'Debes seleccionar una comuna.',
 
-                'telefono.regex' =>
-                'El celular debe comenzar con 9 y contener exactamente 9 dígitos.',
+                'telefono.regex' => 'El celular debe comenzar con 9 y contener exactamente 9 dígitos.',
             ]
         );
 

@@ -5,18 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class UsuarioController extends Controller
 {
     public function index()
     {
-        $usuarios = User::orderBy('name')
-            ->get();
+        $usuarios = User::orderBy('name')->get();
 
-        return view(
-            'admin.usuarios.index',
-            compact('usuarios')
-        );
+        return view('admin.usuarios.index', compact('usuarios'));
     }
 
     public function create()
@@ -51,10 +48,7 @@ class UsuarioController extends Controller
 
         return redirect()
             ->route('admin.usuarios.index')
-            ->with(
-                'success',
-                'Usuario creado correctamente.'
-            );
+            ->with('success', 'Usuario creado correctamente.');
     }
 
     public function edit(User $usuario)
@@ -105,20 +99,16 @@ class UsuarioController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if ($request->filled('password')) {
-            $usuario->password = Hash::make(
-                $request->password
-            );
+        if ($request->filled('password')) 
+        {
+            $usuario->password = Hash::make($request->password);
         }
 
         $usuario->save();
 
         return redirect()
             ->route('admin.usuarios.index')
-            ->with(
-                'success',
-                'Usuario actualizado correctamente.'
-            );
+            ->with('success', 'Usuario actualizado correctamente.');
     }
 
     public function destroy(User $usuario)
@@ -133,41 +123,32 @@ class UsuarioController extends Controller
 
             return redirect()
                 ->route('admin.usuarios.index')
-                ->with(
-                    'error',
-                    'No puedes eliminar tu propio usuario.'
-                );
+                ->with('error', 'No puedes eliminar tu propio usuario.');
         }
 
         $usuario->delete();
 
         return redirect()
             ->route('admin.usuarios.index')
-            ->with(
-                'success',
-                'Usuario eliminado correctamente.'
-            );
+            ->with('success', 'Usuario eliminado correctamente.');
     }
 
     public function cambiarEstado(User $usuario)
     {
         /*
-    |--------------------------------------------------------------------------
-    | No permitir que el administrador se desactive a sí mismo
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | No permitir que el administrador se desactive a sí mismo
+        |--------------------------------------------------------------------------
+        */
 
-        if (auth()->id() === $usuario->id) {
+        if (auth()->id() === $usuario->id) 
+        {
             return redirect()
                 ->route('admin.usuarios.index')
-                ->with(
-                    'error',
-                    'No puedes desactivar tu propio usuario.'
-                );
+                ->with('error', 'No puedes desactivar tu propio usuario.');
         }
 
         $usuario->activo = !$usuario->activo;
-
         $usuario->save();
 
         $mensaje = $usuario->activo
