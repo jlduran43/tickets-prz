@@ -20,9 +20,6 @@ class TiposEntrada extends Model
 
     public function ventaDetalles(): HasMany
     {
-        return $this->hasMany(
-            VentaDetalle::class,
-            'tipos_entradas_id'
-        );
+        return $this->hasMany(VentaDetalle::class, 'tipos_entradas_id');
     }
 }

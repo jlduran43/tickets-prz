@@ -22,8 +22,7 @@ class TicketCompradoMail extends Mailable
     {
         $signer = app(TicketOfflineSigner::class);
 
-        $this->codigoQr =
-            $signer->generarQrFirmado($venta);
+        $this->codigoQr = $signer->generarQrFirmado($venta);
 
         $qrCode = new QrCode(
             data: $this->codigoQr,
@@ -37,18 +36,13 @@ class TicketCompradoMail extends Mailable
 
         $result = $writer->write($qrCode);
 
-        $this->qrBase64 =
-            base64_encode(
-                $result->getString()
-            );
+        $this->qrBase64 = base64_encode($result->getString());
     }
 
     public function build()
     {
         return $this
-            ->subject(
-                'Tu ticket de acceso PRZ - ' . $this->venta->folio
-            )
+            ->subject('Tu ticket de acceso PRZ - ' . $this->venta->folio)
             ->view('emails.ticket-comprado');
     }
 }

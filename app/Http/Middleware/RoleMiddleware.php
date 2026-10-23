@@ -8,17 +8,15 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RoleMiddleware
 {
-    public function handle(
-        Request $request,
-        Closure $next,
-        ...$roles
-    ): Response {
-
-        if (!auth()->check()) {
+    public function handle(Request $request, Closure $next, ...$roles): Response 
+    {
+        if (!auth()->check()) 
+        {
             return redirect()->route('login');
         }
 
-        if (!in_array(auth()->user()->rol, $roles)) {
+        if (!in_array(auth()->user()->rol, $roles)) 
+        {
             abort(403);
         }
 

@@ -62,9 +62,6 @@ class Venta extends Model
 
     public function usuarioValidador()
     {
-        return $this->belongsTo(
-            \App\Models\User::class,
-            'validada_por'
-        );
+        return $this->belongsTo(\App\Models\User::class, 'validada_por');
     }
 }
