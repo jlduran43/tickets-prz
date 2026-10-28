@@ -1,25 +1,21 @@
-console.log(
-    'PRZ ticket-offline.js VERSION 18 CARGADA'
-);
+console.log('PRZ ticket-offline.js VERSION 18 CARGADA');
 
 window.PRZ_TICKET_OFFLINE_VERSION = '18';
 
 let clavePublicaPRZ = null;
 
-async function cargarClavePublica() {
-
-    if (clavePublicaPRZ) {
+async function cargarClavePublica() 
+{
+    if (clavePublicaPRZ) 
+    {
         return clavePublicaPRZ;
     }
 
-    const response = await fetch(
-        '/offline/ticket_public.pem'
-    );
+    const response = await fetch('/offline/ticket_public.pem');
 
-    if (!response.ok) {
-        throw new Error(
-            'No fue posible cargar la clave pública.'
-        );
+    if (!response.ok) 
+    {
+        throw new Error('No fue posible cargar la clave pública.');
     }
 
     const pem = await response.text();
@@ -37,17 +33,11 @@ async function cargarClavePublica() {
 
     const binary = atob(contenido);
 
-    const bytes = new Uint8Array(
-        binary.length
-    );
+    const bytes = new Uint8Array(binary.length);
 
-    for (
-        let i = 0;
-        i < binary.length;
-        i++
-    ) {
-        bytes[i] =
-            binary.charCodeAt(i);
+    for (let i = 0; i < binary.length; i++) 
+    {
+        bytes[i] = binary.charCodeAt(i);
     }
 
     clavePublicaPRZ =
@@ -67,102 +57,60 @@ async function cargarClavePublica() {
 }
 
 
-function base64UrlToBytes(base64Url) {
+function base64UrlToBytes(base64Url) 
+{
 
-    let base64 = base64Url
-        .replace(/-/g, '+')
-        .replace(/_/g, '/');
+    let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
 
-    while (
-        base64.length % 4
-    ) {
+    while (base64.length % 4) 
+    {
         base64 += '=';
     }
 
     const binary = atob(base64);
 
-    const bytes =
-        new Uint8Array(
-            binary.length
-        );
+    const bytes = new Uint8Array(binary.length);
 
-    for (
-        let i = 0;
-        i < binary.length;
-        i++
-    ) {
-        bytes[i] =
-            binary.charCodeAt(i);
+    for (let i = 0; i < binary.length; i++) 
+    {
+        bytes[i] = binary.charCodeAt(i);
     }
 
     return bytes;
 }
 
 
-function base64UrlToString(base64Url) {
+function base64UrlToString(base64Url) 
+{
+    const bytes = base64UrlToBytes(base64Url);
 
-    const bytes =
-        base64UrlToBytes(base64Url);
-
-    return new TextDecoder()
-        .decode(bytes);
+    return new TextDecoder().decode(bytes);
 }
 
-async function verificarTicketFirmado(codigo) {
-
-    if (
-        !codigo.startsWith(
-            'PRZ1.'
-        )
-    ) {
-        throw new Error(
-            'El código no corresponde a un ticket PRZ firmado.'
-        );
+async function verificarTicketFirmado(codigo) 
+{
+    if (!codigo.startsWith('PRZ1.')) 
+    {
+        throw new Error('El código no corresponde a un ticket PRZ firmado.');
     }
 
-    const partes =
-        codigo.split('.');
+    const partes = codigo.split('.');
 
-    if (
-        partes.length !== 3
-    ) {
-        throw new Error(
-            'Formato de ticket inválido.'
-        );
+    if (partes.length !== 3) 
+    {
+        throw new Error('Formato de ticket inválido.');
     }
 
-    const [
-        version,
-        payloadBase64,
-        firmaBase64
-    ] = partes;
+    const [version, payloadBase64, firmaBase64] = partes;
 
-
-    if (
-        version !== 'PRZ1'
-    ) {
-        throw new Error(
-            'Versión del ticket no reconocida.'
-        );
+    if (version !== 'PRZ1') 
+    {
+        throw new Error('Versión del ticket no reconocida.');
     }
 
-
-    const clave =
-        await cargarClavePublica();
-
-
-    const datosFirmados =
-        new TextEncoder()
-            .encode(
-                payloadBase64
-            );
-
-
-    const firma =
-        base64UrlToBytes(
-            firmaBase64
-        );
-
+    const clave = await cargarClavePublica();
+    const datosFirmados = new TextEncoder().encode(payloadBase64);
+    const firma = base64UrlToBytes(firmaBase64);
 
     const firmaValida =
         await crypto.subtle.verify(
@@ -175,298 +123,147 @@ async function verificarTicketFirmado(codigo) {
             datosFirmados
         );
 
-
-    if (
-        !firmaValida
-    ) {
-        throw new Error(
-            'FIRMA_INVALIDA'
-        );
+    if (!firmaValida) 
+    {
+        throw new Error('FIRMA_INVALIDA');
     }
 
+    const json = base64UrlToString(payloadBase64);
+    const payload = JSON.parse(json);
 
-    const json =
-        base64UrlToString(
-            payloadBase64
-        );
-
-
-    const payload =
-        JSON.parse(json);
-
-
-    if (
-        payload.v !== 1
-    ) {
-        throw new Error(
-            'VERSION_INVALIDA'
-        );
+    if (payload.v !== 1) 
+    {
+        throw new Error('VERSION_INVALIDA');
     }
 
+    const ahora = Math.floor(Date.now() / 1000);
 
-    const ahora =
-        Math.floor(
-            Date.now() / 1000
-        );
-
-
-    if (
-        ahora >
-        payload.exp
-    ) {
-        throw new Error(
-            'TICKET_VENCIDO'
-        );
+    if (ahora > payload.exp) 
+    {
+        throw new Error('TICKET_VENCIDO');
     }
-
 
     return payload;
 }
 
-const PRZ_DB_NAME =
-    'PRZTicketOffline';
-
+const PRZ_DB_NAME = 'PRZTicketOffline';
 const PRZ_DB_VERSION = 3;
+const STORE_USADOS = 'tickets_usados';
+const STORE_PENDIENTES = 'sincronizaciones';
 
-const STORE_USADOS =
-    'tickets_usados';
+function abrirDB() 
+{
+    return new Promise((resolve, reject) => 
+        {
+            const request = indexedDB.open(PRZ_DB_NAME, PRZ_DB_VERSION);
 
-const STORE_PENDIENTES =
-    'sincronizaciones';
+            request.onupgradeneeded = function (event) 
+            {
+                const db = event.target.result;
 
-
-function abrirDB() {
-
-    return new Promise(
-        (resolve, reject) => {
-
-            const request =
-                indexedDB.open(
-                    PRZ_DB_NAME,
-                    PRZ_DB_VERSION
-                );
-
-            request.onupgradeneeded =
-                function (event) {
-
-                    const db =
-                        event.target.result;
-
-                    if (
-                        !db.objectStoreNames
-                            .contains(
-                                STORE_USADOS
-                            )
-                    ) {
-                        db.createObjectStore(
-                            STORE_USADOS,
+                    if (!db.objectStoreNames.contains(STORE_USADOS)) 
+                    {
+                        db.createObjectStore(STORE_USADOS,
                             {
-                                keyPath:
-                                    'token'
+                                keyPath: 'token'
                             }
                         );
                     }
 
-
-                    if (
-                        !db.objectStoreNames
-                            .contains(
-                                STORE_PENDIENTES
-                            )
-                    ) {
+                    if (!db.objectStoreNames.contains(STORE_PENDIENTES)) 
+                    {
                         db.createObjectStore(
                             STORE_PENDIENTES,
                             {
-                                keyPath:
-                                    'scan_uuid'
+                                keyPath: 'scan_uuid'
                             }
                         );
                     }
                 };
 
-
-            request.onsuccess =
-                () =>
-                    resolve(
-                        request.result
-                    );
-
-
-            request.onerror =
-                () =>
-                    reject(
-                        request.error
-                    );
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
         }
     );
 }
 
-async function ticketFueUsado(
-    token
-) {
+async function ticketFueUsado(token) 
+{
+    const db = await abrirDB();
 
-    const db =
-        await abrirDB();
+    return new Promise((resolve, reject) => 
+        {
+            const transaction = db.transaction(STORE_USADOS, 'readonly');
+            const store = transaction.objectStore(STORE_USADOS);
+            const request = store.get(token);
 
-    return new Promise(
-        (resolve, reject) => {
-
-            const transaction =
-                db.transaction(
-                    STORE_USADOS,
-                    'readonly'
-                );
-
-            const store =
-                transaction
-                    .objectStore(
-                        STORE_USADOS
-                    );
-
-            const request =
-                store.get(token);
-
-
-            request.onsuccess =
-                () =>
-                    resolve(
-                        !!request.result
-                    );
-
-
-            request.onerror =
-                () =>
-                    reject(
-                        request.error
-                    );
+            request.onsuccess = () =>resolve(!!request.result);
+            request.onerror = () => reject(request.error);
         }
     );
 }
 
-async function guardarTicketUsado(
-    payload
-) {
+async function guardarTicketUsado(payload) 
+{
+    const db = await abrirDB();
 
-    const db =
-        await abrirDB();
+    return new Promise((resolve, reject) => 
+        {
+            const transaction = db.transaction(STORE_USADOS, 'readwrite');
 
-    return new Promise(
-        (resolve, reject) => {
-
-            const transaction =
-                db.transaction(
-                    STORE_USADOS,
-                    'readwrite'
-                );
-
-            const store =
-                transaction
-                    .objectStore(
-                        STORE_USADOS
-                    );
-
-
+            const store = transaction.objectStore(STORE_USADOS);
             const request =
                 store.put({
-                    token:
-                        payload.token,
-
-                    id:
-                        payload.id,
-
-                    folio:
-                        payload.folio,
-
-                    usado_at:
-                        new Date()
-                            .toISOString()
+                    token: payload.token,
+                    id: payload.id,
+                    folio: payload.folio,
+                    usado_at: new Date().toISOString()
                 });
 
-
-            request.onsuccess =
-                () =>
-                    resolve();
-
-
-            request.onerror =
-                () =>
-                    reject(
-                        request.error
-                    );
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
         }
     );
 }
 
-function generarUUID() {
-
+function generarUUID() 
+{
     return crypto.randomUUID();
 }
 
-function obtenerDeviceIdTicket() {
+function obtenerDeviceIdTicket() 
+{
+    let deviceId = localStorage.getItem('prz_device_id');
 
-    let deviceId =
-        localStorage.getItem(
-            'prz_device_id'
-        );
+    if (!deviceId) 
+    {
+        deviceId = crypto.randomUUID();
 
-    if (!deviceId) {
-
-        deviceId =
-            crypto.randomUUID();
-
-        localStorage.setItem(
-            'prz_device_id',
-            deviceId
-        );
+        localStorage.setItem('prz_device_id', deviceId);
     }
 
     return deviceId;
 }
 
-async function agregarPendiente(codigo, payload) {
-
-    const db =
-        await abrirDB();
-
-    const scanUuid =
-        generarUUID();
-
-
+async function agregarPendiente(codigo, payload) 
+{
+    const db = await abrirDB();
+    const scanUuid = generarUUID();
+    
     const registro = {
 
-        scan_uuid:
-            scanUuid,
-
-        signed_qr:
-            codigo,
-
-        token:
-            payload.token,
-
-        venta_id:
-            payload.id,
-
-        folio:
-            payload.folio,
-
-        scanned_at:
-            new Date()
-                .toISOString(),
-
-        device_id:
-            obtenerDeviceIdTicket()
+        scan_uuid: scanUuid,
+        signed_qr: codigo,
+        token: payload.token,
+        venta_id: payload.id,
+        folio: payload.folio,
+        scanned_at: new Date().toISOString(),
+        device_id: obtenerDeviceIdTicket()
     };
 
-
-    return new Promise(
-        (resolve, reject) => {
-
-            const transaction =
-                db.transaction(
-                    STORE_PENDIENTES,
-                    'readwrite'
-                );
-
+    return new Promise((resolve, reject) => 
+        {
+            const transaction = db.transaction(STORE_PENDIENTES,'readwrite');
 
             transaction
                 .objectStore(
@@ -476,79 +273,47 @@ async function agregarPendiente(codigo, payload) {
                     registro
                 );
 
+            transaction.oncomplete = () => resolve(registro);
 
-            transaction.oncomplete =
-                () =>
-                    resolve(
-                        registro
-                    );
-
-
-            transaction.onerror =
-                () =>
-                    reject(
-                        transaction.error
-                    );
+            transaction.onerror = () => reject(transaction.error);
         }
     );
 }
 
-async function procesarTicketOffline(codigo) {
+async function procesarTicketOffline(codigo) 
+{
     try {
 
-        const payload =
-            await verificarTicketFirmado(
-                codigo
-            );
+            const payload = await verificarTicketFirmado(codigo);
+            const usado = await ticketFueUsado(payload.token);
 
-        const usado =
-            await ticketFueUsado(
-                payload.token
-            );
+            if (usado) 
+            {
 
-        if (usado) {
-
-            mostrarTicketUtilizado(
-                payload
-            );
+                mostrarTicketUtilizado(payload);
 
             return;
-        }
+            }
 
-        await agregarPendiente(
-            codigo,
-            payload
-        );
+            await agregarPendiente(codigo, payload);
 
-        await guardarTicketUsado(
-            payload
-        );
+            await guardarTicketUsado(payload);
 
-        mostrarTicketValido(
-            payload
-        );
+            mostrarTicketValido(payload);
 
-    } catch (error) {
+    } catch (error) 
+    {
+        console.error('Error validando ticket offline:', error);
 
-        console.error(
-            'Error validando ticket offline:',
-            error
-        );
-
-        if (
-            error.message ===
-            'TICKET_VENCIDO'
-        ) {
-
+        if (error.message === 'TICKET_VENCIDO') 
+        {
             mostrarTicketVencido();
 
             return;
         }
 
-        if (
-            error.message ===
-            'FIRMA_INVALIDA'
-        ) {
+        if (error.message === 'FIRMA_INVALIDA') 
+        {
 
             mostrarTicketInvalido(
                 'La firma digital del ticket no es válida.'
@@ -557,31 +322,28 @@ async function procesarTicketOffline(codigo) {
             return;
         }
 
-        mostrarTicketInvalido(
-            'No fue posible validar el ticket offline.'
-        );
+        mostrarTicketInvalido('No fue posible validar el ticket offline.');
     }
 }
 
-function mostrarBotonNuevoEscaneo() {
+function mostrarBotonNuevoEscaneo() 
+{
+    const acciones = document.getElementById('accionesScanner');
+    const btnCamara = document.getElementById('btnCamara');
 
-    const acciones =
-        document.getElementById('accionesScanner');
-
-    const btnCamara =
-        document.getElementById('btnCamara');
-
-    if (acciones) {
+    if (acciones) 
+    {
         acciones.style.display = 'block';
     }
 
-    if (btnCamara) {
+    if (btnCamara) 
+    {
         btnCamara.style.display = 'none';
     }
 }
 
-function mostrarTicketValido(payload) {
-
+function mostrarTicketValido(payload) 
+{
     document
         .getElementById('estadoScanner')
         .innerHTML = `
@@ -654,7 +416,8 @@ function mostrarTicketValido(payload) {
         `;
 
     // Sonido de validación correcta OFFLINE
-    if (typeof reproducirSonidoTicketValido === 'function') {
+    if (typeof reproducirSonidoTicketValido === 'function') 
+    {
         reproducirSonidoTicketValido();
     }
 
@@ -662,7 +425,8 @@ function mostrarTicketValido(payload) {
 }
 
 
-function mostrarTicketUtilizado(payload) {
+function mostrarTicketUtilizado(payload) 
+{
 
     document
         .getElementById('estadoScanner')
@@ -736,14 +500,16 @@ function mostrarTicketUtilizado(payload) {
         `;
 
     // Sonido de ticket utilizado OFFLINE
-    if (typeof reproducirSonidoTicketUtilizado === 'function') {
+    if (typeof reproducirSonidoTicketUtilizado === 'function') 
+    {
         reproducirSonidoTicketUtilizado();
     }
 
     mostrarBotonNuevoEscaneo();
 }
 
-function mostrarTicketVencido() {
+function mostrarTicketVencido() 
+{
 
     document
         .getElementById('estadoScanner')
@@ -796,14 +562,16 @@ function mostrarTicketVencido() {
         `;
 
     // Sonido de ticket vencido OFFLINE
-    if (typeof reproducirSonidoTicketUtilizado === 'function') {
+    if (typeof reproducirSonidoTicketUtilizado === 'function') 
+    {
         reproducirSonidoTicketUtilizado();
     }
 
     mostrarBotonNuevoEscaneo();
 }
 
-function mostrarTicketInvalido(mensaje) {
+function mostrarTicketInvalido(mensaje) 
+{
 
     document
         .getElementById('estadoScanner')
@@ -821,9 +589,7 @@ function mostrarTicketInvalido(mensaje) {
                     </h2>
 
                     <p class="ticket-state-description">
-                        ${mensaje ??
-        'El código QR no corresponde a un ticket válido.'
-        }
+                        ${mensaje ?? 'El código QR no corresponde a un ticket válido.'}
                     </p>
 
                     <div class="status-box invalid">
@@ -858,34 +624,27 @@ function mostrarTicketInvalido(mensaje) {
         `;
 
     // Sonido de ticket inválido OFFLINE
-    if (typeof reproducirSonidoTicketUtilizado === 'function') {
+    if (typeof reproducirSonidoTicketUtilizado === 'function') 
+    {
         reproducirSonidoTicketUtilizado();
     }
 
     // Sonido de ticket inválido offline
-    if (typeof reproducirSonidoTicketUtilizado === 'function') {
+    if (typeof reproducirSonidoTicketUtilizado === 'function') 
+    {
         reproducirSonidoTicketUtilizado();
     }
 
     mostrarBotonNuevoEscaneo();
 }
 
-async function obtenerPendientes() {
+async function obtenerPendientes() 
+{
+    const db = await abrirDB();
 
-    const db =
-        await abrirDB();
-
-
-    return new Promise(
-        (resolve, reject) => {
-
-            const transaction =
-                db.transaction(
-                    STORE_PENDIENTES,
-                    'readonly'
-                );
-
-
+    return new Promise((resolve, reject) => 
+        {
+            const transaction = db.transaction(STORE_PENDIENTES, 'readonly');
             const request =
                 transaction
                     .objectStore(
@@ -893,40 +652,19 @@ async function obtenerPendientes() {
                     )
                     .getAll();
 
-
-            request.onsuccess =
-                () =>
-                    resolve(
-                        request.result
-                    );
-
-
-            request.onerror =
-                () =>
-                    reject(
-                        request.error
-                    );
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
         }
     );
 }
 
-async function eliminarPendiente(
-    scanUuid
-) {
+async function eliminarPendiente(scanUuid) 
+{
+    const db = await abrirDB();
 
-    const db =
-        await abrirDB();
-
-
-    return new Promise(
-        (resolve, reject) => {
-
-            const transaction =
-                db.transaction(
-                    STORE_PENDIENTES,
-                    'readwrite'
-                );
-
+    return new Promise((resolve, reject) => 
+        {
+            const transaction = db.transaction(STORE_PENDIENTES, 'readwrite');
 
             transaction
                 .objectStore(
@@ -936,26 +674,19 @@ async function eliminarPendiente(
                     scanUuid
                 );
 
-
-            transaction.oncomplete =
-                () =>
-                    resolve();
-
-
-            transaction.onerror =
-                () =>
-                    reject(
-                        transaction.error
-                    );
+            transaction.oncomplete = () => resolve();
+            transaction.onerror = () => reject(transaction.error);
         }
     );
 }
 
 let sincronizandoPendientes = false;
 
-async function sincronizarPendientes() {
+async function sincronizarPendientes() 
+{
 
-    if (sincronizandoPendientes) {
+    if (sincronizandoPendientes) 
+    {
         console.log(
             'Ya hay una sincronización en ejecución.'
         );
@@ -963,10 +694,9 @@ async function sincronizarPendientes() {
         return;
     }
 
-    if (!navigator.onLine) {
-        console.log(
-            'No hay conexión a Internet.'
-        );
+    if (!navigator.onLine) 
+    {
+        console.log('No hay conexión a Internet.');
 
         return;
     }
@@ -975,35 +705,25 @@ async function sincronizarPendientes() {
 
     try {
 
-        const pendientes =
-            await obtenerPendientes();
+        const pendientes = await obtenerPendientes();
 
-        console.log(
-            'Pendientes encontrados:',
-            pendientes.length
-        );
+        console.log('Pendientes encontrados:', pendientes.length);
 
-        if (!pendientes.length) {
-
-            console.log(
-                'No hay sincronizaciones pendientes.'
-            );
+        if (!pendientes.length) 
+        {
+            console.log('No hay sincronizaciones pendientes.');
 
             return;
         }
 
-        const csrfToken =
-            document.querySelector(
-                'meta[name="csrf-token"]'
-            )?.getAttribute('content');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
         const sesionOffline =
             typeof window.PRZOfflineAuth !== 'undefined'
                 ? await window.PRZOfflineAuth.obtenerSesionOffline()
                 : null;
 
-        const usarPermisoOffline =
-            Boolean(sesionOffline?.permit);
+        const usarPermisoOffline = Boolean(sesionOffline?.permit);
 
         const rutaSincronizacion = usarPermisoOffline
             ? '/control/sincronizar-offline-dispositivo'
@@ -1016,14 +736,11 @@ async function sincronizarPendientes() {
                 : 'Sesión Laravel'
         );
 
-        for (const pendiente of pendientes) {
-
+        for (const pendiente of pendientes) 
+        {
             try {
 
-                console.log(
-                    'Sincronizando:',
-                    pendiente.folio
-                );
+                console.log('Sincronizando:', pendiente.folio);
 
                 const response = await fetch(
                     rutaSincronizacion,
@@ -1058,36 +775,29 @@ async function sincronizarPendientes() {
                 /*
                  * Intentar leer JSON de Laravel
                  */
+
                 let data = null;
 
                 try {
 
-                    data =
-                        await response.json();
+                    data = await response.json();
 
-                } catch (error) {
-
-                    console.error(
-                        'Laravel no devolvió JSON válido.',
-                        error
-                    );
+                } catch (error) 
+                {
+                    console.error('Laravel no devolvió JSON válido.', error);
 
                     continue;
                 }
 
-
-                console.log(
-                    'Respuesta Laravel:',
-                    data
-                );
-
+                console.log('Respuesta Laravel:', data);
 
                 /*
                  * Si hubo error HTTP,
                  * mantenerlo pendiente.
                  */
-                if (!response.ok) {
 
+                if (!response.ok) 
+                {
                     console.error(
                         'Servidor rechazó sincronización:',
                         pendiente.folio,
@@ -1098,21 +808,17 @@ async function sincronizarPendientes() {
                     continue;
                 }
 
-
                 /*
                  * CASO 1
                  *
                  * Sincronización normal.
                  */
-                if (
-                    data.ok === true &&
+
+                if (data.ok === true &&
                     data.estado === 'SINCRONIZADO' &&
                     data.validada_at
                 ) {
-
-                    await eliminarPendiente(
-                        pendiente.scan_uuid
-                    );
+                    await eliminarPendiente(pendiente.scan_uuid);
 
                     console.log(
                         'Sincronizado correctamente:',
@@ -1131,71 +837,48 @@ async function sincronizarPendientes() {
                  *
                  * También debe eliminarse de la cola.
                  */
+
                 if (
                     data.ok === true &&
                     data.estado === 'YA_SINCRONIZADO' &&
                     data.validada_at
                 ) {
-                    await eliminarPendiente(
-                        pendiente.scan_uuid
-                    );
+                    await eliminarPendiente(pendiente.scan_uuid);
 
-                    console.log(
-                        'Ticket previamente sincronizado:',
-                        pendiente.folio
-                    );
+                    console.log('Ticket previamente sincronizado:', pendiente.folio);
 
                     continue;
                 }
-
 
                 /*
                  * Si Laravel devuelve otra respuesta,
                  * dejamos el registro pendiente.
                  */
-                console.warn(
-                    'Sincronización no resuelta:',
-                    pendiente.folio,
-                    data
-                );
 
+                console.warn('Sincronización no resuelta:', pendiente.folio, data);
 
-            } catch (error) {
-
-                console.error(
-                    'Error sincronizando ' +
-                    pendiente.folio,
-                    error
-                );
+            } catch (error) 
+            {
+                console.error('Error sincronizando ' + pendiente.folio, error);
             }
         }
-
 
         /*
          * Verificar cuántos quedaron pendientes.
          */
-        const restantes =
-            await obtenerPendientes();
 
-        console.log(
-            'Pendientes restantes:',
-            restantes.length
-        );
+        const restantes = await obtenerPendientes();
 
+        console.log('Pendientes restantes:', restantes.length);
 
-    } catch (error) {
-
-        console.error(
-            'Error general de sincronización:',
-            error
-        );
-
-    } finally {
-
+    } catch (error) 
+    {
+        console.error('Error general de sincronización:', error);
+    } finally 
+    {
         sincronizandoPendientes = false;
     }
 }
-
 
 /*
 |--------------------------------------------------------------------------
@@ -1211,23 +894,17 @@ async function sincronizarPendientes() {
 
 async function intentarSincronizar() 
 {
-
-    if (!navigator.onLine) {
-
-        console.log(
-            'Todavía sin conexión.'
-        );
+    if (!navigator.onLine) 
+    {
+        console.log('Todavía sin conexión.');
 
         return;
     }
 
-    console.log(
-        'Hay conexión. Revisando pendientes...'
-    );
+    console.log('Hay conexión. Revisando pendientes...');
 
     await sincronizarPendientes();
 }
-
 
 /*
 |--------------------------------------------------------------------------
@@ -1237,21 +914,17 @@ async function intentarSincronizar()
 
 window.addEventListener(
     'online',
-    function () {
-
-        console.log(
-            'Internet recuperado. Sincronización automática en 2 segundos...'
-        );
+    function () 
+    {
+        console.log('Internet recuperado. Sincronización automática en 2 segundos...');
 
         setTimeout(
-            function () {
-
+            function () 
+            {
                 intentarSincronizar();
-
             },
             2000
         );
-
     }
 );
 
@@ -1263,21 +936,18 @@ window.addEventListener(
 
 window.addEventListener(
     'load',
-    function () {
-
-        if (navigator.onLine) {
-
+    function () 
+    {
+        if (navigator.onLine) 
+        {
             setTimeout(
-                function () {
-
+                function () 
+                {
                     intentarSincronizar();
-
                 },
                 1500
             );
-
         }
-
     }
 );
 
@@ -1289,12 +959,10 @@ window.addEventListener(
 
 document.addEventListener(
     'visibilitychange',
-    function () {
-
-        if (
-            document.visibilityState === 'visible'
-        ) {
-
+    function () 
+    {
+        if (document.visibilityState === 'visible') 
+        {
             intentarSincronizar();
         }
     }
@@ -1310,22 +978,24 @@ document.addEventListener(
 |
 */
 
-setInterval(async function () {
-
-    if (!navigator.onLine) {
+setInterval(async function () 
+{
+    if (!navigator.onLine) 
+    {
         return;
     }
 
-    if (sincronizandoPendientes) {
+    if (sincronizandoPendientes) 
+    {
         return;
     }
 
-    try {
-
+    try 
+    {
         const pendientes = await obtenerPendientes();
 
-        if (pendientes.length > 0) {
-
+        if (pendientes.length > 0) 
+        {
             console.log(
                 'Sincronización automática: ' +
                 pendientes.length +
@@ -1335,13 +1005,9 @@ setInterval(async function () {
             await sincronizarPendientes();
         }
 
-    } catch (error) {
-
-        console.error(
-            'Error en sincronización automática:',
-            error
-        );
-
+    } catch (error) 
+    {
+        console.error('Error en sincronización automática:', error);
     }
 
 }, 30000);

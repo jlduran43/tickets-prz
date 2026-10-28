@@ -11,48 +11,45 @@ const OFFLINE_SESSION_STORE = 'sesion';
 
 function abrirOfflineAuthDB() 
 {
-    return new Promise(
-        (resolve, reject) => 
+    return new Promise((resolve, reject) => 
+    {
+        const request = indexedDB.open(OFFLINE_AUTH_DB, OFFLINE_AUTH_VERSION);
+
+        request.onupgradeneeded = function (event) 
         {
-            const request = indexedDB.open(OFFLINE_AUTH_DB, OFFLINE_AUTH_VERSION);
+            const db = event.target.result;
 
-            request.onupgradeneeded =
-                function (event) 
-                {
-                    const db = event.target.result;
-
-                    if (!db.objectStoreNames.contains(OFFLINE_AUTH_STORE)) 
+            if (!db.objectStoreNames.contains(OFFLINE_AUTH_STORE)) 
+            {
+                db.createObjectStore
+                (
+                    OFFLINE_AUTH_STORE,
                     {
-                        db.createObjectStore(
-                            OFFLINE_AUTH_STORE,
-                            {
-                                keyPath: 'email'
-                            }
-                        );
+                        keyPath: 'email'
                     }
+                );
+            }
 
-                    if (!db.objectStoreNames.contains(OFFLINE_SESSION_STORE)) 
+            if (!db.objectStoreNames.contains(OFFLINE_SESSION_STORE)) 
+            {
+                db.createObjectStore
+                (
+                    OFFLINE_SESSION_STORE,
                     {
-                        db.createObjectStore(
-                            OFFLINE_SESSION_STORE,
-                            {
-                                keyPath: 'id'
-                            }
-                        );
+                        keyPath: 'id'
                     }
-                };
-
-            request.onsuccess =
-                () => resolve(
-                    request.result
                 );
+            }
+        };
 
-            request.onerror =
-                () => reject(
-                    request.error
-                );
-        }
-    );
+        request.onsuccess = () => resolve(
+                request.result
+        );
+
+        request.onerror = () => reject(
+            request.error
+        );
+    });
 }
 
 /*
@@ -83,8 +80,7 @@ async function obtenerDeviceId()
 
 function base64UrlToBytes(value) 
 {
-    value =
-        value
+    value = value
             .replace(/-/g, '+')
             .replace(/_/g, '/');
 
@@ -153,8 +149,7 @@ async function generarHashPin(pin, salt)
 {
     const encoder = new TextEncoder();
 
-    const keyMaterial =
-        await crypto.subtle.importKey(
+    const keyMaterial = await crypto.subtle.importKey(
             'raw',
             encoder.encode(pin),
             {
@@ -166,8 +161,7 @@ async function generarHashPin(pin, salt)
             ]
         );
 
-    const bits =
-        await crypto.subtle.deriveBits(
+    const bits = await crypto.subtle.deriveBits(
             {
                 name: 'PBKDF2',
                 salt: salt,
@@ -216,7 +210,8 @@ async function guardarUsuarioOffline(datos, pin)
     const salt = generarSalt();
     const hash = await generarHashPin(pin, salt);
 
-    const registro = {
+    const registro = 
+    {
 
         email:
             datos.user.email
@@ -233,8 +228,8 @@ async function guardarUsuarioOffline(datos, pin)
         actualizado_at: new Date().toISOString()
     };
 
-    return new Promise(
-        (resolve, reject) => {
+    return new Promise((resolve, reject) => 
+        {
 
             const transaction = db.transaction(OFFLINE_AUTH_STORE, 'readwrite');
 
@@ -253,20 +248,14 @@ async function guardarUsuarioOffline(datos, pin)
 
 async function obtenerUsuarioOffline(email) 
 {
-    const db =
-        await abrirOfflineAuthDB();
+    const db = await abrirOfflineAuthDB();
 
-    return new Promise(
-        (resolve, reject) => {
+    return new Promise((resolve, reject) => 
+        {
 
-            const transaction =
-                db.transaction(
-                    OFFLINE_AUTH_STORE,
-                    'readonly'
-                );
+            const transaction = db.transaction(OFFLINE_AUTH_STORE, 'readonly');
 
-            const request =
-                transaction
+            const request = transaction
                     .objectStore(
                         OFFLINE_AUTH_STORE
                     )
@@ -276,19 +265,12 @@ async function obtenerUsuarioOffline(email)
                             .toLowerCase()
                     );
 
-            request.onsuccess =
-                () => resolve(
-                    request.result ?? null
-                );
+            request.onsuccess =() => resolve(request.result ?? null);
 
-            request.onerror =
-                () => reject(
-                    request.error
-                );
+            request.onerror =() => reject(request.error);
         }
     );
 }
-
 
 /*
 |--------------------------------------------------------------------------
@@ -296,24 +278,19 @@ async function obtenerUsuarioOffline(email)
 |--------------------------------------------------------------------------
 */
 
-async function obtenerClavePublica() {
+async function obtenerClavePublica() 
+{
 
-    const response =
-        await fetch(
-            '/offline/offline_auth_public.pem'
-        );
+    const response =await fetch('/offline/offline_auth_public.pem');
 
-    if (!response.ok) {
-        throw new Error(
-            'No fue posible obtener la clave pública.'
-        );
+    if (!response.ok) 
+    {
+        throw new Error('No fue posible obtener la clave pública.');
     }
 
-    const pem =
-        await response.text();
+    const pem = await response.text();
 
-    const pemLimpio =
-        pem
+    const pemLimpio = pem
             .replace(
                 '-----BEGIN PUBLIC KEY-----',
                 ''
@@ -327,10 +304,7 @@ async function obtenerClavePublica() {
                 ''
             );
 
-    const bytes =
-        base64ToBytes(
-            pemLimpio
-        );
+    const bytes = base64ToBytes(pemLimpio);
 
     return crypto.subtle.importKey(
 
@@ -361,50 +335,30 @@ async function obtenerClavePublica() {
 |--------------------------------------------------------------------------
 */
 
-async function verificarPermiso(
-    permit
-) {
+async function verificarPermiso(permit) 
+{
 
-    if (
-        !permit ||
-        !permit.startsWith(
-            'PRZAUTH1.'
-        )
-    ) {
-        throw new Error(
-            'Permiso offline inválido.'
-        );
+    if (!permit || !permit.startsWith('PRZAUTH1.')) 
+    {
+        throw new Error('Permiso offline inválido.');
     }
 
-    const partes =
-        permit.split('.');
+    const partes = permit.split('.');
 
-    if (
-        partes.length !== 3
-    ) {
-        throw new Error(
-            'Formato del permiso inválido.'
-        );
+    if (partes.length !== 3) 
+    {
+        throw new Error('Formato del permiso inválido.');
     }
 
-    const payloadEncoded =
-        partes[1];
-
-    const signatureEncoded =
-        partes[2];
-
-    const publicKey =
-        await obtenerClavePublica();
-
-    const encoder =
-        new TextEncoder();
-
-    const firmaValida =
-        await crypto.subtle.verify(
+    const payloadEncoded = partes[1];
+    const signatureEncoded = partes[2];
+    const publicKey = await obtenerClavePublica();
+    const encoder = new TextEncoder();
+    const firmaValida =await crypto.subtle.verify(
 
             {
                 name:
-                    'RSASSA-PKCS1-v1_5'
+                'RSASSA-PKCS1-v1_5'
             },
 
             publicKey,
@@ -418,28 +372,17 @@ async function verificarPermiso(
             )
         );
 
-    if (!firmaValida) {
+    if (!firmaValida) 
+    {
 
-        throw new Error(
-            'La firma del permiso offline es inválida.'
-        );
+        throw new Error('La firma del permiso offline es inválida.');
     }
 
-    const payloadBytes =
-        base64UrlToBytes(
-            payloadEncoded
-        );
+    const payloadBytes = base64UrlToBytes(payloadEncoded);
+    const payloadJson =new TextDecoder().decode(payloadBytes);
 
-    const payloadJson =
-        new TextDecoder().decode(
-            payloadBytes
-        );
-
-    return JSON.parse(
-        payloadJson
-    );
+    return JSON.parse(payloadJson);
 }
-
 
 /*
 |--------------------------------------------------------------------------
@@ -447,72 +390,41 @@ async function verificarPermiso(
 |--------------------------------------------------------------------------
 */
 
-async function guardarSesionOffline(
-    usuario,
-    payload
-) {
+async function guardarSesionOffline(usuario, payload) 
+{
+    const db = await abrirOfflineAuthDB();
 
-    const db =
-        await abrirOfflineAuthDB();
-
-    const sesion = {
-
-        id:
-            'actual',
-
-        user_id:
-            payload.user_id,
-
-        name:
-            payload.name,
-
-        email:
-            payload.email,
-
-        role:
-            payload.role,
-
-        device_id:
-            payload.device_id,
-
-        permit:
-            usuario.permit,
-
-        login_at:
-            Date.now(),
-
-        expires_at:
-            payload.exp
+    const sesion = 
+    {
+        id: 'actual',
+        user_id: payload.user_id,
+        name: payload.name,
+        email: payload.email,
+        role: payload.role,
+        device_id: payload.device_id,
+        permit: usuario.permit,
+        login_at: Date.now(),
+        expires_at: payload.exp
     };
 
-    return new Promise(
-        (resolve, reject) => {
-
-            const transaction =
-                db.transaction(
+    return new Promise((resolve, reject) => 
+        {
+            const transaction = db.transaction(
                     OFFLINE_SESSION_STORE,
                     'readwrite'
                 );
 
-            transaction
-                .objectStore(
+            transaction.objectStore(
                     OFFLINE_SESSION_STORE
                 )
                 .put(sesion);
 
-            transaction.oncomplete =
-                () => resolve(
-                    sesion
-                );
+            transaction.oncomplete =() => resolve(sesion);
 
-            transaction.onerror =
-                () => reject(
-                    transaction.error
-                );
+            transaction.onerror =() => reject(transaction.error);
         }
     );
 }
-
 
 /*
 |--------------------------------------------------------------------------
@@ -520,40 +432,29 @@ async function guardarSesionOffline(
 |--------------------------------------------------------------------------
 */
 
-async function obtenerSesionOffline() {
+async function obtenerSesionOffline() 
+{
+    const db = await abrirOfflineAuthDB();
 
-    const db =
-        await abrirOfflineAuthDB();
-
-    return new Promise(
-        (resolve, reject) => {
-
-            const transaction =
-                db.transaction(
+    return new Promise((resolve, reject) => 
+        {
+            const transaction = db.transaction(
                     OFFLINE_SESSION_STORE,
                     'readonly'
                 );
 
-            const request =
-                transaction
+            const request = transaction
                     .objectStore(
                         OFFLINE_SESSION_STORE
                     )
                     .get('actual');
 
-            request.onsuccess =
-                () => resolve(
-                    request.result ?? null
-                );
+            request.onsuccess = () => resolve(request.result ?? null);
 
-            request.onerror =
-                () => reject(
-                    request.error
-                );
+            request.onerror = () => reject(request.error);
         }
     );
 }
-
 
 /*
 |--------------------------------------------------------------------------
@@ -561,16 +462,13 @@ async function obtenerSesionOffline() {
 |--------------------------------------------------------------------------
 */
 
-async function cerrarSesionOffline() {
+async function cerrarSesionOffline() 
+{
+    const db = await abrirOfflineAuthDB();
 
-    const db =
-        await abrirOfflineAuthDB();
-
-    return new Promise(
-        (resolve, reject) => {
-
-            const transaction =
-                db.transaction(
+    return new Promise((resolve, reject) => 
+        {
+            const transaction = db.transaction(
                     OFFLINE_SESSION_STORE,
                     'readwrite'
                 );
@@ -581,17 +479,12 @@ async function cerrarSesionOffline() {
                 )
                 .delete('actual');
 
-            transaction.oncomplete =
-                () => resolve();
+            transaction.oncomplete = () => resolve();
 
-            transaction.onerror =
-                () => reject(
-                    transaction.error
-                );
+            transaction.onerror = () => reject(transaction.error);
         }
     );
 }
-
 
 /*
 |--------------------------------------------------------------------------
@@ -599,163 +492,96 @@ async function cerrarSesionOffline() {
 |--------------------------------------------------------------------------
 */
 
-async function loginOffline(
-    email,
-    pin
-) {
+async function loginOffline(email, pin) 
+{
+    const usuario = await obtenerUsuarioOffline(email);
 
-    const usuario =
-        await obtenerUsuarioOffline(
-            email
-        );
-
-    if (!usuario) {
-
-        throw new Error(
-            'Este usuario no ha sido habilitado para trabajar offline en este dispositivo.'
-        );
+    if (!usuario) 
+    {
+        throw new Error('Este usuario no ha sido habilitado para trabajar offline en este dispositivo.');
     }
-
 
     /*
      * Comprobar PIN
      */
 
-    const salt =
-        base64ToBytes(
-            usuario.salt
-        );
+    const salt = base64ToBytes(usuario.salt);
 
-    const hashEsperado =
-        base64ToBytes(
-            usuario.pin_hash
-        );
+    const hashEsperado = base64ToBytes(usuario.pin_hash);
 
-    const hashIngresado =
-        await generarHashPin(
-            pin,
-            salt
-        );
+    const hashIngresado = await generarHashPin(pin, salt);
 
-    if (
-        !compararBytes(
-            hashEsperado,
-            hashIngresado
-        )
-    ) {
-
-        throw new Error(
-            'PIN incorrecto.'
-        );
+    if (!compararBytes(hashEsperado, hashIngresado)) 
+    {
+        throw new Error('PIN incorrecto.');
     }
-
 
     /*
      * Comprobar firma RSA
      */
 
-    const payload =
-        await verificarPermiso(
-            usuario.permit
-        );
-
+    const payload = await verificarPermiso(usuario.permit);
 
     /*
      * Comprobar rol
      */
 
-    if (
-        payload.role !== 'CONTROL'
-    ) {
-
-        throw new Error(
-            'El usuario no tiene permiso CONTROL.'
-        );
+    if (payload.role !== 'CONTROL') 
+    {
+        throw new Error('El usuario no tiene permiso CONTROL.');
     }
-
 
     /*
      * Comprobar dispositivo
      */
 
-    const deviceId =
-        await obtenerDeviceId();
+    const deviceId = await obtenerDeviceId();
 
-    if (
-        payload.device_id !==
-        deviceId
-    ) {
-
-        throw new Error(
-            'Este permiso pertenece a otro dispositivo.'
-        );
+    if (payload.device_id !== deviceId) 
+    {
+        throw new Error('Este permiso pertenece a otro dispositivo.');
     }
-
 
     /*
      * Comprobar vencimiento
      */
 
-    const ahora =
-        Math.floor(
-            Date.now() / 1000
-        );
+    const ahora = Math.floor(Date.now() / 1000);
 
-    if (
-        ahora > payload.exp
-    ) {
-
-        throw new Error(
-            'El permiso offline ha vencido. Conecta el dispositivo a Internet para renovarlo.'
-        );
+    if (ahora > payload.exp) 
+    {
+        throw new Error('El permiso offline ha vencido. Conecta el dispositivo a Internet para renovarlo.');
     }
-
 
     /*
      * Crear sesión local
      */
 
-    await guardarSesionOffline(
-        usuario,
-        payload
-    );
+    await guardarSesionOffline(usuario, payload);
 
     return payload;
 }
 
-async function actualizarSoloPermisoOffline(datos) {
-    const db =
-        await abrirOfflineAuthDB();
+async function actualizarSoloPermisoOffline(datos) 
+{
+    const db = await abrirOfflineAuthDB();
+    const email = datos.user.email.trim().toLowerCase();
+    const usuario = await obtenerUsuarioOffline(email);
 
-    const email =
-        datos.user.email
-            .trim()
-            .toLowerCase();
-
-    const usuario =
-        await obtenerUsuarioOffline(email);
-
-    if (!usuario) {
+    if (!usuario) 
+    {
         return;
     }
 
-    usuario.permit =
-        datos.permit;
-
-    usuario.expires_at =
-        datos.expires_at;
-
-    usuario.actualizado_at =
-        new Date().toISOString();
+    usuario.permit = datos.permit;
+    usuario.expires_at = datos.expires_at;
+    usuario.actualizado_at = new Date().toISOString();
 
     return new Promise(
-        (resolve, reject) => {
+        (resolve, reject) => 
+            {
 
-            const transaction =
-                db.transaction(
-                    OFFLINE_AUTH_STORE,
-                    'readwrite'
-                );
+                const transaction = db.transaction(OFFLINE_AUTH_STORE, 'readwrite');
 
             transaction
                 .objectStore(
@@ -763,13 +589,9 @@ async function actualizarSoloPermisoOffline(datos) {
                 )
                 .put(usuario);
 
-            transaction.oncomplete =
-                () => resolve();
+            transaction.oncomplete = () => resolve();
 
-            transaction.onerror =
-                () => reject(
-                    transaction.error
-                );
+            transaction.onerror = () => reject(transaction.error);
         }
     );
 }
@@ -780,19 +602,13 @@ async function actualizarSoloPermisoOffline(datos) {
 |--------------------------------------------------------------------------
 */
 
-window.PRZOfflineAuth = {
-
+window.PRZOfflineAuth = 
+{
     obtenerDeviceId,
-
     guardarUsuarioOffline,
-
     loginOffline,
-
     obtenerSesionOffline,
-
     cerrarSesionOffline,
-
     verificarPermiso,
-
     actualizarSoloPermisoOffline
 };

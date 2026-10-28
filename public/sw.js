@@ -17,124 +17,96 @@ const OFFLINE_FILES = [
     '/js/ticket-sounds.js?v=6',
 ];
 
-self.addEventListener('install', event => {
-    event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => cache.addAll(OFFLINE_FILES))
-    );
+self.addEventListener('install', event => 
+{
+    event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(OFFLINE_FILES)));
 
     self.skipWaiting();
 });
 
-self.addEventListener('activate', event => {
-
-    event.waitUntil(
-
-        (async () => {
-
-            const cacheNueva =
-                await caches.open(CACHE_NAME);
-
-            const nombresCaches =
-                await caches.keys();
+self.addEventListener('activate', event => 
+{
+    event.waitUntil((async () => 
+        {
+            const cacheNueva = await caches.open(CACHE_NAME);
+            const nombresCaches = await caches.keys();
 
             /*
              * Páginas dinámicas que necesitamos
              * conservar entre versiones.
              */
-            const paginasImportantes = [
-                '/control',
-                '/control/escaner'
-            ];
 
+            const paginasImportantes = ['/control', '/control/escaner'];
 
             /*
              * Antes de eliminar cachés antiguas,
              * recuperar las páginas protegidas.
              */
-            for (const nombre of nombresCaches) {
 
-                if (nombre === CACHE_NAME) {
+            for (const nombre of nombresCaches) 
+            {
+                if (nombre === CACHE_NAME) 
+                {
                     continue;
                 }
 
-                const cacheAnterior =
-                    await caches.open(nombre);
+                const cacheAnterior = await caches.open(nombre);
 
-
-                for (const pagina of paginasImportantes) {
-
+                for (const pagina of paginasImportantes) 
+                {
                     /*
                      * Si ya está en la caché nueva,
                      * no hacemos nada.
                      */
-                    const yaExiste =
-                        await cacheNueva.match(pagina);
 
-                    if (yaExiste) {
+                    const yaExiste = await cacheNueva.match(pagina);
+
+                    if (yaExiste) 
+                    {
                         continue;
                     }
-
 
                     /*
                      * Buscar copia en caché anterior.
                      */
-                    const respuestaAnterior =
-                        await cacheAnterior.match(pagina);
 
-                    if (respuestaAnterior) {
+                    const respuestaAnterior = await cacheAnterior.match(pagina);
 
-                        console.log(
-                            'Migrando a nueva caché:',
-                            pagina
-                        );
+                    if (respuestaAnterior) 
+                    {
+                        console.log('Migrando a nueva caché:', pagina);
 
-                        await cacheNueva.put(
-                            pagina,
-                            respuestaAnterior.clone()
-                        );
+                        await cacheNueva.put(pagina, respuestaAnterior.clone());
                     }
                 }
             }
-
 
             /*
              * Ahora sí podemos eliminar
              * las cachés antiguas.
              */
+
             await Promise.all(
-
                 nombresCaches
-                    .filter(
-                        nombre =>
-                            nombre !== CACHE_NAME
-                    )
-                    .map(
-                        nombre =>
-                            caches.delete(nombre)
-                    )
+                    .filter(nombre => nombre !== CACHE_NAME)
+                    .map(nombre => caches.delete(nombre))
             );
-
 
             /*
              * Tomar control inmediatamente.
              */
+
             await self.clients.claim();
 
-            console.log(
-                'Service Worker activado:',
-                CACHE_NAME
-            );
-
+            console.log('Service Worker activado:', CACHE_NAME);
         })()
-
     );
-
 });
 
-self.addEventListener('fetch', event => {
-
-    if (event.request.method !== 'GET') {
+self.addEventListener('fetch', event => 
+{
+    if (event.request.method !== 'GET') 
+    {
         return;
     }
 
@@ -142,12 +114,15 @@ self.addEventListener('fetch', event => {
     const url = new URL(request.url);
 
     // No interceptar solicitudes de otros dominios.
-    if (url.origin !== self.location.origin) {
+    
+    if (url.origin !== self.location.origin) 
+    {
         return;
     }
 
     // Nunca interceptar las rutas de compras,
     // tickets ni transacciones de Webpay.
+    
     const rutasExcluidas = [
         '/webpay',
         '/ventas',
@@ -161,22 +136,22 @@ self.addEventListener('fetch', event => {
                 url.pathname === ruta ||
                 url.pathname.startsWith(ruta + '/')
         )
-    ) {
+    ) 
+    {
         return;
     }
 
     // Solo intervenir en las páginas que
     // necesitan navegación offline.
+    
     const paginasOffline = [
         '/control',
         '/control/escaner',
         '/offline-login'
     ];
 
-    if (
-        request.mode === 'navigate' &&
-        !paginasOffline.includes(url.pathname)
-    ) {
+    if (request.mode === 'navigate' && !paginasOffline.includes(url.pathname)) 
+    {
         return;
     }
 
@@ -188,131 +163,102 @@ self.addEventListener('fetch', event => {
      * 1. busca /control en caché
      * 2. si tampoco existe, abre /offline-login
      */
-    if (
-        request.mode === 'navigate' &&
-        url.pathname === '/control'
-    ) {
-
+    
+    if (request.mode === 'navigate' && url.pathname === '/control') 
+    {
         event.respondWith(
 
             fetch(request)
 
-                .then(response => {
-
+                .then(response => 
+                {
                     const clone = response.clone();
 
                     /*
                      * Guardar solamente si Laravel realmente
                      * entregó /control y NO redirigió al login.
                      */
+
                     if (
                         response.ok &&
                         !response.redirected &&
-                        new URL(response.url).pathname === '/control'
-                    ) {
+                        new URL(response.url).pathname === '/control') 
+                    {
 
                         caches
                             .open(CACHE_NAME)
                             .then(cache => {
 
-                                cache.put(
-                                    '/control',
-                                    clone
-                                );
-
+                                cache.put('/control', clone);
                             });
-
                     }
 
                     return response;
                 })
 
-                .catch(async () => {
+                .catch(async () => 
+                {
+                    const cache = await caches.open(CACHE_NAME);
 
-                    const cache =
-                        await caches.open(
-                            CACHE_NAME
-                        );
-
-                    let control =
-                        await cache.match(
-                            '/control'
-                        );
+                    let control = await cache.match('/control');
 
                     /*
                      * Segunda oportunidad:
                      * buscar /control en cualquier caché existente.
                      */
-                    if (!control) {
 
-                        control =
-                            await caches.match(
-                                '/control'
-                            );
+                    if (!control) 
+                    {
+                        control = await caches.match('/control');
                     }
 
-                    if (control) {
-
-                        console.log(
-                            'Cargando /control desde caché offline.'
-                        );
+                    if (control) 
+                    {
+                        console.log('Cargando /control desde caché offline.');
 
                         return control;
                     }
 
-                    console.warn(
-                        '/control todavía no está preparado offline.'
-                    );
+                    console.warn('/control todavía no está preparado offline.');
 
-                    return cache.match(
-                        '/offline-login'
-                    );
-
+                    return cache.match('/offline-login');
                 })
-
         );
 
         return;
     }
 
     /*
- * ESCÁNER OFFLINE
- *
- * Intenta Internet primero.
- * Si falla, utiliza la pantalla del escáner guardada.
- */
-    if (
-        request.mode === 'navigate' &&
-        url.pathname === '/control/escaner'
-    ) {
-
+    * ESCÁNER OFFLINE
+    *
+    * Intenta Internet primero.
+    * Si falla, utiliza la pantalla del escáner guardada.
+    */
+    if (request.mode === 'navigate' && url.pathname === '/control/escaner') 
+    {
         event.respondWith(
 
             fetch(request)
 
-                .then(response => {
-
+                .then(response => 
+                {
                     const clone = response.clone();
 
                     /*
                      * No guardar accidentalmente
                      * una redirección al login.
                      */
+
                     if (
                         response.ok &&
                         !response.redirected &&
                         new URL(response.url).pathname === '/control/escaner'
                     ) {
-
                         caches
                             .open(CACHE_NAME)
-                            .then(cache => {
-
-                                cache.put(
-                                    '/control/escaner',
-                                    clone
-                                );
-
+                            .then(cache => 
+                            {
+                                cache.put('/control/escaner', clone);
                             });
 
                     }
@@ -320,33 +266,26 @@ self.addEventListener('fetch', event => {
                     return response;
                 })
 
-                .catch(async () => {
+                .catch(async () => 
+                {
+                    const cache = await caches.open(CACHE_NAME);
+                    const scanner = await cache.match('/control/escaner');
 
-                    const cache =
-                        await caches.open(
-                            CACHE_NAME
-                        );
-
-                    const scanner =
-                        await cache.match(
-                            '/control/escaner'
-                        );
-
-                    if (scanner) {
+                    if (scanner) 
+                    {
                         return scanner;
                     }
 
                     /*
-                 * NO volver silenciosamente a /control.
-                 */
+                    * NO volver silenciosamente a /control.
+                    */
                     return new Response(
                         `
                     <!DOCTYPE html>
                     <html lang="es">
                     <head>
                         <meta charset="UTF-8">
-                        <meta name="viewport"
-                              content="width=device-width, initial-scale=1">
+                        <meta name="viewport" content="width=device-width, initial-scale=1">
                         <title>Escáner no disponible</title>
                     </head>
                     <body style="font-family:Arial;padding:30px;">
@@ -373,39 +312,35 @@ self.addEventListener('fetch', event => {
                     );
 
                 })
-
         );
 
         return;
     }
 
     /*
-|--------------------------------------------------------------------------
-| LOGIN OFFLINE
-|--------------------------------------------------------------------------
-*/
+    |--------------------------------------------------------------------------
+    | LOGIN OFFLINE
+    |--------------------------------------------------------------------------
+    */
 
-    if (
-        request.mode === 'navigate' &&
-        url.pathname === '/offline-login'
-    ) {
+    if (request.mode === 'navigate' && url.pathname === '/offline-login') 
+    {
         event.respondWith(
-            (async () => {
-
+            (async () => 
+            {
                 // 1. Buscar login guardado
-                const cached = await caches.match(
-                    '/offline-login'
-                );
 
-                if (cached && cached.ok) {
-                    console.log(
-                        'Login offline cargado desde caché'
-                    );
+                const cached = await caches.match('/offline-login');
+
+                if (cached && cached.ok) 
+                {
+                    console.log('Login offline cargado desde caché');
 
                     return cached;
                 }
 
                 // 2. Intentar obtener login desde servidor
+
                 try {
                     const response = await fetch(request);
 
@@ -413,34 +348,27 @@ self.addEventListener('fetch', event => {
                         response.ok &&
                         !response.redirected &&
                         new URL(response.url).pathname === '/offline-login'
-                    ) {
-                        const cache = await caches.open(
-                            CACHE_NAME
-                        );
+                    ) 
+                    {
+                        const cache = await caches.open(CACHE_NAME);
 
-                        await cache.put(
-                            '/offline-login',
-                            response.clone()
-                        );
+                        await cache.put('/offline-login',response.clone());
                     }
 
                     return response;
 
-                } catch (error) {
-
-                    console.error(
-                        'No se pudo cargar login offline:',
-                        error
-                    );
+                } catch (error) 
+                {
+                    console.error('No se pudo cargar login offline:', error);
 
                     // 3. Evitar pantalla en blanco
+
                     return new Response(
                         `<!DOCTYPE html>
                     <html lang="es">
                     <head>
                         <meta charset="UTF-8">
-                        <meta name="viewport"
-                              content="width=device-width, initial-scale=1">
+                        <meta name="viewport" content="width=device-width, initial-scale=1">
                         <title>Login offline no disponible</title>
                     </head>
                     <body style="font-family:Arial;
@@ -460,8 +388,7 @@ self.addEventListener('fetch', event => {
                         {
                             status: 503,
                             headers: {
-                                'Content-Type':
-                                    'text/html; charset=utf-8'
+                                'Content-Type': 'text/html; charset=utf-8'
                             }
                         }
                     );
@@ -478,45 +405,36 @@ self.addEventListener('fetch', event => {
      *
      * Se conserva prácticamente tu lógica actual.
      */
-    if (request.mode === 'navigate') {
 
+    if (request.mode === 'navigate') 
+    {
         event.respondWith(
 
             fetch(request)
 
-                .then(response => {
+                .then(response => 
+                {
+                    const clone = response.clone();
 
-                    const clone =
-                        response.clone();
-
-                    if (response.ok) {
-
+                    if (response.ok) 
+                    {
                         caches
                             .open(CACHE_NAME)
-                            .then(cache => {
-
-                                cache.put(
-                                    request,
-                                    clone
-                                );
-
+                            .then(cache => 
+                            {
+                                cache.put(request, clone);
                             });
 
                     }
 
                     return response;
-
                 })
 
-                .catch(() =>
-                    caches.match(request)
-                )
-
+                .catch(() => caches.match(request))
         );
 
         return;
     }
-
 
     /*
      * JS, CSS, PEM, imágenes, etc.
@@ -524,44 +442,37 @@ self.addEventListener('fetch', event => {
      * Caché primero.
      * Si no existe, descarga y guarda.
      */
+
     event.respondWith(
 
         caches
             .match(request)
-            .then(cached => {
-
-                if (cached) {
+            .then(cached => 
+            {
+                if (cached) 
+                {
                     return cached;
                 }
 
                 return fetch(request)
 
-                    .then(response => {
+                    .then(response => 
+                    {
+                        const clone = response.clone();
 
-                        const clone =
-                            response.clone();
-
-                        if (response.ok) {
-
+                        if (response.ok) 
+                        {
                             caches
                                 .open(CACHE_NAME)
-                                .then(cache => {
-
-                                    cache.put(
-                                        request,
-                                        clone
-                                    );
-
+                                .then(cache => 
+                                {
+                                    cache.put(request, clone);
                                 });
-
                         }
 
                         return response;
 
                     });
-
             })
-
     );
-
 });
