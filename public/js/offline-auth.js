@@ -1,14 +1,7 @@
-const OFFLINE_AUTH_DB =
-    'prz_offline_auth';
-
+const OFFLINE_AUTH_DB = 'prz_offline_auth';
 const OFFLINE_AUTH_VERSION = 1;
-
-const OFFLINE_AUTH_STORE =
-    'usuarios';
-
-const OFFLINE_SESSION_STORE =
-    'sesion';
-
+const OFFLINE_AUTH_STORE = 'usuarios';
+const OFFLINE_SESSION_STORE = 'sesion';
 
 /*
 |--------------------------------------------------------------------------
@@ -16,29 +9,20 @@ const OFFLINE_SESSION_STORE =
 |--------------------------------------------------------------------------
 */
 
-function abrirOfflineAuthDB() {
-
+function abrirOfflineAuthDB() 
+{
     return new Promise(
-        (resolve, reject) => {
-
-            const request =
-                indexedDB.open(
-                    OFFLINE_AUTH_DB,
-                    OFFLINE_AUTH_VERSION
-                );
+        (resolve, reject) => 
+        {
+            const request = indexedDB.open(OFFLINE_AUTH_DB, OFFLINE_AUTH_VERSION);
 
             request.onupgradeneeded =
-                function (event) {
+                function (event) 
+                {
+                    const db = event.target.result;
 
-                    const db =
-                        event.target.result;
-
-                    if (
-                        !db.objectStoreNames.contains(
-                            OFFLINE_AUTH_STORE
-                        )
-                    ) {
-
+                    if (!db.objectStoreNames.contains(OFFLINE_AUTH_STORE)) 
+                    {
                         db.createObjectStore(
                             OFFLINE_AUTH_STORE,
                             {
@@ -47,12 +31,8 @@ function abrirOfflineAuthDB() {
                         );
                     }
 
-                    if (
-                        !db.objectStoreNames.contains(
-                            OFFLINE_SESSION_STORE
-                        )
-                    ) {
-
+                    if (!db.objectStoreNames.contains(OFFLINE_SESSION_STORE)) 
+                    {
                         db.createObjectStore(
                             OFFLINE_SESSION_STORE,
                             {
@@ -75,34 +55,25 @@ function abrirOfflineAuthDB() {
     );
 }
 
-
 /*
 |--------------------------------------------------------------------------
 | Generar ID permanente del dispositivo
 |--------------------------------------------------------------------------
 */
 
-async function obtenerDeviceId() {
+async function obtenerDeviceId() 
+{
+    let deviceId = localStorage.getItem('prz_device_id');
 
-    let deviceId =
-        localStorage.getItem(
-            'prz_device_id'
-        );
+    if (!deviceId) 
+    {
+        deviceId = crypto.randomUUID();
 
-    if (!deviceId) {
-
-        deviceId =
-            crypto.randomUUID();
-
-        localStorage.setItem(
-            'prz_device_id',
-            deviceId
-        );
+        localStorage.setItem('prz_device_id', deviceId);
     }
 
     return deviceId;
 }
-
 
 /*
 |--------------------------------------------------------------------------
@@ -110,28 +81,22 @@ async function obtenerDeviceId() {
 |--------------------------------------------------------------------------
 */
 
-function base64UrlToBytes(value) {
-
+function base64UrlToBytes(value) 
+{
     value =
         value
             .replace(/-/g, '+')
             .replace(/_/g, '/');
 
-    while (
-        value.length % 4
-    ) {
+    while (value.length % 4) 
+    {
         value += '=';
     }
 
-    const binary =
-        atob(value);
+    const binary = atob(value);
 
-    return Uint8Array.from(
-        binary,
-        char => char.charCodeAt(0)
-    );
+    return Uint8Array.from(binary, char => char.charCodeAt(0));
 }
-
 
 /*
 |--------------------------------------------------------------------------
@@ -139,13 +104,10 @@ function base64UrlToBytes(value) {
 |--------------------------------------------------------------------------
 */
 
-function generarSalt() {
-
-    return crypto.getRandomValues(
-        new Uint8Array(16)
-    );
+function generarSalt() 
+{
+    return crypto.getRandomValues(new Uint8Array(16));
 }
-
 
 /*
 |--------------------------------------------------------------------------
@@ -153,8 +115,8 @@ function generarSalt() {
 |--------------------------------------------------------------------------
 */
 
-function bytesToBase64(bytes) {
-
+function bytesToBase64(bytes) 
+{
     let binary = '';
 
     bytes.forEach(
@@ -168,24 +130,18 @@ function bytesToBase64(bytes) {
     return btoa(binary);
 }
 
-
 /*
 |--------------------------------------------------------------------------
 | Base64 -> bytes
 |--------------------------------------------------------------------------
 */
 
-function base64ToBytes(base64) {
+function base64ToBytes(base64) 
+{
+    const binary = atob(base64);
 
-    const binary =
-        atob(base64);
-
-    return Uint8Array.from(
-        binary,
-        char => char.charCodeAt(0)
-    );
+    return Uint8Array.from(binary, char => char.charCodeAt(0));
 }
-
 
 /*
 |--------------------------------------------------------------------------
@@ -193,13 +149,9 @@ function base64ToBytes(base64) {
 |--------------------------------------------------------------------------
 */
 
-async function generarHashPin(
-    pin,
-    salt
-) {
-
-    const encoder =
-        new TextEncoder();
+async function generarHashPin(pin, salt) 
+{
+    const encoder = new TextEncoder();
 
     const keyMaterial =
         await crypto.subtle.importKey(
@@ -218,22 +170,16 @@ async function generarHashPin(
         await crypto.subtle.deriveBits(
             {
                 name: 'PBKDF2',
-
                 salt: salt,
-
                 iterations: 210000,
-
                 hash: 'SHA-256'
             },
 
-            keyMaterial,
-
-            256
+            keyMaterial, 256
         );
 
     return new Uint8Array(bits);
 }
-
 
 /*
 |--------------------------------------------------------------------------
@@ -241,31 +187,22 @@ async function generarHashPin(
 |--------------------------------------------------------------------------
 */
 
-function compararBytes(
-    a,
-    b
-) {
-
-    if (
-        a.length !== b.length
-    ) {
+function compararBytes(a, b) 
+{
+    if (a.length !== b.length) 
+    {
         return false;
     }
 
     let resultado = 0;
 
-    for (
-        let i = 0;
-        i < a.length;
-        i++
-    ) {
-        resultado |=
-            a[i] ^ b[i];
+    for (let i = 0; i < a.length; i++) 
+    {
+        resultado |= a[i] ^ b[i];
     }
 
     return resultado === 0;
 }
-
 
 /*
 |--------------------------------------------------------------------------
@@ -273,22 +210,11 @@ function compararBytes(
 |--------------------------------------------------------------------------
 */
 
-async function guardarUsuarioOffline(
-    datos,
-    pin
-) {
-
-    const db =
-        await abrirOfflineAuthDB();
-
-    const salt =
-        generarSalt();
-
-    const hash =
-        await generarHashPin(
-            pin,
-            salt
-        );
+async function guardarUsuarioOffline(datos, pin) 
+{
+    const db = await abrirOfflineAuthDB();
+    const salt = generarSalt();
+    const hash = await generarHashPin(pin, salt);
 
     const registro = {
 
@@ -297,57 +223,27 @@ async function guardarUsuarioOffline(
                 .trim()
                 .toLowerCase(),
 
-        user_id:
-            datos.user.id,
-
-        name:
-            datos.user.name,
-
-        role:
-            datos.user.role,
-
-        permit:
-            datos.permit,
-
-        expires_at:
-            datos.expires_at,
-
-        salt:
-            bytesToBase64(salt),
-
-        pin_hash:
-            bytesToBase64(hash),
-
-        actualizado_at:
-            new Date().toISOString()
+        user_id: datos.user.id,
+        name: datos.user.name,
+        role: datos.user.role,
+        permit: datos.permit,
+        expires_at: datos.expires_at,
+        salt: bytesToBase64(salt),
+        pin_hash: bytesToBase64(hash),
+        actualizado_at: new Date().toISOString()
     };
 
     return new Promise(
         (resolve, reject) => {
 
-            const transaction =
-                db.transaction(
-                    OFFLINE_AUTH_STORE,
-                    'readwrite'
-                );
+            const transaction = db.transaction(OFFLINE_AUTH_STORE, 'readwrite');
 
-            transaction
-                .objectStore(
-                    OFFLINE_AUTH_STORE
-                )
-                .put(registro);
-
-            transaction.oncomplete =
-                () => resolve(registro);
-
-            transaction.onerror =
-                () => reject(
-                    transaction.error
-                );
+            transaction.objectStore(OFFLINE_AUTH_STORE).put(registro);
+            transaction.oncomplete = () => resolve(registro);
+            transaction.onerror = () => reject(transaction.error);
         }
     );
 }
-
 
 /*
 |--------------------------------------------------------------------------
@@ -355,10 +251,8 @@ async function guardarUsuarioOffline(
 |--------------------------------------------------------------------------
 */
 
-async function obtenerUsuarioOffline(
-    email
-) {
-
+async function obtenerUsuarioOffline(email) 
+{
     const db =
         await abrirOfflineAuthDB();
 

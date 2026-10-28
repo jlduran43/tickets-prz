@@ -21,21 +21,19 @@ class TicketOfflineSigner
 
     public function generarQrFirmado(Venta $venta): string
     {
-        if ($venta->estado !== 'PAGADA') {
-            throw new RuntimeException(
-                'No se puede generar un QR para una venta no pagada.'
-            );
-        }
-        if (!$venta->pagada_at) {
-            throw new RuntimeException(
-                'La venta todavía no está pagada.'
-            );
+        if ($venta->estado !== 'PAGADA') 
+        {
+            throw new RuntimeException('No se puede generar un QR para una venta no pagada.');
         }
 
-        if (!$venta->token_ticket) {
-            throw new RuntimeException(
-                'La venta no tiene token de ticket.'
-            );
+        if (!$venta->pagada_at) 
+        {
+            throw new RuntimeException('La venta todavía no está pagada.');
+        }
+
+        if (!$venta->token_ticket) 
+        {
+            throw new RuntimeException('La venta no tiene token de ticket.');
         }
 
         $emitido = $venta->pagada_at->copy();
@@ -61,20 +59,16 @@ class TicketOfflineSigner
 
         $payloadBase64 = $this->base64UrlEncode($json);
 
-        if (!file_exists($this->privateKeyPath)) {
-            throw new RuntimeException(
-                'No existe la clave privada.'
-            );
+        if (!file_exists($this->privateKeyPath)) 
+        {
+            throw new RuntimeException('No existe la clave privada.');
         }
 
-        $privateKey = openssl_pkey_get_private(
-            file_get_contents($this->privateKeyPath)
-        );
+        $privateKey = openssl_pkey_get_private(file_get_contents($this->privateKeyPath));
 
-        if (!$privateKey) {
-            throw new RuntimeException(
-                'No fue posible leer la clave privada.'
-            );
+        if (!$privateKey) 
+        {
+            throw new RuntimeException('No fue posible leer la clave privada.');
         }
 
         $ok = openssl_sign(
@@ -84,14 +78,12 @@ class TicketOfflineSigner
             OPENSSL_ALGO_SHA256
         );
 
-        if (!$ok) {
-            throw new RuntimeException(
-                'No fue posible firmar el ticket.'
-            );
+        if (!$ok) 
+        {
+            throw new RuntimeException('No fue posible firmar el ticket.');
         }
 
-        $signatureBase64 =
-            $this->base64UrlEncode($signature);
+        $signatureBase64 = $this->base64UrlEncode($signature);
 
         return sprintf(
             'PRZ1.%s.%s',
@@ -104,30 +96,31 @@ class TicketOfflineSigner
     {
         $partes = explode('.', trim($codigo));
 
-        if (count($partes) !== 3) {
+        if (count($partes) !== 3) 
+        {
             return null;
         }
 
         [$version, $payloadBase64, $signatureBase64] = $partes;
 
-        if ($version !== 'PRZ1') {
+        if ($version !== 'PRZ1') 
+        {
             return null;
         }
 
-        if (!file_exists($this->publicKeyPath)) {
+        if (!file_exists($this->publicKeyPath)) 
+        {
             return null;
         }
 
-        $publicKey = openssl_pkey_get_public(
-            file_get_contents($this->publicKeyPath)
-        );
+        $publicKey = openssl_pkey_get_public(file_get_contents($this->publicKeyPath));
 
-        if (!$publicKey) {
+        if (!$publicKey) 
+        {
             return null;
         }
 
-        $signature =
-            $this->base64UrlDecode($signatureBase64);
+        $signature = $this->base64UrlDecode($signatureBase64);
 
         $resultado = openssl_verify(
             $payloadBase64,
@@ -136,19 +129,20 @@ class TicketOfflineSigner
             OPENSSL_ALGO_SHA256
         );
 
-        if ($resultado !== 1) {
+        if ($resultado !== 1) 
+        {
             return null;
         }
 
-        $json =
-            $this->base64UrlDecode($payloadBase64);
+        $json = $this->base64UrlDecode($payloadBase64);
 
         $payload = json_decode(
             $json,
             true
         );
 
-        if (!is_array($payload)) {
+        if (!is_array($payload)) 
+        {
             return null;
         }
 
@@ -171,7 +165,8 @@ class TicketOfflineSigner
     {
         $padding = strlen($data) % 4;
 
-        if ($padding) {
+        if ($padding) 
+        {
             $data .= str_repeat(
                 '=',
                 4 - $padding

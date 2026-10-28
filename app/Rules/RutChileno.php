@@ -11,7 +11,8 @@ class RutChileno implements ValidationRule
     {
         $rut = strtoupper(preg_replace('/[^0-9K]/', '', $value));
 
-        if (strlen($rut) < 2) {
+        if (strlen($rut) < 2) 
+        {
             $fail('El RUT ingresado no es válido.');
             return;
         }
@@ -19,7 +20,8 @@ class RutChileno implements ValidationRule
         $cuerpo = substr($rut, 0, -1);
         $dv = substr($rut, -1);
 
-        if (!ctype_digit($cuerpo)) {
+        if (!ctype_digit($cuerpo)) 
+        {
             $fail('El RUT ingresado no es válido.');
             return;
         }
@@ -27,12 +29,14 @@ class RutChileno implements ValidationRule
         $suma = 0;
         $multiplicador = 2;
 
-        for ($i = strlen($cuerpo) - 1; $i >= 0; $i--) {
+        for ($i = strlen($cuerpo) - 1; $i >= 0; $i--) 
+        {
             $suma += intval($cuerpo[$i]) * $multiplicador;
 
             $multiplicador++;
 
-            if ($multiplicador > 7) {
+            if ($multiplicador > 7) 
+            {
                 $multiplicador = 2;
             }
         }
@@ -40,15 +44,19 @@ class RutChileno implements ValidationRule
         $resto = $suma % 11;
         $resultado = 11 - $resto;
 
-        if ($resultado === 11) {
+        if ($resultado === 11) 
+        {
             $dvCalculado = '0';
-        } elseif ($resultado === 10) {
+        } elseif ($resultado === 10) 
+        {
             $dvCalculado = 'K';
-        } else {
+        } else 
+        {
             $dvCalculado = (string) $resultado;
         }
 
-        if ($dv !== $dvCalculado) {
+        if ($dv !== $dvCalculado) 
+        {
             $fail('El RUT ingresado no es válido.');
         }
     }
