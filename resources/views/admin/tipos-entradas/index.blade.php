@@ -22,7 +22,6 @@
 
         </div>
 
-
         @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
 
@@ -32,7 +31,6 @@
 
             </div>
         @endif
-
 
         <div class="card shadow-sm">
 
@@ -45,25 +43,11 @@
                         <thead class="table-light">
 
                             <tr>
-                                <th>
-                                    ID
-                                </th>
-
-                                <th>
-                                    Nombre
-                                </th>
-
-                                <th>
-                                    Precio
-                                </th>
-
-                                <th>
-                                    Estado
-                                </th>
-
-                                <th class="text-end">
-                                    Acciones
-                                </th>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Precio</th>
+                                <th>Estado</th>
+                                <th class="text-end">Acciones</th>
                             </tr>
 
                         </thead>
@@ -72,29 +56,18 @@
 
                             @forelse ($tiposEntradas as $tipo)
                                 <tr>
-
+                                    <td>{{ $tipo->id }}</td>
                                     <td>
-                                        {{ $tipo->id }}
+                                        <strong>{{ $tipo->nombre }}</strong>
                                     </td>
-
-                                    <td>
-                                        <strong>
-                                            {{ $tipo->nombre }}
-                                        </strong>
-                                    </td>
-
                                     <td>
                                         <strong>
                                             ${{ number_format($tipo->precio, 0, ',', '.') }}
                                         </strong>
                                     </td>
-
                                     <td>
-
                                         @if ($tipo->activo)
-                                            <span class="badge bg-success">
-                                                Activo
-                                            </span>
+                                            <span class="badge bg-success">Activo</span>
                                         @else
                                             <span class="badge bg-secondary">
                                                 Inactivo
@@ -105,15 +78,16 @@
 
                                     <td class="text-end">
 
-                                        <a href="{{ route('admin.tipos-entradas.edit', $tipo) }}"
-                                            class="btn btn-sm btn-primary">
+                                        <a href="{{ route('admin.tipos-entradas.edit', 
+                                                $tipo) }}"
+                                                class="btn btn-sm btn-primary">
                                             Editar
                                         </a>
 
-
                                         <form
-                                            action="{{ route('admin.tipos-entradas.estado', $tipo) }}"
-                                            method="POST" class="d-inline">
+                                            action="{{ route('admin.tipos-entradas.estado', 
+                                                    $tipo) }}"
+                                                    method="POST" class="d-inline">
 
                                             @csrf
                                             @method('PATCH')

@@ -13,7 +13,6 @@
     @enderror
 </div>
 
-
 <div class="mb-3">
     <label for="precio" class="form-label">
         Precio
@@ -24,8 +23,10 @@
             $
         </span>
 
-        <input type="number" name="precio" id="precio" class="form-control @error('precio') is-invalid @enderror"
-            value="{{ old('precio', $tipoEntrada->precio ?? '') }}" min="0" step="1" required>
+        <input  type="number" name="precio" id="precio" class="form-control 
+                @error('precio') is-invalid @enderror" 
+                value="{{ old('precio', $tipoEntrada->precio ?? '') }}" 
+                min="0" step="1" required>
 
         @error('precio')
             <div class="invalid-feedback">
@@ -42,8 +43,9 @@
 <div class="mb-4">
     <div class="form-check form-switch">
 
-        <input type="checkbox" name="activo" id="activo" value="1" class="form-check-input"
-            @checked(old('activo', isset($tipoEntrada) ? $tipoEntrada->activo : true))>
+        <input  type="checkbox" name="activo" id="activo" value="1" 
+                class="form-check-input"
+                @checked(old('activo', isset($tipoEntrada) ? $tipoEntrada->activo : true))>
 
         <label for="activo" class="form-check-label">
             Tipo de entrada activo
