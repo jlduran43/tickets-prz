@@ -4,6 +4,9 @@
 
 @section('content')
 
+    {{-- Estilos exclusivos del listado de usuarios --}}
+    <link rel="stylesheet" href="{{ asset('css/usuarios-index.css') }}">
+
     <div class="container py-4">
 
         <div class="row justify-content-center">
@@ -171,22 +174,21 @@
                                             {{-- ACCIONES --}}
                                             <td class="text-center">
 
-                                                <div class="d-flex justify-content-center gap-2">
+                                                <div
+                                                    class="d-flex justify-content-center align-items-center gap-2 flex-wrap">
                                                     <a href="{{ route('admin.usuarios.edit', $usuario) }}"
-                                                        class="btn btn-warning btn-sm px-3 py-2 rounded-2 d-inline-flex align-items-center gap-1">
-                                                        <i class="bi bi-pencil-square"></i>
+                                                        class="badge bg-warning text-dark rounded-pill px-3 py-2 text-decoration-none prz-accion-pill">
+                                                        <i class="bi bi-pencil-square me-1"></i>
                                                         Editar
                                                     </a>
 
                                                     <button type="button"
-                                                        class="btn btn-sm
-                                                            {{ $usuario->activo ? 'btn-danger' : 'btn-success' }}
-                                                            btn-accion-usuario"
+                                                        class="badge {{ $usuario->activo ? 'bg-danger' : 'bg-success' }}
+                                                            rounded-pill px-3 py-2 border-0 prz-accion-pill btn-accion-usuario"
                                                         data-bs-toggle="modal" data-bs-target="#modalEstadoUsuario"
                                                         data-url="{{ route('admin.usuarios.estado', $usuario) }}"
                                                         data-nombre="{{ $usuario->name }}"
                                                         data-activo="{{ $usuario->activo ? 1 : 0 }}">
-
                                                         @if ($usuario->activo)
                                                             <i class="bi bi-person-x me-1"></i>
                                                             Desactivar
@@ -194,9 +196,7 @@
                                                             <i class="bi bi-person-check me-1"></i>
                                                             Activar
                                                         @endif
-
                                                     </button>
-
                                                 </div>
 
                                             </td>
@@ -207,7 +207,7 @@
 
                                         <tr>
 
-                                            <td colspan="5" class="text-center py-5 text-muted">
+                                            <td colspan="6" class="text-center py-5 text-muted">
 
                                                 <i class="bi bi-people" style="font-size: 42px;"></i>
 
@@ -227,26 +227,73 @@
                         </div>
 
 
-                        {{-- PAGINACIÓN --}}
+                        {{-- PAGINACIÓN CIRCULAR EN ESPAÑOL --}}
                         @if ($usuarios->hasPages())
-                            <div    class="d-flex flex-column flex-md-row
-                                    justify-content-between align-items-center
-                                    gap-3 px-4 py-3 border-top">
-
+                            <div
+                                class="d-flex flex-column flex-md-row justify-content-between
+                                        align-items-center gap-3 px-4 py-3 border-top">
                                 <div class="text-muted small">
-                                    Mostrando
-                                    <strong>{{ $usuarios->firstItem() }}</strong>
-                                    a
-                                    <strong>{{ $usuarios->lastItem() }}</strong>
-                                    de
-                                    <strong>{{ $usuarios->total() }}</strong>
-                                    usuarios
+                                    Mostrando <strong>{{ $usuarios->firstItem() }}</strong>
+                                    a <strong>{{ $usuarios->lastItem() }}</strong>
+                                    de <strong>{{ $usuarios->total() }}</strong> usuarios
                                 </div>
 
-                                <div>
-                                    {{ $usuarios->links('pagination::bootstrap-5') }}
-                                </div>
+                                <nav aria-label="Paginación de usuarios">
+                                    <div class="d-flex align-items-center gap-2 prz-paginacion">
+                                        @if ($usuarios->onFirstPage())
+                                            <span class="prz-pagina prz-pagina-disabled" aria-disabled="true">
+                                                <i class="bi bi-chevron-left"></i>
+                                            </span>
+                                        @else
+                                            <a class="prz-pagina" href="{{ $usuarios->previousPageUrl() }}"
+                                                aria-label="Página anterior">
+                                                <i class="bi bi-chevron-left"></i>
+                                            </a>
+                                        @endif
 
+                                        @php
+                                            $paginaActual = $usuarios->currentPage();
+                                            $ultimaPagina = $usuarios->lastPage();
+                                            $paginaInicio = max(1, $paginaActual - 2);
+                                            $paginaFin = min($ultimaPagina, $paginaActual + 2);
+                                        @endphp
+
+                                        @if ($paginaInicio > 1)
+                                            <a class="prz-pagina" href="{{ $usuarios->url(1) }}">1</a>
+                                            @if ($paginaInicio > 2)
+                                                <span class="prz-pagina-puntos">…</span>
+                                            @endif
+                                        @endif
+
+                                        @for ($pagina = $paginaInicio; $pagina <= $paginaFin; $pagina++)
+                                            <a href="{{ $usuarios->url($pagina) }}"
+                                                class="prz-pagina {{ $pagina === $paginaActual ? 'prz-pagina-activa' : '' }}"
+                                                @if ($pagina === $paginaActual) aria-current="page" @endif>
+                                                {{ $pagina }}
+                                            </a>
+                                        @endfor
+
+                                        @if ($paginaFin < $ultimaPagina)
+                                            @if ($paginaFin < $ultimaPagina - 1)
+                                                <span class="prz-pagina-puntos">…</span>
+                                            @endif
+                                            <a class="prz-pagina" href="{{ $usuarios->url($ultimaPagina) }}">
+                                                {{ $ultimaPagina }}
+                                            </a>
+                                        @endif
+
+                                        @if ($usuarios->hasMorePages())
+                                            <a class="prz-pagina" href="{{ $usuarios->nextPageUrl() }}"
+                                                aria-label="Página siguiente">
+                                                <i class="bi bi-chevron-right"></i>
+                                            </a>
+                                        @else
+                                            <span class="prz-pagina prz-pagina-disabled" aria-disabled="true">
+                                                <i class="bi bi-chevron-right"></i>
+                                            </span>
+                                        @endif
+                                    </div>
+                                </nav>
                             </div>
                         @endif
 
