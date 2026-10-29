@@ -1,46 +1,24 @@
-/* Acciones con el mismo diseño de píldora que Rol y Estado */
-.prz-accion-pill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    font: inherit;
-    font-size: 0.75em;
-    font-weight: 700;
-    line-height: 1;
-    white-space: nowrap;
-    min-height: 32px;
-    cursor: pointer;
-    transition: filter .15s ease, transform .15s ease;
-}
-.prz-accion-pill:hover { filter: brightness(.94); transform: translateY(-1px); }
-.prz-accion-pill:focus-visible { outline: 3px solid #86b7fe; outline-offset: 2px; }
 
-/* Paginación circular con selección negra */
-.prz-pagina {
-    width: 38px;
-    height: 38px;
-    flex: 0 0 38px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid #d5d7db;
-    border-radius: 50%;
-    background: #fff;
-    color: #555;
-    font-weight: 600;
-    text-decoration: none;
-    transition: background-color .15s ease, color .15s ease;
+/* ACCIONES DE USUARIOS - ALINEACIÓN HORIZONTAL */
+
+.table td .d-flex.justify-content-center.gap-2 {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
 }
-.prz-pagina:hover { background: #f2f3f4; color: #111; }
-.prz-pagina-activa, .prz-pagina-activa:hover {
-    background: #111;
-    color: #fff;
-    border-color: #111;
+
+/* Evitar que los botones se dividan en varias líneas */
+.table td .btn-accion-usuario,
+.table td a[href*="/edit"] {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
 }
-.prz-pagina-disabled { color: #aaa; background: #fafafa; cursor: default; }
-.prz-pagina-puntos { color: #666; padding: 0 2px; }
-@media (max-width: 400px) {
-    .prz-paginacion { gap: 4px !important; }
-    .prz-pagina { width: 32px; height: 32px; flex-basis: 32px; }
+
+/* Mantener los botones centrados */
+.table td:last-child {
+    text-align: center;
+    vertical-align: middle;
 }

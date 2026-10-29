@@ -172,7 +172,7 @@
                                             </td>
 
                                             {{-- ACCIONES --}}
-                                            <td class="text-center">
+                                            <td class="text-center text-nowrap">
 
                                                 <div
                                                     class="d-flex justify-content-center align-items-center gap-2 flex-wrap">
