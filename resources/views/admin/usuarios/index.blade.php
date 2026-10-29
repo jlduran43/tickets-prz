@@ -5,7 +5,7 @@
 @section('content')
 
     {{-- Estilos exclusivos del listado de usuarios --}}
-    <link rel="stylesheet" href="{{ asset('css/usuarios-index.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/usuarios-index.css') }}?v=3">
 
     <div class="container py-4">
 

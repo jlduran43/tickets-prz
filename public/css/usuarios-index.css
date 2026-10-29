@@ -22,57 +22,61 @@
     vertical-align: middle;
 }
 
+/* ==========================================
+   PAGINACIÓN CIRCULAR - USUARIOS
+========================================== */
 
-/* PAGINACIÓN CIRCULAR */
-
-.pagination {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 0;
+.prz-paginacion {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
 }
 
-.pagination .page-item .page-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 40px;
-    height: 40px;
-
-    padding: 0;
-    border: 1px solid #dedede;
+/* Todos los círculos */
+.prz-paginacion .prz-pagina {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    padding: 0 !important;
+    border: 1px solid #dedede !important;
     border-radius: 50% !important;
-
-    background-color: #fff;
-    color: #555;
-    text-decoration: none;
-
-    font-size: 15px;
-    font-weight: 500;
-
-    box-shadow: none;
+    background: #ffffff !important;
+    color: #555555 !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    text-decoration: none !important;
+    box-shadow: none !important;
     transition: all 0.2s ease;
 }
 
-/* PÁGINA ACTIVA */
-.pagination .page-item.active .page-link {
-    background-color: #111;
-    border-color: #111;
-    color: #fff;
+/* Página seleccionada */
+.prz-paginacion .prz-pagina.prz-pagina-activa {
+    background: #111111 !important;
+    border-color: #111111 !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
 }
 
-/* HOVER */
-.pagination .page-item:not(.active):not(.disabled) .page-link:hover {
-    background-color: #f1f1f1;
-    border-color: #ccc;
-    color: #111;
+/* Efecto al pasar el mouse */
+.prz-paginacion a.prz-pagina:not(.prz-pagina-activa):hover {
+    background: #f2f2f2 !important;
+    border-color: #cccccc !important;
+    color: #111111 !important;
 }
 
-/* BOTÓN DESHABILITADO */
-.pagination .page-item.disabled .page-link {
-    color: #aaa;
-    background-color: #fafafa;
-    border-color: #eee;
+/* Flechas deshabilitadas */
+.prz-paginacion .prz-pagina-disabled {
+    color: #aaaaaa !important;
+    background: #fafafa !important;
+    cursor: not-allowed;
+}
+
+/* Puntos suspensivos */
+.prz-paginacion .prz-pagina-puntos {
+    padding: 0 4px;
+    color: #888888;
 }
