@@ -168,7 +168,7 @@
 
                                 <a  href="{{ route('admin.usuarios.index') }}" 
                                     class="btn btn-outline-secondary w-100">
-                                    Cancelar
+                                    Volver
                                 </a>
 
                                 <button type="submit" class="btn btn-success w-100">
