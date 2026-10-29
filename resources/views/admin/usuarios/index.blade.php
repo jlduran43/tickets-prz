@@ -31,8 +31,7 @@
 
                     <div>
 
-                        <a  href="{{ route('admin.usuarios.create') }}" 
-                            class="btn btn-success">
+                        <a href="{{ route('admin.usuarios.create') }}" class="btn btn-success">
 
                             <i class="bi bi-person-plus me-2"></i>
 
@@ -92,7 +91,7 @@
                                                     <div class="rounded-circle bg-light
                                                                 d-flex align-items-center
                                                                 justify-content-center"
-                                                                style="width: 38px; height: 38px;">
+                                                        style="width: 38px; height: 38px;">
 
                                                         <i class="bi bi-person text-success"></i>
 
@@ -116,17 +115,20 @@
                                             <td>
 
                                                 @if ($usuario->rol === 'ADMIN')
-                                                    <span class="badge bg-dark 
+                                                    <span
+                                                        class="badge bg-dark 
                                                                 rounded-pill px-3 py-2">
                                                         Administrador
                                                     </span>
                                                 @elseif($usuario->rol === 'CONTROL')
-                                                    <span class="badge bg-success 
+                                                    <span
+                                                        class="badge bg-success 
                                                                 rounded-pill px-3 py-2">
                                                         Control
                                                     </span>
                                                 @else
-                                                    <span class="badge bg-secondary 
+                                                    <span
+                                                        class="badge bg-secondary 
                                                                 rounded-pill px-3 py-2">
                                                         Cliente
                                                     </span>
@@ -143,7 +145,8 @@
                                             <td>
 
                                                 @if ($usuario->activo)
-                                                    <span class="badge bg-success 
+                                                    <span
+                                                        class="badge bg-success 
                                                                 rounded-pill px-3 py-2">
 
                                                         <i class="bi bi-check-circle me-1"></i>
@@ -152,7 +155,8 @@
 
                                                     </span>
                                                 @else
-                                                    <span class="badge bg-danger 
+                                                    <span
+                                                        class="badge bg-danger 
                                                                 rounded-pill px-3 py-2">
 
                                                         <i class="bi bi-x-circle me-1"></i>
@@ -168,21 +172,20 @@
                                             <td class="text-center">
 
                                                 <div class="d-flex justify-content-center gap-2">
-                                                    <a  href="{{ route('admin.usuarios.edit', $usuario) }}"
+                                                    <a href="{{ route('admin.usuarios.edit', $usuario) }}"
                                                         class="btn btn-warning btn-sm px-3 py-2 rounded-2 d-inline-flex align-items-center gap-1">
                                                         <i class="bi bi-pencil-square"></i>
                                                         Editar
                                                     </a>
 
-                                                    <button type="button" 
-                                                            class="btn btn-sm
+                                                    <button type="button"
+                                                        class="btn btn-sm
                                                             {{ $usuario->activo ? 'btn-danger' : 'btn-success' }}
                                                             btn-accion-usuario"
-
-                                                            data-bs-toggle="modal" data-bs-target="#modalEstadoUsuario"
-                                                            data-url="{{ route('admin.usuarios.estado', $usuario) }}"
-                                                            data-nombre="{{ $usuario->name }}"
-                                                            data-activo="{{ $usuario->activo ? 1 : 0 }}">
+                                                        data-bs-toggle="modal" data-bs-target="#modalEstadoUsuario"
+                                                        data-url="{{ route('admin.usuarios.estado', $usuario) }}"
+                                                        data-nombre="{{ $usuario->name }}"
+                                                        data-activo="{{ $usuario->activo ? 1 : 0 }}">
 
                                                         @if ($usuario->activo)
                                                             <i class="bi bi-person-x me-1"></i>
@@ -204,11 +207,9 @@
 
                                         <tr>
 
-                                            <td colspan="5" 
-                                                class="text-center py-5 text-muted">
+                                            <td colspan="5" class="text-center py-5 text-muted">
 
-                                                <i  class="bi bi-people" 
-                                                    style="font-size: 42px;"></i>
+                                                <i class="bi bi-people" style="font-size: 42px;"></i>
 
                                                 <div class="mt-2">
                                                     No hay usuarios registrados.
@@ -225,6 +226,30 @@
 
                         </div>
 
+
+                        {{-- PAGINACIÓN --}}
+                        @if ($usuarios->hasPages())
+                            <div    class="d-flex flex-column flex-md-row
+                                    justify-content-between align-items-center
+                                    gap-3 px-4 py-3 border-top">
+
+                                <div class="text-muted small">
+                                    Mostrando
+                                    <strong>{{ $usuarios->firstItem() }}</strong>
+                                    a
+                                    <strong>{{ $usuarios->lastItem() }}</strong>
+                                    de
+                                    <strong>{{ $usuarios->total() }}</strong>
+                                    usuarios
+                                </div>
+
+                                <div>
+                                    {{ $usuarios->links('pagination::bootstrap-5') }}
+                                </div>
+
+                            </div>
+                        @endif
+
                     </div>
 
                 </div>
@@ -236,8 +261,8 @@
     </div>
 
     {{-- MODAL ACTIVAR / DESACTIVAR USUARIO --}}
-    <div class="modal fade" id="modalEstadoUsuario" tabindex="-1" 
-                aria-labelledby="modalEstadoUsuarioLabel" aria-hidden="true">
+    <div class="modal fade" id="modalEstadoUsuario" tabindex="-1" aria-labelledby="modalEstadoUsuarioLabel"
+        aria-hidden="true">
 
         <div class="modal-dialog modal-dialog-centered">
 
@@ -249,8 +274,7 @@
                         Cambiar estado de usuario
                     </h5>
 
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" 
-                            aria-label="Cerrar">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar">
                     </button>
 
                 </div>
@@ -272,8 +296,7 @@
 
                 <div class="modal-footer">
 
-                    <button type="button" class="btn btn-secondary" 
-                            data-bs-dismiss="modal">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         Cancelar
                     </button>
 
