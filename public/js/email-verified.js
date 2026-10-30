@@ -1,29 +1,33 @@
-document.addEventListener(
-    'DOMContentLoaded',
-    function () 
+
+document.addEventListener('DOMContentLoaded', function () 
+{
+
+    const contador = document.getElementById('contador');
+
+    if (!contador) return;
+
+    const destino = contador.dataset.redirect;
+
+    if (!destino) 
     {
-        let segundos = 3;
-
-        const contador = document.getElementById('contador');
-
-        const intervalo = setInterval(
-            function () 
-            {
-                segundos--;
-
-                if (contador) 
-                {
-                    contador.textContent = segundos;
-                }
-
-                if (segundos <= 0) 
-                {
-                    clearInterval(intervalo);
-
-                    window.location.href = "{{ route('ventas.create') }}";
-                }
-            },
-            1000
-        );
+        console.error('No se encontró la URL de redirección.');
+        return;
     }
-);
+
+    let segundos = 3;
+
+    const intervalo = setInterval(function () 
+    {
+        segundos--;
+
+        contador.textContent = Math.max(segundos, 0);
+
+        if (segundos <= 0) 
+        {
+
+            clearInterval(intervalo);
+            window.location.assign(destino);
+        }
+
+    }, 1000);
+});
