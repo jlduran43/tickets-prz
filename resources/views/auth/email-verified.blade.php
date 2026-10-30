@@ -50,5 +50,5 @@
 @endsection
 
 @section('js')
-    <script src="{{ asset('js/email-verified.js') }}" defer></script>
+    <script src="{{ asset('js/email-verified.js') }}v=3" defer></script>
 @endsection
