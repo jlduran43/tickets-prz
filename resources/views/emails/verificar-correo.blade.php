@@ -3,133 +3,161 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Verificar correo electrónico - Tickets PRZ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifica tu correo - Tickets PRZ</title>
 </head>
 
-<body style="margin:0;padding:0;background-color:#f3f6f3;font-family:Arial,Helvetica,sans-serif;color:#24332b;">
+<body style="margin:0; padding:0; background-color:#f3f6f3; font-family:Arial, Helvetica, sans-serif; color:#24332b;">
 
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
-        style="background-color:#f3f6f3;">
-
+        style="background-color:#f3f6f3; margin:0; padding:30px 0;">
         <tr>
-            <td align="center" style="padding:35px 14px;">
+            <td align="center">
 
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
-                    style="max-width:620px;background-color:#ffffff;border-radius:16px;">
+                    style="max-width:640px; background-color:#ffffff; border-radius:18px; overflow:hidden;">
 
-                    <!-- CABECERA INSTITUCIONAL -->
+                    {{-- CABECERA --}}
                     <tr>
-                        <td align="center" bgcolor="#176B45"
-                            style="background-color:#176B45;padding:36px 24px;border-radius:16px 16px 0 0;">
+                        <td style="background-color:#176B45; padding:30px 28px;">
 
-                            <p style="margin:0 0 8px;color:#d8eee1;font-size:12px;font-weight:bold;letter-spacing:2px;">
-                                PARQUE MUSEO
-                            </p>
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
 
-                            <h1 style="margin:0;color:#ffffff;font-size:27px;line-height:1.3;font-weight:bold;">
-                                Pedro del Río Zañartu
-                            </h1>
+                                    {{-- LOGO IZQUIERDO --}}
+                                    <td width="110" valign="middle" align="left" style="padding-right:18px;">
+                                        <div
+                                            style="
+                                            width:88px;
+                                            height:88px;
+                                            border-radius:50%;
+                                            overflow:hidden;
+                                            background-color:#ffffff;
+                                            text-align:center;
+                                            line-height:88px;
+                                        ">
+                                            <img src="{{ asset('images/logo-prz.png') }}"
+                                                alt="Logo Parque Museo Pedro del Río Zañartu" width="88"
+                                                height="88"
+                                                style="
+                                                    display:block;
+                                                    width:88px;
+                                                    height:88px;
+                                                    border:0;
+                                                    outline:none;
+                                                    text-decoration:none;
+                                                    object-fit:cover;
+                                                    border-radius:50%;
+                                                 ">
+                                        </div>
+                                    </td>
 
-                            <p style="margin:13px 0 0;color:#e0f1e6;font-size:14px;">
-                                Sistema de Tickets PRZ
-                            </p>
+                                    {{-- TEXTO DERECHA --}}
+                                    <td valign="middle" align="left">
+                                        <p
+                                            style="margin:0 0 8px 0; color:#dff1e7; font-size:12px; font-weight:bold; letter-spacing:2px;">
+                                            PARQUE MUSEO
+                                        </p>
+
+                                        <h1
+                                            style="margin:0; color:#ffffff; font-size:26px; line-height:1.3; font-weight:bold;">
+                                            Pedro del Río Zañartu
+                                        </h1>
+
+                                        <p style="margin:10px 0 0 0; color:#e7f5ec; font-size:16px;">
+                                            Sistema de Tickets PRZ
+                                        </p>
+                                    </td>
+
+                                </tr>
+                            </table>
 
                         </td>
                     </tr>
 
-                    <!-- CONTENIDO -->
+                    {{-- CONTENIDO --}}
                     <tr>
-                        <td style="padding:38px 32px 30px;">
+                        <td style="padding:38px 34px 30px 34px;">
 
-                            <h2 style="margin:0 0 22px;color:#14532d;font-size:25px;font-weight:bold;">
+                            <h2 style="margin:0 0 20px 0; color:#14532d; font-size:26px; font-weight:bold;">
                                 ¡Hola {{ $usuario->name }}!
                             </h2>
 
-                            <p style="margin:0 0 20px;color:#45564b;font-size:16px;line-height:1.8;">
+                            <p style="margin:0 0 18px 0; color:#45564b; font-size:16px; line-height:1.8;">
                                 Gracias por registrarte en Tickets PRZ.
                             </p>
 
-                            <p style="margin:0 0 30px;color:#45564b;font-size:16px;line-height:1.8;">
+                            <p style="margin:0 0 28px 0; color:#45564b; font-size:16px; line-height:1.8;">
                                 Para activar tu cuenta y comenzar a comprar tus tickets, necesitamos verificar tu correo
                                 electrónico.
                             </p>
 
-                            <!-- BOTÓN -->
+                            {{-- BOTÓN --}}
                             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-
                                 <tr>
-                                    <td align="center" style="padding:5px 0 32px;">
-
-                                        <table role="presentation" cellpadding="0" cellspacing="0" border="0">
-                                            <tr>
-                                                <td align="center" bgcolor="#176B45"
-                                                    style="background-color:#176B45;border-radius:8px;">
-
-                                                    <a href="{{ $url }}"
-                                                        style="display:inline-block;padding:17px 30px;color:#ffffff;text-decoration:none;font-size:16px;font-weight:bold;border-radius:8px;">
-                                                        Verificar correo electrónico
-                                                    </a>
-
-                                                </td>
-                                            </tr>
-                                        </table>
-
+                                    <td align="center" style="padding:6px 0 30px 0;">
+                                        <a href="{{ $url }}"
+                                            style="
+                                                display:inline-block;
+                                                background-color:#176B45;
+                                                color:#ffffff;
+                                                text-decoration:none;
+                                                font-size:16px;
+                                                font-weight:bold;
+                                                padding:16px 28px;
+                                                border-radius:10px;
+                                           ">
+                                            Verificar correo electrónico
+                                        </a>
                                     </td>
                                 </tr>
-
                             </table>
 
-                            <!-- AVISO DE SEGURIDAD -->
+                            {{-- CAJA DE SEGURIDAD --}}
                             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
-                                style="background-color:#f0f7f2;border:1px solid #cfe5d6;border-radius:10px;">
-
+                                style="background-color:#f0f7f2; border:1px solid #cfe3d6; border-radius:12px;">
                                 <tr>
-                                    <td style="padding:20px 18px;text-align:center;">
-
-                                        <p style="margin:0;color:#176B45;font-size:14px;line-height:1.7;">
+                                    <td style="padding:18px 18px; text-align:center;">
+                                        <p style="margin:0; color:#176341; font-size:14px; line-height:1.7;">
                                             Este enlace de verificación tiene una duración limitada por seguridad.
                                         </p>
-
                                     </td>
                                 </tr>
-
                             </table>
 
-                            <!-- INFORMACIÓN ADICIONAL -->
-                            <p style="margin:28px 0 18px;color:#637168;font-size:15px;line-height:1.8;">
+                            <p style="margin:28px 0 16px 0; color:#637168; font-size:15px; line-height:1.8;">
                                 Si tú no creaste esta cuenta, puedes ignorar este mensaje.
                             </p>
 
-                            <p style="margin:0;color:#45564b;font-size:15px;line-height:1.8;">
+                            <p style="margin:0; color:#45564b; font-size:15px; line-height:1.8;">
                                 Saludos,<br>
-                                <strong style="color:#176B45;">
-                                    Parque Museo Pedro del Río Zañartu
-                                </strong>
+                                <strong style="color:#176B45;">Parque Museo Pedro del Río Zañartu</strong>
                             </p>
 
                         </td>
                     </tr>
 
-                    <!-- PIE INSTITUCIONAL -->
+                    {{-- PIE --}}
                     <tr>
                         <td align="center"
-                            style="background-color:#eef4ef;border-top:1px solid #dce9df;padding:25px 22px;border-radius:0 0 16px 16px;">
+                            style="background-color:#eef4ef; border-top:1px solid #dce9df; padding:24px 20px;">
 
-                            <p style="margin:0 0 8px;color:#176B45;font-size:14px;font-weight:bold;">
+                            <p style="margin:0 0 8px 0; color:#176B45; font-size:14px; font-weight:bold;">
                                 Parque Museo Pedro del Río Zañartu
                             </p>
 
-                            <p style="margin:0 0 10px;color:#66786d;font-size:13px;">
+                            <p style="margin:0 0 10px 0; color:#66786d; font-size:13px;">
                                 Hualpén · Región del Biobío · Chile
                             </p>
 
-                            <a href="https://www.prz.cl"
-                                style="color:#176B45;text-decoration:none;font-size:13px;font-weight:bold;">
-                                www.prz.cl
-                            </a>
+                            <p style="margin:0 0 10px 0;">
+                                <a href="https://www.prz.cl"
+                                    style="color:#176B45; text-decoration:none; font-size:13px; font-weight:bold;">
+                                    www.prz.cl
+                                </a>
+                            </p>
 
-                            <p style="margin:18px 0 0;color:#89978c;font-size:12px;line-height:1.6;">
+                            <p style="margin:12px 0 0 0; color:#8a978e; font-size:12px; line-height:1.6;">
                                 Este es un mensaje automático del sistema Tickets PRZ.
                             </p>
 
@@ -140,7 +168,6 @@
 
             </td>
         </tr>
-
     </table>
 
 </body>
