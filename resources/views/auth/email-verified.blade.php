@@ -50,3 +50,14 @@
 
     </div>
 @endsection
+
+@section('js')
+    <script>
+        console.log('PRUEBA JS EMAIL VERIFIED');
+
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('Contador encontrado:',
+                document.getElementById('contador'));
+        });
+    </script>
+@endsection
