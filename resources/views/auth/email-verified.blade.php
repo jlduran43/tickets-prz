@@ -33,13 +33,13 @@
 
                 <div>
                     Te redirigiremos en
-                    <span id="contador" data-redirect="{{ route('ventas.create') }}">3</span>
+                    <span id="contador" data-redirect="{{ $redirectUrl }}">3</span>
                     segundos...
                 </div>
 
             </div>
 
-            <a href="{{ route('ventas.create') }}" class="btn-ir">
+            <a href="{{ $redirectUrl }}" class="btn-ir">
                 <i class="bi bi-cart"></i>
                 Ir a comprar ticket ahora
             </a>

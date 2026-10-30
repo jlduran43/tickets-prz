@@ -233,9 +233,12 @@ Route::get(
 
 Route::get('/email/verificado', function () {
 
-    return view('auth.email-verified');
+    return view('auth.email-verified', [
+        'redirectUrl' => route('ventas.create'),
+    ]);
+
 })
-    ->middleware('auth')
+    ->middleware(['auth', 'verified'])
     ->name('verification.success');
 
 
