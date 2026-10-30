@@ -52,12 +52,5 @@
 @endsection
 
 @section('js')
-    <script>
-        console.log('PRUEBA JS EMAIL VERIFIED');
-
-        document.addEventListener('DOMContentLoaded', function () {
-            console.log('Contador encontrado:',
-                document.getElementById('contador'));
-        });
-    </script>
+    <script src="{{ asset('js/contador-verificacion.js') }}?v=1" defer></script>
 @endsection
