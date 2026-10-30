@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
+    <meta http-equiv="refresh" content="3;url={{ $redirectUrl }}">
+
     <link rel="stylesheet" href="{{ asset('css/email-verified.css') }}">
 
     <div class="verified-page">
@@ -47,8 +49,4 @@
         </div>
 
     </div>
-@endsection
-
-@section('js')
-    <script src="{{ asset('js/email-verified.js') }}v=3" defer></script>
 @endsection
