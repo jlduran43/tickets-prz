@@ -29,7 +29,7 @@
                                     <!-- LOGO -->
                                     <td width="105" valign="middle" style="padding-right:16px;">
 
-                                        <img src="{{ asset('img/logo-parque-email.png') }}" width="90"
+                                        <img src="{{ asset('img/logo-prz.png') }}" width="90"
                                             height="90" alt="Logo Parque Museo"
                                             style="display:block;width:90px;height:90px;border-radius:50%;background-color:#ffffff;border:0;">
 
