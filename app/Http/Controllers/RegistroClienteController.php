@@ -36,7 +36,7 @@ class RegistroClienteController extends Controller
         $request->validate(
             [
                 'name' => [
-                    'required'.
+                    'required',
                     'string',
                     'max:255',
                 ],
