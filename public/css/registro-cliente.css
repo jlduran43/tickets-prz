@@ -1,0 +1,293 @@
+html,
+body 
+{
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+}
+
+body 
+{
+    background: #f4f7f2;
+}
+
+.register-page 
+{
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 15px;
+}
+
+.register-card 
+{
+    position: relative;
+    width: 100%;
+    max-width: 760px;
+    background: white;
+    border-radius: 24px;
+    padding: 45px 55px;
+    box-shadow: 0 15px 45px rgba(28, 79, 58, 0.10);
+    overflow: hidden;
+}
+
+/* Hojas decorativas */
+
+.decor-leaf 
+{
+    position: absolute;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.20;
+}
+
+.decor-top-right 
+{
+    width: 160px;
+    top: 0;
+    right: 0;
+}
+
+.decor-bottom-left 
+{
+    width: 150px;
+    bottom: 0;
+    left: 0;
+}
+
+.register-content 
+{
+    position: relative;
+    z-index: 2;
+}
+
+/* Encabezado */
+
+.register-icon 
+{
+    text-align: center;
+    color: #2f8b63;
+    font-size: 44px;
+    line-height: 1;
+    margin-bottom: 10px;
+}
+
+.register-title 
+{
+    text-align: center;
+    color: #14532d;
+    font-size: 2.3rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.register-subtitle 
+{
+    text-align: center;
+    color: #6c757d;
+    margin-bottom: 35px;
+    font-size: 1rem;
+}
+
+/* Labels */
+
+.form-label 
+{
+    color: #234736;
+    font-weight: 600;
+    margin-bottom: 7px;
+}
+
+/* Inputs */
+
+.form-control,
+.form-select 
+{
+    height: 52px;
+    border-radius: 12px;
+    border: 1px solid #d7e1db;
+    transition: all 0.2s ease;
+    background-color: #fff;
+}
+
+.form-control:focus,
+.form-select:focus 
+{
+    border-color: #3f8f69;
+    box-shadow: 0 0 0 0.20rem rgba(63, 143, 105, 0.15);
+}
+
+/* Inputs con iconos */
+
+.input-icon 
+{
+    position: relative;
+}
+
+.input-icon>i 
+{
+    position: absolute;
+    left: 17px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64756d;
+    font-size: 18px;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.input-icon .form-control 
+{
+    padding-left: 48px;
+}
+
+/* Botón */
+
+.btn-register 
+{
+    height: 54px;
+    border: none;
+    border-radius: 12px;
+    background:
+        linear-gradient(135deg,
+            #2d7a57,
+            #3f9b6f);
+    font-size: 1rem;
+    font-weight: 700;
+    color: white;
+    transition: all 0.2s ease;
+}
+
+.btn-register:hover 
+{
+    background:
+        linear-gradient(135deg,
+            #256747,
+            #368760);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(47, 139, 99, 0.20);
+}
+
+/* Login */
+
+.login-link 
+{
+    text-align: center;
+    margin-top: 24px;
+    color: #495c53;
+}
+
+.login-link a 
+{
+    color: #1f6b4f;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.login-link a:hover 
+{
+    text-decoration: underline;
+}
+
+/* Caja inferior */
+
+.register-info 
+{
+    margin-top: 28px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    border-radius: 14px;
+    background:
+        linear-gradient(135deg,
+            #f3f8f5,
+            #edf6f1);
+}
+
+.register-info-icon 
+{
+    width: 48px;
+    flex-shrink: 0;
+    color: #2f8b63;
+    text-align: center;
+    font-size: 34px;
+}
+
+.register-info-title 
+{
+    color: #176341;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.register-info-text 
+{
+    color: #64756d;
+    font-size: 0.8rem;
+    margin-top: 2px;
+}
+
+/* Errores */
+
+.validation-error 
+{
+    color: #dc3545;
+    font-size: 0.82rem;
+    margin-top: 5px;
+}
+
+/* Responsive */
+
+@media (max-width: 767.98px) 
+{
+    .register-page 
+    {
+        padding: 20px 10px;
+    }
+
+    .register-card 
+    {
+        padding: 30px 22px;
+        border-radius: 18px;
+    }
+
+    .register-title 
+    {
+        font-size: 1.9rem;
+    }
+
+    .register-subtitle 
+    {
+        font-size: 0.9rem;
+        margin-bottom: 25px;
+    }
+
+    .decor-top-right 
+    {
+        width: 110px;
+    }
+
+    .decor-bottom-left 
+    {
+        width: 100px;
+    }
+
+    /* Evitar espacio extra en el campo teléfono */
+
+    .input-icon .input-group .form-control 
+    {
+        padding-left: 15px;
+    }
+
+    .input-icon .input-group .input-group-text 
+    {
+        border-radius: 12px 0 0 12px;
+    }
+
+    .input-icon .input-group .form-control 
+    {
+        border-radius: 0 12px 12px 0;
+    }
+}
