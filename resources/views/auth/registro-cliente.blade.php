@@ -303,5 +303,12 @@
 @endsection
 
 @section('js')
-    <script src="{{ asset('js/registro-cliente.js') }}"></script>
+    <script>
+        window.registroConfig = {
+            comunaAnterior: @json(old('comuna_id')),
+            telefonoInicial: @json(old('telefono', ''))
+        };
+    </script>
+
+    <script src="{{ asset('js/registro-cliente.js') }}?v={{ time() }}"></script>
 @endsection

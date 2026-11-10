@@ -1,5 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () 
-{
+document.addEventListener('DOMContentLoaded', function () {
     /*
     |--------------------------------------------------------------------------
     | REGIÓN -> COMUNA
@@ -10,64 +9,54 @@ document.addEventListener('DOMContentLoaded', function ()
     const comunaSelect = document.getElementById('comuna_id');
     const btnCrearCuenta = document.getElementById('btnCrearCuenta');
 
-    const comunaAnterior = "{{ old('comuna_id') }}";
+    const comunaAnterior = window.registroConfig?.comunaAnterior ?? null;
 
-    function cargarComunas(regionId, comunaSeleccionada = null) 
-    {
+    function cargarComunas(regionId, comunaSeleccionada = null) {
 
-        if (!comunaSelect) 
-        {
+        if (!comunaSelect) {
             return;
         }
 
         comunaSelect.innerHTML = '<option value="">Cargando comunas...</option>';
 
-        if (!regionId) 
-        {
+        if (!regionId) {
             comunaSelect.innerHTML = '<option value="">Seleccione una comuna</option>';
 
             return;
         }
 
         fetch(`/comunas/${regionId}`)
-            .then(response => 
-                {
-                if (!response.ok) 
-                {
+            .then(response => {
+                if (!response.ok) {
                     throw new Error('No se pudieron cargar las comunas.');
                 }
 
                 return response.json();
             })
-            .then(comunas => 
-            {
+            .then(comunas => {
                 comunaSelect.innerHTML = '<option value="">Seleccione una comuna</option>';
 
-                comunas.forEach(comuna => 
-                {
+                comunas.forEach(comuna => {
                     const option = document.createElement('option');
 
                     option.value = comuna.id;
                     option.textContent = comuna.nombre;
 
-                    if (comunaSeleccionada && comunaSeleccionada == comuna.id) 
-                    {
+                    if (comunaSeleccionada && comunaSeleccionada == comuna.id) {
                         option.selected = true;
                     }
 
                     comunaSelect.appendChild(option);
                 });
             })
-            .catch(error => 
-            {
+            .catch(error => {
                 console.error('Error cargando comunas:', error);
 
                 comunaSelect.innerHTML = '<option value="">Error al cargar comunas</option>';
             });
     }
 
-    if (regionSelect) 
-    {
+    if (regionSelect) {
         regionSelect.addEventListener(
             'change',
             function () {
@@ -75,8 +64,7 @@ document.addEventListener('DOMContentLoaded', function ()
             }
         );
 
-        if (regionSelect.value) 
-        {
+        if (regionSelect.value) {
             cargarComunas(regionSelect.value, comunaAnterior);
         }
     }
@@ -102,8 +90,7 @@ document.addEventListener('DOMContentLoaded', function ()
     |
     */
 
-    function limpiarRut(rut) 
-    {
+    function limpiarRut(rut) {
         return rut.replace(/\./g, '').replace(/-/g, '').replace(/[^0-9kK]/g, '').toUpperCase();
     }
 
@@ -120,12 +107,10 @@ document.addEventListener('DOMContentLoaded', function ()
     |
     */
 
-    function formatearRut(rut) 
-    {
+    function formatearRut(rut) {
         rut = limpiarRut(rut);
 
-        if (rut.length <= 1) 
-        {
+        if (rut.length <= 1) {
             return rut;
         }
 
@@ -133,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function ()
 
         let cuerpo = rut.slice(0, -1);
 
-        cuerpo = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+        cuerpo = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
         return cuerpo + '-' + dv;
     }
@@ -144,12 +129,10 @@ document.addEventListener('DOMContentLoaded', function ()
     |--------------------------------------------------------------------------
     */
 
-    function validarRut(rutCompleto) 
-    {
+    function validarRut(rutCompleto) {
         const rut = limpiarRut(rutCompleto);
 
-        if (rut.length < 2) 
-        {
+        if (rut.length < 2) {
             return false;
         }
 
@@ -160,22 +143,19 @@ document.addEventListener('DOMContentLoaded', function ()
          * El cuerpo solo puede contener números
          */
 
-        if (!/^\d+$/.test(cuerpo)) 
-        {
+        if (!/^\d+$/.test(cuerpo)) {
             return false;
         }
 
         let suma = 0;
         let multiplicador = 2;
 
-        for (let i = cuerpo.length - 1; i >= 0; i--) 
-        {
+        for (let i = cuerpo.length - 1; i >= 0; i--) {
             suma += parseInt(cuerpo[i]) * multiplicador;
 
             multiplicador++;
 
-            if (multiplicador > 7) 
-            {
+            if (multiplicador > 7) {
                 multiplicador = 2;
             }
         }
@@ -186,16 +166,13 @@ document.addEventListener('DOMContentLoaded', function ()
 
         let dvEsperado;
 
-        if (resultado === 11) 
-        {
+        if (resultado === 11) {
             dvEsperado = '0';
 
-        } else if (resultado === 10) 
-        {
+        } else if (resultado === 10) {
             dvEsperado = 'K';
 
-        } else 
-        {
+        } else {
             dvEsperado = resultado.toString();
         }
 
@@ -208,10 +185,8 @@ document.addEventListener('DOMContentLoaded', function ()
     |--------------------------------------------------------------------------
     */
 
-    function actualizarEstadoRut() 
-    {
-        if (!rutInput) 
-        {
+    function actualizarEstadoRut() {
+        if (!rutInput) {
             return;
         }
 
@@ -222,12 +197,10 @@ document.addEventListener('DOMContentLoaded', function ()
          * dejamos el campo normal.
          */
 
-        if (rutLimpio.length < 7) 
-        {
+        if (rutLimpio.length < 7) {
             rutInput.classList.remove('is-valid', 'is-invalid');
 
-            if (rutFeedback) 
-            {
+            if (rutFeedback) {
                 rutFeedback.textContent = '';
                 rutFeedback.className = 'small mt-1';
             }
@@ -239,14 +212,12 @@ document.addEventListener('DOMContentLoaded', function ()
          * RUT válido
          */
 
-        if (validarRut(rutInput.value)) 
-        {
+        if (validarRut(rutInput.value)) {
             rutInput.classList.remove('is-invalid');
 
             rutInput.classList.add('is-valid');
 
-            if (rutFeedback) 
-            {
+            if (rutFeedback) {
                 rutFeedback.className = 'small mt-1 text-success';
                 rutFeedback.textContent = 'RUT válido';
             }
@@ -256,14 +227,12 @@ document.addEventListener('DOMContentLoaded', function ()
          * RUT inválido
          */
 
-        else 
-        {
+        else {
             rutInput.classList.remove('is-valid');
 
             rutInput.classList.add('is-invalid');
 
-            if (rutFeedback) 
-            {
+            if (rutFeedback) {
                 rutFeedback.className = 'small mt-1 text-danger';
                 rutFeedback.textContent = 'El RUT ingresado no es válido.';
             }
@@ -276,12 +245,10 @@ document.addEventListener('DOMContentLoaded', function ()
     |--------------------------------------------------------------------------
     */
 
-    if (rutInput) 
-    {
+    if (rutInput) {
         rutInput.addEventListener(
             'input',
-            function () 
-            {
+            function () {
                 this.value = formatearRut(this.value);
 
                 actualizarEstadoRut();
@@ -294,8 +261,7 @@ document.addEventListener('DOMContentLoaded', function ()
 
         rutInput.addEventListener(
             'blur',
-            function () 
-            {
+            function () {
                 actualizarEstadoRut();
             }
         );
@@ -306,8 +272,7 @@ document.addEventListener('DOMContentLoaded', function ()
          * automáticamente.
          */
 
-        if (rutInput.value) 
-        {
+        if (rutInput.value) {
             rutInput.value = formatearRut(rutInput.value);
 
             actualizarEstadoRut();
@@ -327,86 +292,71 @@ const emailFeedback = document.getElementById('email-feedback');
 
 let emailTimeout = null;
 
-function validarFormatoEmail(email) 
-{
+function validarFormatoEmail(email) {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     return regex.test(email);
 }
 
-function limpiarEstadoEmail() 
-{
+function limpiarEstadoEmail() {
     emailInput.classList.remove('is-valid', 'is-invalid');
 
-    if (emailFeedback) 
-    {
+    if (emailFeedback) {
         emailFeedback.textContent = '';
         emailFeedback.className = 'small mt-1';
     }
 }
 
-function marcarEmailValido(mensaje = 'Correo válido') 
-{
+function marcarEmailValido(mensaje = 'Correo válido') {
     emailInput.classList.remove('is-invalid');
     emailInput.classList.add('is-valid');
 
-    if (emailFeedback) 
-    {
+    if (emailFeedback) {
         emailFeedback.className = 'small mt-1 text-success';
 
         emailFeedback.textContent = mensaje;
     }
 }
 
-function marcarEmailInvalido(mensaje) 
-{
+function marcarEmailInvalido(mensaje) {
     emailInput.classList.remove('is-valid');
     emailInput.classList.add('is-invalid');
 
-    if (emailFeedback) 
-    {
+    if (emailFeedback) {
         emailFeedback.className = 'small mt-1 text-danger';
 
         emailFeedback.textContent = mensaje;
     }
 }
 
-async function comprobarEmail(email) 
-{
-    try 
-    {
+async function comprobarEmail(email) {
+    try {
         const response = await fetch(`/validar-email?email=${encodeURIComponent(email)}`);
 
-        if (!response.ok) 
-        {
+        if (!response.ok) {
             throw new Error('No se pudo validar el correo.');
         }
 
         const data = await response.json();
 
-        if (data.existe) 
-        {
+        if (data.existe) {
             marcarEmailInvalido('Este correo electrónico ya se encuentra registrado.');
 
-        } else 
-        {
+        } else {
             marcarEmailValido('Correo disponible');
         }
 
-    } catch (error) 
-    {
+    } catch (error) {
         console.error('Error validando correo:', error);
 
         limpiarEstadoEmail();
     }
 }
 
-if (emailInput) 
-{
+if (emailInput) {
     emailInput.addEventListener(
         'input',
-        function () 
-        {
+        function () {
             clearTimeout(emailTimeout);
 
             const email = this.value.trim();
@@ -415,8 +365,7 @@ if (emailInput)
              * Vacío
              */
 
-            if (!email) 
-            {
+            if (!email) {
 
                 limpiarEstadoEmail();
 
@@ -427,8 +376,7 @@ if (emailInput)
              * Formato incorrecto
              */
 
-            if (!validarFormatoEmail(email)) 
-            {
+            if (!validarFormatoEmail(email)) {
                 marcarEmailInvalido('Ingresa un correo electrónico válido.');
 
                 return;
@@ -443,16 +391,14 @@ if (emailInput)
 
             limpiarEstadoEmail();
 
-            if (emailFeedback) 
-            {
+            if (emailFeedback) {
                 emailFeedback.className = 'small mt-1 text-muted';
 
                 emailFeedback.textContent = 'Verificando correo...';
             }
 
             emailTimeout = setTimeout(
-                function () 
-                {
+                function () {
                     comprobarEmail(email);
                 },
                 500
@@ -464,16 +410,13 @@ if (emailInput)
      * Si viene old('email')
      */
 
-    if (emailInput.value) 
-    {
+    if (emailInput.value) {
         const email = emailInput.value.trim();
 
-        if (validarFormatoEmail(email)) 
-        {
+        if (validarFormatoEmail(email)) {
             comprobarEmail(email);
 
-        } else 
-        {
+        } else {
             marcarEmailInvalido('Ingresa un correo electrónico válido.');
         }
     }
@@ -490,16 +433,14 @@ const passwordConfirmationInput = document.getElementById('password_confirmation
 const passwordFeedback = document.getElementById('password-feedback');
 const passwordConfirmationFeedback = document.getElementById('password-confirmation-feedback');
 
-function validarPassword() 
-{
+function validarPassword() {
     const password = passwordInput.value;
 
     /*
      * Campo vacío
      */
 
-    if (!password) 
-    {
+    if (!password) {
         passwordInput.classList.remove('is-valid', 'is-invalid');
 
         passwordFeedback.textContent = '';
@@ -511,14 +452,13 @@ function validarPassword()
      * Menos de 8 caracteres
      */
 
-    if (password.length < 8) 
-    {
+    if (password.length < 8) {
         passwordInput.classList.remove('is-valid');
         passwordInput.classList.add('is-invalid');
 
         passwordFeedback.className = 'small mt-1 text-danger';
 
-        passwordFeedback.textContent ='La contraseña debe tener al menos 8 caracteres.';
+        passwordFeedback.textContent = 'La contraseña debe tener al menos 8 caracteres.';
 
         return false;
     }
@@ -539,8 +479,7 @@ function validarPassword()
     return true;
 }
 
-function validarConfirmacionPassword() 
-{
+function validarConfirmacionPassword() {
     const password = passwordInput.value;
     const confirmation = passwordConfirmationInput.value;
 
@@ -548,8 +487,7 @@ function validarConfirmacionPassword()
      * Todavía no escribe confirmación
      */
 
-    if (!confirmation) 
-    {
+    if (!confirmation) {
         passwordConfirmationInput.classList.remove('is-valid', 'is-invalid');
 
         passwordConfirmationFeedback.textContent = '';
@@ -561,8 +499,7 @@ function validarConfirmacionPassword()
      * No coinciden
      */
 
-    if (password !== confirmation) 
-    {
+    if (password !== confirmation) {
         passwordConfirmationInput.classList.remove('is-valid');
         passwordConfirmationInput.classList.add('is-invalid');
 
@@ -578,8 +515,7 @@ function validarConfirmacionPassword()
      * no cumple el mínimo.
      */
 
-    if (password.length < 8) 
-    {
+    if (password.length < 8) {
         passwordConfirmationInput.classList.remove('is-valid');
 
         passwordConfirmationInput.classList.add('is-invalid');
@@ -612,12 +548,10 @@ function validarConfirmacionPassword()
 |--------------------------------------------------------------------------
 */
 
-if (passwordInput && passwordConfirmationInput) 
-{
+if (passwordInput && passwordConfirmationInput) {
     passwordInput.addEventListener(
         'input',
-        function () 
-        {
+        function () {
             validarPassword();
 
             /*
@@ -625,8 +559,7 @@ if (passwordInput && passwordConfirmationInput)
              * la confirmación, comprobarla nuevamente.
              */
 
-            if (passwordConfirmationInput.value) 
-            {
+            if (passwordConfirmationInput.value) {
                 validarConfirmacionPassword();
             }
 
@@ -636,8 +569,7 @@ if (passwordInput && passwordConfirmationInput)
 
     passwordConfirmationInput.addEventListener(
         'input',
-        function () 
-        {
+        function () {
             validarConfirmacionPassword();
 
             actualizarBotonRegistro();
@@ -645,61 +577,55 @@ if (passwordInput && passwordConfirmationInput)
     );
 }
 
-function actualizarBotonRegistro() 
-{
+function actualizarBotonRegistro() {
+    const btnCrearCuenta = document.getElementById('btnCrearCuenta');
+
+    if (!btnCrearCuenta || !passwordInput || !passwordConfirmationInput) {
+        return;
+    }
+
     const passwordValida = passwordInput.value.length >= 8;
 
-    const coinciden = passwordInput.value === passwordConfirmationInput.value;
+    const coinciden =
+        passwordInput.value === passwordConfirmationInput.value;
 
-    if (passwordValida && coinciden) 
-    {
-        btnCrearCuenta.disabled = false;
-    } else 
-    {
-        btnCrearCuenta.disabled = true;
-    }
+    btnCrearCuenta.disabled = !(passwordValida && coinciden);
 }
 
-document.addEventListener('DOMContentLoaded', function () 
-{
+document.addEventListener('DOMContentLoaded', function () {
     const telefono = document.getElementById('telefono');
     const telefonoCompleto = document.getElementById('telefono_completo');
     const feedback = document.getElementById('telefono_feedback');
 
-    const telefonoInicial = @json(old('telefono', ''));
+    const telefonoInicial = window.registroConfig?.telefonoInicial ?? '';
 
-    function actualizarTelefono() 
-    {
+    function actualizarTelefono() {
         telefono.value = telefono.value.replace(/\D/g, '').slice(0, 9);
 
         const numero = telefono.value;
 
         telefonoCompleto.value = numero ? '+56' + numero : '';
 
-        if (!numero) 
-        {
+        if (!numero) {
             feedback.textContent = '';
             feedback.className = 'form-text';
-        } else if (/^9\d{8}$/.test(numero)) 
-        {
+        } else if (/^9\d{8}$/.test(numero)) {
             feedback.textContent = '✓ Número de celular válido';
             feedback.className = 'form-text text-success';
-        } else 
-        {
+        } else {
             feedback.textContent = 'El celular debe comenzar con 9 y tener 9 dígitos.';
             feedback.className = 'form-text text-danger';
         }
 
         telefono.setCustomValidity(/^9\d{8}$/.test(numero) ? '' :
-        'Ingresa un celular chileno válido de 9 dígitos.'
+            'Ingresa un celular chileno válido de 9 dígitos.'
         );
     }
 
     // Cargar el teléfono guardado en el perfil.
     let numeroInicial = String(telefonoInicial).replace(/\D/g, '');
 
-    if (numeroInicial.startsWith('56')) 
-    {
+    if (numeroInicial.startsWith('56')) {
         numeroInicial = numeroInicial.slice(2);
     }
 
@@ -708,8 +634,7 @@ document.addEventListener('DOMContentLoaded', function ()
 
     telefono.addEventListener('input', actualizarTelefono);
 
-    telefono.closest('form').addEventListener('submit', function () 
-    {
+    telefono.closest('form').addEventListener('submit', function () {
         actualizarTelefono();
     });
 });
